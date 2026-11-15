@@ -19,13 +19,17 @@ class InterfaceHausverwaltungTriggers extends DolibarrTriggers
 		if (!isModEnabled('hausverwaltung')) {
 			return 0;
 		}
-		if (!in_array($action, array('PAYMENT_ADD_TO_BANK', 'PAYMENT_CUSTOMER_DELETE', 'PAYMENT_SUPPLIER_DELETE'), true)) {
+		if (!in_array($action, array('PAYMENT_ADD_TO_BANK', 'PAYMENT_CUSTOMER_DELETE', 'PAYMENT_SUPPLIER_DELETE', 'BILL_VALIDATE', 'BILL_UNVALIDATE', 'BILL_DELETE'), true)) {
 			return 0;
 		}
 		dol_include_once('/hausverwaltung/class/hvreserve.class.php');
 		$r = new HvReserve($this->db);
 		if ($action === 'PAYMENT_ADD_TO_BANK') {
 			$res = $r->onPaymentAddedToBank($object, $user);
+		} elseif ($action === 'BILL_VALIDATE') {
+			$res = $r->onInvoiceValidated($object, $user);
+		} elseif ($action === 'BILL_UNVALIDATE' || $action === 'BILL_DELETE') {
+			$res = $r->onInvoiceUnvalidated($object, $user);
 		} else {
 			$res = $r->onPaymentDeleted($object, $user);
 		}

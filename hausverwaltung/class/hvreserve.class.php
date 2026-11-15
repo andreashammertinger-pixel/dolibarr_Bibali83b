@@ -49,16 +49,69 @@ class HvReserve
 		if (empty($f->lines)) {
 			$f->fetch_lines();
 		}
-		if ((float) $f->total_ttc == 0.0) {
+		// Bezugsgröße = Summe der positiven Positionen (ein verrechnetes Guthaben wirkt wie eine Zahlung)
+		$gross = 0;
+		foreach ($f->lines as $l) {
+			if ((float) $l->total_ttc > 0) {
+				$gross += (float) $l->total_ttc;
+			}
+		}
+		if ($gross == 0.0) {
 			return $ratios;
 		}
 		foreach ($f->lines as $l) {
 			if (!empty($l->fk_product) && isset($map[(int) $l->fk_product])) {
 				$bid = (int) $map[(int) $l->fk_product]->rowid;
-				$ratios[$bid] = ($ratios[$bid] ?? 0) + (float) $l->total_ttc / (float) $f->total_ttc;
+				$ratios[$bid] = ($ratios[$bid] ?? 0) + (float) $l->total_ttc / $gross;
 			}
 		}
 		return $ratios;
+	}
+
+	/**
+	 * Freigabe einer Vorschreibung mit verrechnetem Guthaben: der durch das Guthaben gedeckte
+	 * Rücklagenanteil wird sofort vom Betriebskonto auf das Rücklagenkonto umgebucht.
+	 */
+	public function onInvoiceValidated(Facture $f, User $user)
+	{
+		$account = !empty($f->fk_account) ? (int) $f->fk_account : getDolGlobalInt('HAUSVERWALTUNG_BANK_ACCOUNT');
+		if ($account <= 0) {
+			return 0;
+		}
+		require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+		$p = new Product($this->db);
+		if ($p->fetch(0, 'HV-GUT') <= 0) {
+			return 0;
+		}
+		if (empty($f->lines)) {
+			$f->fetch_lines();
+		}
+		$credit = 0;
+		foreach ($f->lines as $l) {
+			if ((int) $l->fk_product === (int) $p->id) {
+				$credit += -(float) $l->total_ttc;
+			}
+		}
+		if ($credit <= 0) {
+			return 0;
+		}
+		$pseudo = new stdClass();
+		$pseudo->element = 'invoice_credit';
+		$pseudo->id = 0;
+		$pseudo->fk_account = $account;
+		$pseudo->datepaye = $f->date;
+		$pseudo->amounts = array((int) $f->id => $credit);
+		return $this->onPaymentAddedToBank($pseudo, $user);
+	}
+
+	/** Rücknahme der Guthaben-Umbuchung (Rechnung zurück auf Entwurf / gelöscht) */
+	public function onInvoiceUnvalidated(Facture $f, User $user)
+	{
+		$pseudo = new stdClass();
+		$pseudo->element = 'invoice_credit';
+		$pseudo->id = 0;
+		$pseudo->fk_invoice = (int) $f->id;
+		return $this->onPaymentDeleted($pseudo, $user);
 	}
 
 	/**
@@ -107,6 +160,7 @@ class HvReserve
 		global $langs;
 
 		$isSupplier = ($payment->element === 'payment_supplier');
+		// 'payment' (Kundenzahlung) und 'invoice_credit' (verrechnetes Guthaben) sind Zuführungen
 		$payAccount = (int) $payment->fk_account;
 		if ($payAccount <= 0 || empty($payment->amounts) || !is_array($payment->amounts)) {
 			return 0;
@@ -157,7 +211,7 @@ class HvReserve
 			} else {
 				$from = $payAccount;
 				$to = (int) $b->fk_bank_reserve;
-				$label = 'Zuführung Rücklage '.$b->label.' – '.$mv['invref'];
+				$label = ($payment->element === 'invoice_credit' ? 'Zuführung Rücklage (Guthaben verrechnet) ' : 'Zuführung Rücklage ').$b->label.' – '.$mv['invref'];
 				$dir = 'in';
 			}
 			$amount = $mv['amount'];
@@ -212,6 +266,9 @@ class HvReserve
 	{
 		$sql = "SELECT rowid, fk_bank_line_from, fk_bank_line_to FROM ".$this->db->prefix()."hv_reserve_move";
 		$sql .= " WHERE element = '".$this->db->escape($payment->element)."' AND fk_payment = ".((int) $payment->id);
+		if (!empty($payment->fk_invoice)) {
+			$sql .= " AND fk_invoice = ".((int) $payment->fk_invoice);
+		}
 		$res = $this->db->query($sql);
 		if (!$res) {
 			return -1;

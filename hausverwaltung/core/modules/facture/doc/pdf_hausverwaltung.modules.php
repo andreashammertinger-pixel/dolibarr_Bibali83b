@@ -106,6 +106,12 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$pdf->SetAuthor($outputlangs->convToOutputCharset($mysoc->name));
 		$pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
 		$pdf->AddPage();
+		if (empty($object->array_options)) {
+			$object->fetch_optionals();
+		}
+		$hvperiod = (string) ($object->array_options['options_hv_period'] ?? '');
+		$isSettlement = (bool) preg_match('/^(\d{4})-A$/', $hvperiod, $sm);
+		$titleKey = $isSettlement ? 'HvPdfTitleSettlement' : 'HvPdfTitle';
 
 		$L = $this->marge_gauche;
 		$W = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
@@ -128,7 +134,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$pdf->SetTextColor($dark[0], $dark[1], $dark[2]);
 		$pdf->SetFont('', 'B', $fs + 10);
 		$pdf->SetXY($mid, $this->marge_haute);
-		$pdf->Cell($R - $mid, 10, $outputlangs->transnoentities('HvPdfTitle'), 0, 1, 'R');
+		$pdf->Cell($R - $mid, 10, $outputlangs->transnoentities($titleKey), 0, 1, 'R');
 		$pdf->SetTextColor(0, 0, 0);
 		$pdf->SetFont('', '', $fs - 1);
 		$y = $this->marge_haute + 12;
@@ -144,9 +150,11 @@ class pdf_hausverwaltung extends ModelePDFFactures
 			$y += 5;
 		}
 		$dueDay = getDolGlobalInt('HAUSVERWALTUNG_DUE_DAY', 5);
-		$pdf->SetFont('', 'I', $fs - 2);
-		$pdf->SetXY($mid, $y);
-		$pdf->Cell($R - $mid, 5, $outputlangs->transnoentities('HvPdfDueMonthly', $dueDay), 0, 1, 'R');
+		if (!$isSettlement) {
+			$pdf->SetFont('', 'I', $fs - 2);
+			$pdf->SetXY($mid, $y);
+			$pdf->Cell($R - $mid, 5, $outputlangs->transnoentities('HvPdfDueMonthly', $dueDay), 0, 1, 'R');
+		}
 
 		// Kennzeichnung der Übersetzungskopie: oben links, neben Titel/Datum (unter dem Logo, falls vorhanden)
 		if ($this->copylang) {
@@ -220,7 +228,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$unitInfo = $this->unitInfo($object);
 		$pdf->SetFont('', 'B', $fs + 1);
 		$pdf->SetXY($L, $y);
-		$pdf->Cell($W, 6, $outputlangs->transnoentities('HvPdfSubject', $mysoc->name), 0, 1, 'L');
+		$pdf->Cell($W, 6, $outputlangs->transnoentities($isSettlement ? 'HvPdfSubjectSettlement' : 'HvPdfSubject', $mysoc->name), 0, 1, 'L');
 		if ($unitInfo) {
 			$pdf->SetFont('', 'B', $fs);
 			$pdf->SetX($L);
@@ -228,7 +236,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		}
 		$pdf->SetFont('', '', $fs - 1);
 		$pdf->SetX($L);
-		$pdf->Cell($W, 5, $outputlangs->transnoentities('HvPdfSubline', $plabel, $dueDay), 0, 1, 'L');
+		$pdf->Cell($W, 5, $isSettlement ? $outputlangs->transnoentities('HvPdfSublineSettlement', $sm[1], dol_print_date($object->date_lim_reglement, 'day', false, $outputlangs, true)) : $outputlangs->transnoentities('HvPdfSubline', $plabel, $dueDay), 0, 1, 'L');
 		$y = $pdf->GetY() + 4;
 
 		// --- Positionstabelle
@@ -262,6 +270,11 @@ class pdf_hausverwaltung extends ModelePDFFactures
 			$vals = $showVat
 				? array($desc, vatrate($l->tva_tx, true), price($l->subprice, 0, $outputlangs, 1, 2, 2), (float) $l->qty, price($l->total_ht, 0, $outputlangs, 1, 2, 2))
 				: array($desc, price($l->subprice * (1 + $l->tva_tx / 100), 0, $outputlangs, 1, 2, getDolGlobalInt('HAUSVERWALTUNG_RATE_DECIMALS', 2)), price($l->qty, 0, $outputlangs, 1, 2, 2), price($l->total_ttc, 0, $outputlangs, 1, 2, 2));
+			if (!$showVat && (float) $l->qty == 1.0 && $unitInfo && (float) $unitInfo['area'] != 1.0) {
+				// Pauschalzeile (Guthaben / Nachzahlung): kein €/m² und keine m²
+				$vals[1] = '';
+				$vals[2] = '';
+			}
 			$pdf->SetFillColor(240, 244, 241);
 			$fill = ($i++ % 2) ? 1 : 0;
 			$yl = $pdf->GetY();
@@ -416,6 +429,14 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		if ($p->fetch(0, 'HV-VW') > 0) {
 			$out[(int) $p->id] = $outputlangs->transnoentities('HvLineAdmin', $mlabel);
 		}
+		foreach ($object->lines as $l) {
+			if (!empty($l->fk_product) && preg_match('/(\d{4})/', (string) $l->desc, $ym)) {
+				$pr = new Product($this->db);
+				if ($pr->fetch((int) $l->fk_product) > 0 && in_array($pr->ref, array('HV-GUT', 'HV-BKA'), true)) {
+					$out[(int) $l->fk_product] = $outputlangs->transnoentities($pr->ref === 'HV-GUT' ? 'HvLineCredit' : 'HvLineSettlement', $ym[1]);
+				}
+			}
+		}
 		if (!empty($o->fk_product_reserve)) {
 			$out[(int) $o->fk_product_reserve] = $outputlangs->transnoentities('HvLineReserve', $outputlangs->transnoentities('HvBuildingNo', preg_replace('/\D/', '', $o->bref) ?: $o->bref), $mlabel);
 		}
@@ -463,8 +484,16 @@ class pdf_hausverwaltung extends ModelePDFFactures
 			return null;
 		}
 		$area = 0;
-		foreach ($object->lines as $l) {
-			$area = max($area, (float) $l->qty);
+		dol_include_once('/hausverwaltung/class/hvrepository.class.php');
+		$repo = new HvRepository($this->db);
+		$units = $repo->getUnits(false);
+		if (isset($units[$unitId])) {
+			$area = (float) $units[$unitId]->area;
+		}
+		if ($area <= 0) {
+			foreach ($object->lines as $l) {
+				$area = max($area, (float) $l->qty);
+			}
 		}
 		return array('ref' => $o->ref, 'area' => $area);
 	}

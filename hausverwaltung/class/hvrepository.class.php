@@ -74,6 +74,34 @@ class HvRepository
 		return $cache;
 	}
 
+	public function hasSocField($name)
+	{
+		static $cols = null;
+		if ($cols === null) {
+			$cols = array();
+			$res = $this->db->query("SHOW COLUMNS FROM ".$this->db->prefix()."societe_extrafields");
+			while ($res && ($o = $this->db->fetch_object($res))) {
+				$cols[] = $o->Field;
+			}
+		}
+		return in_array($name, $cols, true);
+	}
+
+	/**
+	 * Status Haushaltsversicherung: ok | expiring (< 30 Tage) | expired | missing
+	 */
+	public static function hhStatus($u, $db)
+	{
+		if (empty($u->hh_valid_until)) {
+			return 'missing';
+		}
+		$t = $db->jdate($u->hh_valid_until);
+		if ($t < dol_now()) {
+			return 'expired';
+		}
+		return ($t < dol_now() + 30 * 86400) ? 'expiring' : 'ok';
+	}
+
 	/** @return array<int,object> */
 	public function getUnits($onlyactive = true)
 	{
@@ -86,10 +114,14 @@ class HvRepository
 			}
 			$areaExpr = "COALESCE(".implode(', ', $parts).", u.area)";
 		}
-		$sql = "SELECT u.*, u.area as area_module, ".$areaExpr." as area, ".($fields ? "CASE WHEN COALESCE(".implode(', ', $parts).") IS NULL THEN 0 ELSE 1 END" : "0")." as area_from_soc, s.nom as socname, b.ref as building_ref FROM ".$this->db->prefix()."hv_unit u";
+		$hh = $this->hasSocField('hv_hh_valid_until') ? "seh.hv_hh_valid_until as hh_valid_until, seh.hv_hh_insurer as hh_insurer," : "NULL as hh_valid_until, NULL as hh_insurer,";
+		$sql = "SELECT u.*, u.area as area_module, ".$areaExpr." as area, ".$hh." ".($fields ? "CASE WHEN COALESCE(".implode(', ', $parts).") IS NULL THEN 0 ELSE 1 END" : "0")." as area_from_soc, s.nom as socname, b.ref as building_ref FROM ".$this->db->prefix()."hv_unit u";
 		$sql .= " LEFT JOIN ".$this->db->prefix()."societe s ON s.rowid = u.fk_soc";
 		if ($fields) {
 			$sql .= " LEFT JOIN ".$this->db->prefix()."societe_extrafields se ON se.fk_object = u.fk_soc";
+		}
+		if ($this->hasSocField('hv_hh_valid_until')) {
+			$sql .= " LEFT JOIN ".$this->db->prefix()."societe_extrafields seh ON seh.fk_object = u.fk_soc";
 		}
 		$sql .= " LEFT JOIN ".$this->db->prefix()."hv_building b ON b.rowid = u.fk_building";
 		$sql .= " WHERE u.entity = ".$this->entity();

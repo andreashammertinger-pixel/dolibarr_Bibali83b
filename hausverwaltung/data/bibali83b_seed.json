@@ -1,33 +1,192 @@
 {
   "_comment": "Startdaten aus Bibali83B_Betriebskosten_Template.xlsx (ohne personenbezogene Daten). Geschäftspartner werden nach dem Import in 'Apartments' zugeordnet.",
   "buildings": [
-    {"ref": "H1", "label": "Haus 1 – Steinhaus (8 Apartments)", "position": 1},
-    {"ref": "H2", "label": "Haus 2 – Gebäude (2 Apartments)", "position": 2},
-    {"ref": "H3", "label": "Haus 3 – Bungalow", "position": 3}
+    {
+      "ref": "H1",
+      "label": "Haus 1 – Steinhaus (8 Apartments)",
+      "position": 1
+    },
+    {
+      "ref": "H2",
+      "label": "Haus 2 – Gebäude (2 Apartments)",
+      "position": 2
+    },
+    {
+      "ref": "H3",
+      "label": "Haus 3 – Bungalow",
+      "position": 3
+    }
   ],
   "units": [
-    {"ref": "1.1", "building": "H1", "area": 77.42, "reserve_rate": 0.8, "admin_rate": 0.3},
-    {"ref": "1.2", "building": "H1", "area": 75.45, "reserve_rate": 0.8, "admin_rate": 0.3},
-    {"ref": "1.3", "building": "H1", "area": 61.74, "reserve_rate": 0.8, "admin_rate": 0.3},
-    {"ref": "1.4", "building": "H1", "area": 34.76, "reserve_rate": 0.8, "admin_rate": 0.3},
-    {"ref": "1.5", "building": "H1", "area": 61.19, "reserve_rate": 0.8, "admin_rate": 0.3},
-    {"ref": "1.6", "building": "H1", "area": 62.50, "reserve_rate": 0.8, "admin_rate": 0.3},
-    {"ref": "1.7", "building": "H1", "area": 35.20, "reserve_rate": 0.8, "admin_rate": 0.3},
-    {"ref": "1.8", "building": "H1", "area": 61.77, "reserve_rate": 0.8, "admin_rate": 0.3},
-    {"ref": "2.1", "building": "H2", "area": 53.70, "reserve_rate": 0.9, "admin_rate": 0.3},
-    {"ref": "2.2", "building": "H2", "area": 51.75, "reserve_rate": 0.9, "admin_rate": 0.3},
-    {"ref": "3.1", "building": "H3", "area": 39.61, "reserve_rate": 1.0, "admin_rate": 0.3}
+    {
+      "ref": "1.1",
+      "building": "H1",
+      "area": 77.42,
+      "reserve_rate": 0.8,
+      "admin_rate": 0.3
+    },
+    {
+      "ref": "1.2",
+      "building": "H1",
+      "area": 75.45,
+      "reserve_rate": 0.8,
+      "admin_rate": 0.3
+    },
+    {
+      "ref": "1.3",
+      "building": "H1",
+      "area": 61.74,
+      "reserve_rate": 0.8,
+      "admin_rate": 0.3
+    },
+    {
+      "ref": "1.4",
+      "building": "H1",
+      "area": 34.76,
+      "reserve_rate": 0.8,
+      "admin_rate": 0.3
+    },
+    {
+      "ref": "1.5",
+      "building": "H1",
+      "area": 61.19,
+      "reserve_rate": 0.8,
+      "admin_rate": 0.3
+    },
+    {
+      "ref": "1.6",
+      "building": "H1",
+      "area": 62.5,
+      "reserve_rate": 0.8,
+      "admin_rate": 0.3
+    },
+    {
+      "ref": "1.7",
+      "building": "H1",
+      "area": 35.2,
+      "reserve_rate": 0.8,
+      "admin_rate": 0.3
+    },
+    {
+      "ref": "1.8",
+      "building": "H1",
+      "area": 61.77,
+      "reserve_rate": 0.8,
+      "admin_rate": 0.3
+    },
+    {
+      "ref": "2.1",
+      "building": "H2",
+      "area": 53.7,
+      "reserve_rate": 0.9,
+      "admin_rate": 0.3
+    },
+    {
+      "ref": "2.2",
+      "building": "H2",
+      "area": 51.75,
+      "reserve_rate": 0.9,
+      "admin_rate": 0.3
+    },
+    {
+      "ref": "3.1",
+      "building": "H3",
+      "area": 39.61,
+      "reserve_rate": 1.0,
+      "admin_rate": 0.3
+    }
   ],
   "costitems": [
-    {"label": "Gebäudeversicherung Haus 1", "building": "H1", "period": 12, "net": 582.92, "vat": 0, "reference": "08-0580801-01", "note": "WIENER OSIGURANJE"},
-    {"label": "Gebäudeversicherung Haus 2", "building": "H2", "period": 12, "net": 158.03, "vat": 0, "reference": "08-0580803-01", "note": "WIENER OSIGURANJE"},
-    {"label": "Gebäudeversicherung Haus 3", "building": "H3", "period": 12, "net": 44.84, "vat": 0, "reference": "08-0580802-01", "note": "WIENER OSIGURANJE"},
-    {"label": "Wartung Bio-Kläranlage", "building": "", "period": 12, "net": 158.40, "vat": 25, "note": "Antonini d.o.o."},
-    {"label": "Wartung Dach und Dachrinnen", "building": "", "period": 12, "net": 150.00, "vat": 25, "note": "Annahme"},
-    {"label": "Wartung Klimaanlagen", "building": "", "period": 12, "net": 450.00, "vat": 25, "note": "Annahme"},
-    {"label": "Gartenpflege", "building": "H3", "period": 6, "net": 200.00, "vat": 25, "note": "Annahme – im Excel Haus 3 zugeordnet, bitte prüfen"},
-    {"label": "Stiegenhausreinigung", "building": "H1", "period": 1, "net": 60.00, "vat": 25, "note": "Annahme"},
-    {"label": "Strom Stiegenhaus", "building": "H1", "period": 1, "net": 17.83, "vat": 13, "note": "HEP Elektra d.o.o. – Annahme"},
-    {"label": "Sonstiges / Puffer", "building": "", "period": 1, "net": 50.00, "vat": 25, "note": "Annahme"}
+    {
+      "label": "Gebäudeversicherung Haus 1",
+      "building": "H1",
+      "period": 12,
+      "net": 582.92,
+      "vat": 0,
+      "reference": "08-0580801-01",
+      "note": "WIENER OSIGURANJE"
+    },
+    {
+      "label": "Gebäudeversicherung Haus 2",
+      "building": "H2",
+      "period": 12,
+      "net": 158.03,
+      "vat": 0,
+      "reference": "08-0580803-01",
+      "note": "WIENER OSIGURANJE"
+    },
+    {
+      "label": "Gebäudeversicherung Haus 3",
+      "building": "H3",
+      "period": 12,
+      "net": 44.84,
+      "vat": 0,
+      "reference": "08-0580802-01",
+      "note": "WIENER OSIGURANJE"
+    },
+    {
+      "label": "Wartung Bio-Kläranlage",
+      "building": "",
+      "period": 12,
+      "net": 158.4,
+      "vat": 25,
+      "note": "Antonini d.o.o."
+    },
+    {
+      "label": "Wartung Dach und Dachrinnen",
+      "building": "",
+      "period": 12,
+      "net": 150.0,
+      "vat": 25,
+      "note": "Annahme"
+    },
+    {
+      "label": "Wartung Klimaanlagen",
+      "building": "",
+      "period": 12,
+      "net": 450.0,
+      "vat": 25,
+      "note": "Annahme"
+    },
+    {
+      "label": "Gartenpflege Haus 3 (eigener Garten)",
+      "building": "H3",
+      "period": 6,
+      "net": 200.0,
+      "vat": 25,
+      "note": "Annahme"
+    },
+    {
+      "label": "Gartenpflege allgemeine Flächen (Hof zdz-5/zdz-6)",
+      "building": "",
+      "period": 6,
+      "net": 0,
+      "vat": 25,
+      "note": "Betrag offen – bitte eintragen"
+    },
+    {
+      "label": "Stiegenhausreinigung",
+      "building": "H1",
+      "period": 1,
+      "net": 60.0,
+      "vat": 25,
+      "note": "Annahme"
+    },
+    {
+      "label": "Strom Stiegenhaus",
+      "building": "H1",
+      "period": 1,
+      "net": 17.83,
+      "vat": 13,
+      "note": "HEP Elektra d.o.o. – Annahme"
+    },
+    {
+      "label": "Sonstiges / Puffer",
+      "building": "",
+      "period": 1,
+      "net": 50.0,
+      "vat": 25,
+      "note": "Annahme"
+    }
   ]
 }

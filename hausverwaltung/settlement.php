@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2026 Green Villa and Apartment Resorts d.o.o. — GPL v3+ */
-/** Jahresabrechnung: Ist-Kosten (Eingangsrechnungen) vs. Akonto je Apartment */
+/** Jahresabrechnung: Ist vs. Akonto, Buchung von Nachzahlungen / Guthaben */
 // Load Dolibarr environment
 $res = 0;
 if (!$res && !empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
@@ -33,69 +33,53 @@ if (!$res) {
 	die("Include of main fails");
 }
 
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
 dol_include_once('/hausverwaltung/lib/hausverwaltung.lib.php');
-dol_include_once('/hausverwaltung/class/hvcalculator.class.php');
-dol_include_once('/hausverwaltung/class/hvinvoicer.class.php');
-require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+dol_include_once('/hausverwaltung/class/hvsettlement.class.php');
 
 $langs->loadLangs(array('hausverwaltung@hausverwaltung', 'bills'));
 if (!$user->hasRight('hausverwaltung', 'read')) {
 	accessforbidden();
 }
-$year = GETPOSTINT('year') ?: (int) dol_print_date(dol_now(), '%Y');
+$year = GETPOSTINT('year') ?: ((int) dol_print_date(dol_now(), '%Y') - 1);
+$action = GETPOST('action', 'aZ09');
+$form = new Form($db);
+$st = new HvSettlement($db);
+$log = array();
+if ($action === 'confirm_book' && GETPOST('confirm') === 'yes' && $user->hasRight('hausverwaltung', 'invoice')) {
+	$log = $st->book($user, $year, GETPOSTINT('validate') ? true : false);
+}
+$data = $st->compute($year);
 $calc = new HvCalculator($db);
-$repo = new HvRepository($db);
-$costitems = $repo->getCostItems(false);
-$d1 = $db->idate(dol_get_first_day($year, 1));
-$d2 = $db->idate(dol_get_last_day($year, 12));
-
-// Ist-Kosten je Kostenart aus freigegebenen Eingangsrechnungen (ohne "aus Rücklage bezahlt")
-$actual = array();
-$unassigned = 0;
-$sql = "SELECT fe.hv_costitem, SUM(f.total_ttc) as total FROM ".$db->prefix()."facture_fourn f";
-$sql .= " INNER JOIN ".$db->prefix()."facture_fourn_extrafields fe ON fe.fk_object = f.rowid";
-$sql .= " WHERE f.entity = ".((int) $conf->entity)." AND f.fk_statut IN (1,2) AND f.datef BETWEEN '".$d1."' AND '".$d2."'";
-$sql .= " AND (fe.hv_reserve IS NULL OR fe.hv_reserve = 0) AND fe.hv_costitem > 0 GROUP BY fe.hv_costitem";
-$res = $db->query($sql);
-while ($res && ($o = $db->fetch_object($res))) {
-	$actual[(int) $o->hv_costitem] = (float) $o->total;
-}
-
-// Ist-Anteil je Apartment
-$unitActual = array();
-foreach ($actual as $cid => $amount) {
-	$fk_b = isset($costitems[$cid]) ? (int) $costitems[$cid]->fk_building : 0;
-	foreach ($calc->allocate($amount, $fk_b) as $uid => $v) {
-		$unitActual[$uid] = ($unitActual[$uid] ?? 0) + $v;
-	}
-}
-
-// Vorgeschriebene / bezahlte Akonto-BK je Apartment
-$pBk = new Product($db);
-$pBk->fetch(0, HvInvoicer::REF_BK);
-$prepaid = array();
-$paid = array();
-if ($pBk->id > 0) {
-	$sql = "SELECT fe.hv_unit, SUM(d.total_ttc) as total, SUM(CASE WHEN f.paye = 1 THEN d.total_ttc ELSE 0 END) as paid FROM ".$db->prefix()."facturedet d";
-	$sql .= " INNER JOIN ".$db->prefix()."facture f ON f.rowid = d.fk_facture";
-	$sql .= " INNER JOIN ".$db->prefix()."facture_extrafields fe ON fe.fk_object = f.rowid";
-	$sql .= " WHERE f.entity = ".((int) $conf->entity)." AND f.fk_statut IN (1,2) AND d.fk_product = ".((int) $pBk->id);
-	$sql .= " AND fe.hv_period LIKE '".((int) $year)."-%' GROUP BY fe.hv_unit";
-	$res = $db->query($sql);
-	while ($res && ($o = $db->fetch_object($res))) {
-		$prepaid[(int) $o->hv_unit] = (float) $o->total;
-		$paid[(int) $o->hv_unit] = (float) $o->paid;
-	}
-}
 
 llxHeader('', $langs->trans('HvSettlement'), '', '', 0, 0, '', '', '', 'mod-hausverwaltung');
 print load_fiche_titre($langs->trans('HvSettlement').' '.$year, '<form method="GET"><input type="number" name="year" class="width75" value="'.$year.'"> <input type="submit" class="button small" value="OK"></form>', 'bill');
 
+if ($action === 'book') {
+	print $form->formconfirm($_SERVER['PHP_SELF'].'?year='.$year.'&validate='.GETPOSTINT('validate'), $langs->trans('HvBookSettlement'), $langs->trans('HvBookSettlementConfirm', $year), 'confirm_book', '', 0, 1);
+}
+
+if ($log) {
+	print '<table class="noborder centpercent"><tr class="liste_titre"><th>'.$langs->trans('HvUnit').'</th><th>'.$langs->trans('Status').'</th><th>'.$langs->trans('Invoice').'</th><th class="right">'.$langs->trans('HvSaldo').'</th></tr>';
+	foreach ($log as $l) {
+		$link = '';
+		if ($l['invoice_id']) {
+			$f = new Facture($db);
+			$f->fetch($l['invoice_id']);
+			$link = $f->getNomUrl(1);
+		}
+		print '<tr class="oddeven"><td>'.dol_escape_htmltag($l['unit']).'</td><td class="'.($l['status'] === 'error' ? 'error' : '').'">'.dol_escape_htmltag($l['status'].' '.$l['message']).'</td><td>'.$link.'</td><td class="right">'.hvMoney($l['saldo']).'</td></tr>';
+	}
+	print '</table><br>';
+}
+
+// Kostenarten Plan / Ist
 print '<div class="div-table-responsive"><table class="noborder centpercent"><tr class="liste_titre"><th>'.$langs->trans('HvCostItem').'</th><th>'.$langs->trans('HvBuilding').'</th><th class="right">'.$langs->trans('HvBudget').'</th><th class="right">'.$langs->trans('HvActual').'</th><th class="right">'.$langs->trans('HvDifference').'</th></tr>';
 $tb = $ta = 0;
-foreach ($costitems as $c) {
+foreach ($data['costitems'] as $c) {
 	$budget = HvCalculator::monthly($c) * 12 * ($c->active ? 1 : 0);
-	$act = $actual[(int) $c->rowid] ?? 0;
+	$act = $data['actual'][(int) $c->rowid] ?? 0;
 	if ($budget == 0 && $act == 0) {
 		continue;
 	}
@@ -105,15 +89,37 @@ foreach ($costitems as $c) {
 }
 print '<tr class="liste_total"><td colspan="2">'.$langs->trans('Total').'</td><td class="right">'.hvMoney($tb).'</td><td class="right">'.hvMoney($ta).'</td><td class="right">'.hvMoney($tb - $ta).'</td></tr></table></div><br>';
 
-print '<div class="div-table-responsive"><table class="noborder centpercent"><tr class="liste_titre"><th>'.$langs->trans('HvUnit').'</th><th>'.$langs->trans('HvOwner').'</th><th class="right">'.$langs->trans('HvActual').'</th><th class="right">'.$langs->trans('HvPrepaid').'</th><th class="right">'.$langs->trans('AlreadyPaid').'</th><th class="right">'.$langs->trans('HvSaldo').'</th></tr>';
-foreach ($calc->units as $uid => $u) {
-	$a = $unitActual[$uid] ?? 0;
-	$p = $prepaid[$uid] ?? 0;
-	$s = $p - $a;
-	print '<tr class="oddeven"><td>'.dol_escape_htmltag($u->ref).'</td><td>'.dol_escape_htmltag($u->socname).'</td><td class="right">'.hvMoney($a).'</td><td class="right">'.hvMoney($p).'</td><td class="right">'.hvMoney($paid[$uid] ?? 0).'</td><td class="right '.($s < 0 ? 'error' : 'ok').'"><strong>'.hvMoney($s).'</strong></td></tr>';
+// Je Apartment
+$anyOpen = false;
+print '<div class="div-table-responsive"><table class="noborder centpercent"><tr class="liste_titre"><th>'.$langs->trans('HvUnit').'</th><th>'.$langs->trans('HvOwner').'</th><th class="right">'.$langs->trans('HvActual').'</th><th class="right">'.$langs->trans('HvPrepaid').'</th><th class="right">'.$langs->trans('AlreadyPaid').'</th><th class="right">'.$langs->trans('HvSaldo').'</th><th>'.$langs->trans('Status').'</th></tr>';
+foreach ($data['units'] as $uid => $r) {
+	$u = $r['unit'];
+	$b = $r['booked'];
+	$status = '';
+	if ($b) {
+		if ((float) $b->saldo < 0 && $b->fk_invoice) {
+			$f = new Facture($db);
+			$f->fetch($b->fk_invoice);
+			$status = $langs->trans('HvSettlementInvoiceCreated').' '.$f->getNomUrl(1);
+		} elseif ((float) $b->saldo > 0) {
+			$status = $langs->trans('HvCreditRemaining').': '.hvMoney($b->credit_remaining);
+		} else {
+			$status = $langs->trans('HvSettlementBooked');
+		}
+	} else {
+		$anyOpen = true;
+		$status = '<span class="opacitymedium">'.$langs->trans('HvNotBooked').'</span>';
+	}
+	print '<tr class="oddeven"><td>'.dol_escape_htmltag($u->ref).'</td><td>'.dol_escape_htmltag($u->socname).'</td><td class="right">'.hvMoney($r['actual']).'</td><td class="right">'.hvMoney($r['prepaid']).'</td><td class="right">'.hvMoney($r['paid']).'</td><td class="right '.($r['saldo'] < 0 ? 'error' : 'ok').'"><strong>'.hvMoney($r['saldo']).'</strong></td><td>'.$status.'</td></tr>';
 }
 print '</table></div>';
-print '<br><div class="opacitymedium">Ist-Kosten = freigegebene Eingangsrechnungen des Jahres mit Kostenart, ohne Rechnungen „aus Rücklage bezahlt“. Verteilung nach m² wie im Kostenplan (alle Gebäude bzw. nur das jeweilige Gebäude).</div>';
+print '<br><div class="opacitymedium">'.$langs->trans('HvSettlementHelp').'</div>';
+
+if ($anyOpen && $user->hasRight('hausverwaltung', 'invoice')) {
+	print '<br><form method="GET" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="year" value="'.$year.'"><input type="hidden" name="action" value="book">';
+	print '<label><input type="checkbox" name="validate" value="1" checked> '.$langs->trans('HvValidateDirectly').'</label> ';
+	print '<input type="submit" class="button button-save" value="'.$langs->trans('HvBookSettlement').'"></form>';
+}
 
 llxFooter();
 $db->close();

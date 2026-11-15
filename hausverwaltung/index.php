@@ -53,6 +53,17 @@ if (empty($calc->units)) {
 	print info_admin($langs->trans('HvImportSeedHelp').' → <a href="'.dol_buildpath('/hausverwaltung/admin/setup.php', 1).'">'.$langs->trans('HvSetupPage').'</a>');
 }
 
+// Warnung Haushaltsversicherung (Miteigentumsvertrag §10.2)
+$hhMissing = array();
+foreach ($calc->units as $u) {
+	if (in_array(HvRepository::hhStatus($u, $db), array('missing', 'expired'), true)) {
+		$hhMissing[] = $u->ref;
+	}
+}
+if ($hhMissing) {
+	print info_admin($langs->trans('HvHhWarning').': '.implode(', ', $hhMissing).' → <a href="'.dol_buildpath('/hausverwaltung/units.php', 1).'">'.$langs->trans('HvUnits').'</a>', 0, 0, 'warning');
+}
+
 // Monatliche Kosten je Gebäude
 print '<div class="div-table-responsive-no-min"><table class="noborder centpercent">';
 print '<tr class="liste_titre"><th>'.$langs->trans('HvBuilding').'</th><th class="right">'.$langs->trans('HvArea').'</th><th class="right">'.$langs->trans('HvMonthly').' '.$langs->trans('HvBk').'</th></tr>';

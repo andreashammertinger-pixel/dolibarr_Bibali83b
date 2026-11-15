@@ -297,6 +297,14 @@ class HvInvoicer
 					$err = true;
 				}
 			}
+			// Guthaben aus Jahresabrechnung verrechnen (reduziert die Vorschreibung)
+			if (!$err) {
+				dol_include_once('/hausverwaltung/class/hvsettlement.class.php');
+				$st = new HvSettlement($this->db);
+				if ($st->applyCredit($user, $f, (int) $unitId, $outlangs) < 0) {
+					$err = true;
+				}
+			}
 			if (!$err) {
 				$this->db->query("UPDATE ".$this->db->prefix()."facture SET date_lim_reglement = '".$this->db->idate($due)."' WHERE rowid = ".((int) $f->id));
 			}

@@ -14,7 +14,8 @@ Bildet die Logik der Excel-Vorlage `Bibali83B_Betriebskosten_Template.xlsx` in D
 | **Vorschreibung** | Erzeugt pro Monat eine Kundenrechnung je Apartment mit 3 Positionen: `HV-BK` Betriebskosten, `HV-RL-x` Rücklage, `HV-VW` Verwaltung. Dubletten-Schutz je Apartment + Monat, optional direkt freigeben + PDF |
 | **Rücklagen-Automatik** | Bei Zahlungseingang (Trigger `PAYMENT_ADD_TO_BANK`) wird der Rücklagenanteil automatisch vom Betriebskonto auf das Rücklagenkonto des Gebäudes umgebucht – auch anteilig bei Teilzahlungen. Eingangsrechnungen mit „Aus Rücklage bezahlt“ werden vom Rücklagenkonto entnommen. Löschen einer Zahlung macht die Umbuchung rückgängig |
 | **Eingangsrechnungen** | Extrafelder *Kostenart (Hausverwaltung)* und *Aus Rücklage bezahlt* auf Lieferantenrechnungen |
-| **Jahresabrechnung** | Plan vs. Ist je Kostenart, Ist-Anteil je Apartment vs. vorgeschriebene Akonto-BK → Saldo |
+| **Jahresabrechnung** | Plan vs. Ist je Kostenart, Ist-Anteil je Apartment vs. vorgeschriebene Akonto-BK → Saldo. *Abrechnung buchen*: **Nachzahlung** → eigene Rechnung „Abrechnung“ (Leistung `HV-BKA`); **Guthaben** → wird automatisch als Zeile „Guthaben aus Abrechnung“ (`HV-GUT`) mit den folgenden Vorschreibungen verrechnet, bis es aufgebraucht ist. Der durch ein Guthaben gedeckte Rücklagenanteil wird bei der Freigabe sofort auf das Rücklagenkonto umgebucht. |
+| **Haushaltsversicherung** | Nachweisfelder am Geschäftspartner (Versicherer, Polizzen-Nr., gültig bis) gemäß Miteigentumsvertrag §10.2; Status in *Apartments*, Warnung in der Übersicht |
 | **Mobil** | `/custom/hausverwaltung/mobile.php`: Beleg fotografieren, Kostenart wählen (Lieferant und MwSt werden vorbelegt), Betrag → Lieferantenrechnung im Entwurf inkl. Foto. Außerdem offene Vorschreibungen und Rücklagenstände |
 
 ### Festgelegte Struktur (Entscheidungen)
@@ -40,6 +41,10 @@ Layout nach Excel-Blatt *Rechnung*: Titel „Vorschreibung“, Datum/Fälligkeit
 * Wird auf der Vorschreibung unter der Position gedruckt (`KPD xx.xx.xx`).
 * Die Seite *Vorschreibung erstellen* warnt, solange eine verwendete Leistung keinen KPD-Code hat.
 * Die konkreten Codes bitte über die KPD-2025-Suche der Porezna uprava / DZS bestimmen und vom Steuerberater bestätigen lassen.
+
+### Verteilschlüssel
+Verteilung nach **m² Etagenfläche laut Elaborat etažiranja 2023-127** (inkl. gewichteter Loggia/Terrasse; Summe 615,09 m²). Vergleich: Verteilung nach Miteigentumsanteil (‰) weicht höchstens ±0,16 €/Monat ab.
+Im Geschäftspartner-Feld `bk_schluessel` muss daher die **Elaborat-Fläche** stehen (nicht die Wohnfläche ohne Loggia/Terrasse).
 
 ### m² aus dem Geschäftspartner
 Die Fläche je Apartment wird aus den Extrafeldern des Geschäftspartners gelesen: zuerst `bk_schluessel` (BK-Schlüssel), sonst `wohnflaeche_m2` (Einstellung `HAUSVERWALTUNG_AREA_FIELDS`). Der Wert im Modul gilt nur, wenn dort nichts eingetragen ist.
