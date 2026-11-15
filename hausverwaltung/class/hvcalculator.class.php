@@ -102,16 +102,24 @@ class HvCalculator
 			$shareB = !empty($areas[$b]) ? $area / $areas[$b] : 0;
 			$bkAll = ($mc[0] ?? 0) * $shareAll;
 			$bkB = ($mc[$b] ?? 0) * $shareB;
-			$bk = round($bkAll + $bkB, 2);
-			$reserve = round($area * (float) $u->reserve_rate, 2);
+			// Je m²-Sätze (wie auf der Vorschreibung: Einzelpreis = €/m², Menge = m²)
+			$bkRate = $area > 0 ? round(($bkAll + $bkB) / $area, 5) : 0;
+			$reserveRate = round((float) $u->reserve_rate, 5);
+			$adminRate = round((float) $u->admin_rate * (1 + self::adminVatRate() / 100), 5);
+			$bk = round($bkRate * $area, 2);
+			$reserve = round($reserveRate * $area, 2);
 			$adminNet = round($area * (float) $u->admin_rate, 2);
-			$admin = round($adminNet * (1 + self::adminVatRate() / 100), 2);
+			$admin = round($adminRate * $area, 2);
 			$out[$id] = array(
 				'unit' => $u,
 				'share_all' => $shareAll,
 				'share_building' => $shareB,
 				'bk_all' => $bkAll,
 				'bk_building' => $bkB,
+				'area' => $area,
+				'bk_rate' => $bkRate,
+				'reserve_rate' => $reserveRate,
+				'admin_rate' => $adminRate,
 				'bk' => $bk,
 				'reserve' => $reserve,
 				'admin_net' => $adminNet,

@@ -148,23 +148,25 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$pdf->SetXY($mid, $y);
 		$pdf->Cell($R - $mid, 5, $outputlangs->transnoentities('HvPdfDueMonthly', $dueDay), 0, 1, 'R');
 
-		// Kennzeichnung der Übersetzungskopie
+		// Kennzeichnung der Übersetzungskopie: oben links, neben Titel/Datum (unter dem Logo, falls vorhanden)
 		if ($this->copylang) {
 			$origlangs = new Translate('', $conf);
 			$origlangs->setDefaultLang($orig);
 			$origlangs->loadLangs(array('hausverwaltung@hausverwaltung'));
+			$bw = $mid - $L - 6;
+			$by = ($logo && is_readable($logo)) ? $this->marge_haute + 20 : $this->marge_haute + 2;
 			$pdf->SetFillColor(253, 236, 200);
 			$pdf->SetTextColor(120, 70, 0);
 			$pdf->SetFont('', 'B', $fs - 1);
-			$pdf->SetXY($L, 46);
-			$pdf->Cell($W, 6, $outputlangs->transnoentities('HvPdfCopy'), 0, 2, 'L', 1);
+			$pdf->SetXY($L, $by);
+			$pdf->Cell($bw, 6, $outputlangs->transnoentities('HvPdfCopy'), 0, 2, 'L', 1);
 			$pdf->SetFont('', '', $fs - 3);
-			$pdf->MultiCell($W, 3.8, $outputlangs->transnoentities('HvPdfCopyNote')."\n".$origlangs->transnoentities('HvPdfCopyNote'), 0, 'L', 1);
+			$pdf->MultiCell($bw, 3.8, $outputlangs->transnoentities('HvPdfCopyNote')."\n".$origlangs->transnoentities('HvPdfCopyNote'), 0, 'L', 1);
 			$pdf->SetTextColor(0, 0, 0);
 		}
 
 		// --- Adressblöcke "An" (links) / "Von" (rechts)
-		$yAddr = $this->copylang ? 76 : 58;
+		$yAddr = 58;
 		$pdf->SetFont('', 'B', $fs - 1);
 		$pdf->SetXY($L, $yAddr - 6);
 		$pdf->Cell(80, 5, $outputlangs->transnoentities('HvPdfTo'), 0, 0, 'L');
@@ -179,25 +181,19 @@ class pdf_hausverwaltung extends ModelePDFFactures
 			$contact = $object->contact;
 		}
 		$toName = $contact ? $contact->getFullName($outputlangs, 1) : $object->thirdparty->name;
-		$toAddr = pdf_build_address($outputlangs, $mysoc, $object->thirdparty, $contact ?: '', $contact ? 1 : 0, 'target', $object);
-		// Adressblock enthält bei Kontakten bereits den Namen in der ersten Zeile
-		$addrLines = explode("\n", $toAddr);
-		if (trim($addrLines[0]) === trim($toName)) {
-			array_shift($addrLines);
-			$toAddr = implode("\n", $addrLines);
-		}
-		$pdf->SetFont('', 'B', $fs);
+		$src = ($contact && (!empty($contact->address) || !empty($contact->town))) ? $contact : $object->thirdparty;
+		$pdf->SetFont('', '', $fs);
 		$pdf->SetXY($L, $yAddr);
-		$pdf->MultiCell(80, 5, $outputlangs->convToOutputCharset($toName), 0, 'L');
-		$pdf->SetFont('', '', $fs - 1);
-		$pdf->SetX($L);
-		$pdf->MultiCell(80, 4.5, $toAddr, 0, 'L');
-		$pdf->SetX($L);
-		$pdf->SetFont('', '', $fs - 2);
-		$pdf->MultiCell(80, 4.5, $outputlangs->transnoentities('HvUnit').': '.$object->thirdparty->name, 0, 'L');
+		$pdf->MultiCell(80, 5, $outputlangs->convToOutputCharset($toName."\n".$this->addressLines($src)), 0, 'L');
 
 		// Absender: Gemeinschaft + Verwalter
-		$from = $mysoc->name."\n".pdf_build_address($outputlangs, $mysoc, $object->thirdparty, '', 0, 'source', $object);
+		$from = $mysoc->name."\n".$this->addressLines($mysoc)."\n";
+		if (!empty($mysoc->email)) {
+			$from .= "\n".$outputlangs->transnoentities('Email').': '.$mysoc->email;
+		}
+		if (!empty($mysoc->url)) {
+			$from .= "\n".$outputlangs->transnoentities('Web').': '.$mysoc->url;
+		}
 		$oib = $this->oib($mysoc);
 		if ($oib && strpos($from, $oib) === false) {
 			$from .= "\nOIB: ".$oib;
@@ -221,9 +217,15 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$y = max(110, $yAfterFrom + 6);
 		$period = $object->array_options['options_hv_period'] ?? '';
 		$plabel = $period ? substr($period, 5, 2).'/'.substr($period, 0, 4) : dol_print_date($object->date, '%m/%Y');
+		$unitInfo = $this->unitInfo($object);
 		$pdf->SetFont('', 'B', $fs + 1);
 		$pdf->SetXY($L, $y);
 		$pdf->Cell($W, 6, $outputlangs->transnoentities('HvPdfSubject', $mysoc->name), 0, 1, 'L');
+		if ($unitInfo) {
+			$pdf->SetFont('', 'B', $fs);
+			$pdf->SetX($L);
+			$pdf->Cell($W, 5.5, $outputlangs->transnoentities('HvUnit').' '.$unitInfo['ref'].'   ·   '.price($unitInfo['area'], 0, $outputlangs, 1, 2, 2).' m²', 0, 1, 'L');
+		}
 		$pdf->SetFont('', '', $fs - 1);
 		$pdf->SetX($L);
 		$pdf->Cell($W, 5, $outputlangs->transnoentities('HvPdfSubline', $plabel, $dueDay), 0, 1, 'L');
@@ -238,7 +240,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		}
 		$cols = $showVat
 			? array(array('Description', 0.45, 'L'), array('VAT', 0.10, 'R'), array('PriceUHT', 0.15, 'R'), array('Qty', 0.13, 'R'), array('TotalHT', 0.17, 'R'))
-			: array(array('Description', 0.55, 'L'), array('PriceU', 0.15, 'R'), array('Qty', 0.13, 'R'), array('Total', 0.17, 'R'));
+			: array(array('Description', 0.53, 'L'), array('HvPdfRatePerM2', 0.16, 'R'), array('HvPdfM2', 0.14, 'R'), array('Total', 0.17, 'R'));
 		$pdf->SetFillColor($dark[0], $dark[1], $dark[2]);
 		$pdf->SetTextColor(255, 255, 255);
 		$pdf->SetFont('', 'B', $fs - 1);
@@ -259,7 +261,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 			}
 			$vals = $showVat
 				? array($desc, vatrate($l->tva_tx, true), price($l->subprice, 0, $outputlangs, 1, 2, 2), (float) $l->qty, price($l->total_ht, 0, $outputlangs, 1, 2, 2))
-				: array($desc, price($l->subprice * (1 + $l->tva_tx / 100), 0, $outputlangs, 1, 2, 2), (float) $l->qty, price($l->total_ttc, 0, $outputlangs, 1, 2, 2));
+				: array($desc, price($l->subprice * (1 + $l->tva_tx / 100), 0, $outputlangs, 1, 2, 5), price($l->qty, 0, $outputlangs, 1, 2, 2), price($l->total_ttc, 0, $outputlangs, 1, 2, 2));
 			$pdf->SetFillColor(240, 244, 241);
 			$fill = ($i++ % 2) ? 1 : 0;
 			$yl = $pdf->GetY();
@@ -418,6 +420,53 @@ class pdf_hausverwaltung extends ModelePDFFactures
 			$out[(int) $o->fk_product_reserve] = $outputlangs->transnoentities('HvLineReserve', $outputlangs->transnoentities('HvBuildingNo', preg_replace('/\D/', '', $o->bref) ?: $o->bref), $mlabel);
 		}
 		return $out;
+	}
+
+	/** Adresszeilen (Straße, PLZ Ort, Land auf Englisch) */
+	protected function addressLines($o)
+	{
+		global $conf;
+		$lines = array();
+		if (!empty($o->address)) {
+			$lines[] = trim($o->address);
+		}
+		$zt = trim(($o->zip ?? '').' '.($o->town ?? ''));
+		if ($zt !== '') {
+			$lines[] = $zt;
+		}
+		$cid = !empty($o->country_id) ? (int) $o->country_id : 0;
+		if ($cid > 0) {
+			static $en = null;
+			if ($en === null) {
+				$en = new Translate('', $conf);
+				$en->setDefaultLang('en_US');
+				$en->loadLangs(array('dict'));
+			}
+			$lines[] = getCountry($cid, '', $this->db, $en);
+		}
+		return implode("\n", $lines);
+	}
+
+	/** Apartment-Nr. und m² aus der Vorschreibung (Einheit + Menge der Positionen) */
+	protected function unitInfo($object)
+	{
+		if (empty($object->array_options)) {
+			$object->fetch_optionals();
+		}
+		$unitId = (int) ($object->array_options['options_hv_unit'] ?? 0);
+		if ($unitId <= 0) {
+			return null;
+		}
+		$res = $this->db->query("SELECT ref FROM ".$this->db->prefix()."hv_unit WHERE rowid = ".$unitId);
+		$o = $res ? $this->db->fetch_object($res) : null;
+		if (!$o) {
+			return null;
+		}
+		$area = 0;
+		foreach ($object->lines as $l) {
+			$area = max($area, (float) $l->qty);
+		}
+		return array('ref' => $o->ref, 'area' => $area);
 	}
 
 	/** @return array<int,string> fk_product => KPD-Code */

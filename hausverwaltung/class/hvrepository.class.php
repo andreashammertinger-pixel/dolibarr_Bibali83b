@@ -47,11 +47,50 @@ class HvRepository
 		return $this->fetchAll($sql);
 	}
 
+	/**
+	 * Extrafelder des Geschäftspartners, aus denen die m² gelesen werden (erstes befülltes gewinnt).
+	 * Standard: bk_schluessel (BK-Schlüssel), dann wohnflaeche_m2.
+	 *
+	 * @return string[] vorhandene Spalten
+	 */
+	public function areaFields()
+	{
+		static $cache = null;
+		if ($cache !== null) {
+			return $cache;
+		}
+		$cache = array();
+		$wanted = array_filter(array_map('trim', explode(',', getDolGlobalString('HAUSVERWALTUNG_AREA_FIELDS', 'bk_schluessel,wohnflaeche_m2'))));
+		$res = $this->db->query("SHOW COLUMNS FROM ".$this->db->prefix()."societe_extrafields");
+		$cols = array();
+		while ($res && ($o = $this->db->fetch_object($res))) {
+			$cols[] = $o->Field;
+		}
+		foreach ($wanted as $w) {
+			if (preg_match('/^[a-z0-9_]+$/', $w) && in_array($w, $cols, true)) {
+				$cache[] = $w;
+			}
+		}
+		return $cache;
+	}
+
 	/** @return array<int,object> */
 	public function getUnits($onlyactive = true)
 	{
-		$sql = "SELECT u.*, s.nom as socname, b.ref as building_ref FROM ".$this->db->prefix()."hv_unit u";
+		$fields = $this->areaFields();
+		$areaExpr = 'u.area';
+		if ($fields) {
+			$parts = array();
+			foreach ($fields as $f) {
+				$parts[] = "NULLIF(se.".$f.", 0)";
+			}
+			$areaExpr = "COALESCE(".implode(', ', $parts).", u.area)";
+		}
+		$sql = "SELECT u.*, u.area as area_module, ".$areaExpr." as area, ".($fields ? "CASE WHEN COALESCE(".implode(', ', $parts).") IS NULL THEN 0 ELSE 1 END" : "0")." as area_from_soc, s.nom as socname, b.ref as building_ref FROM ".$this->db->prefix()."hv_unit u";
 		$sql .= " LEFT JOIN ".$this->db->prefix()."societe s ON s.rowid = u.fk_soc";
+		if ($fields) {
+			$sql .= " LEFT JOIN ".$this->db->prefix()."societe_extrafields se ON se.fk_object = u.fk_soc";
+		}
 		$sql .= " LEFT JOIN ".$this->db->prefix()."hv_building b ON b.rowid = u.fk_building";
 		$sql .= " WHERE u.entity = ".$this->entity();
 		if ($onlyactive) {

@@ -41,6 +41,10 @@ Layout nach Excel-Blatt *Rechnung*: Titel „Vorschreibung“, Datum/Fälligkeit
 * Die Seite *Vorschreibung erstellen* warnt, solange eine verwendete Leistung keinen KPD-Code hat.
 * Die konkreten Codes bitte über die KPD-2025-Suche der Porezna uprava / DZS bestimmen und vom Steuerberater bestätigen lassen.
 
+### m² aus dem Geschäftspartner
+Die Fläche je Apartment wird aus den Extrafeldern des Geschäftspartners gelesen: zuerst `bk_schluessel` (BK-Schlüssel), sonst `wohnflaeche_m2` (Einstellung `HAUSVERWALTUNG_AREA_FIELDS`). Der Wert im Modul gilt nur, wenn dort nichts eingetragen ist.
+Auf der Vorschreibung: Einzelpreis = **€/m²**, Menge = **m² des Apartments**; Apartment-Nr. und m² stehen im Betreff-Block.
+
 ### Berechnungslogik (wie Excel)
 * Monatsanteil einer Kostenart = Brutto ÷ Rhythmus (Monate)
 * Kostenart *alle Gebäude* → Anteil = m² Apartment ÷ m² aller Apartments

@@ -281,9 +281,9 @@ class HvInvoicer
 			}
 
 			$lines = array(
-				array($pBk->id, $outlangs->transnoentities('HvLineBk', $mlabel, $u->ref), $r['bk']),
-				array($fkReserveProduct, $outlangs->transnoentities('HvLineReserve', $building ? $outlangs->transnoentities('HvBuildingNo', preg_replace('/\D/', '', $building->ref) ?: $building->ref) : '', $mlabel), $r['reserve']),
-				array($pAdmin->id, $outlangs->transnoentities('HvLineAdmin', $mlabel), $r['admin']),
+				array($pBk->id, $outlangs->transnoentities('HvLineBk', $mlabel, $u->ref), $r['bk_rate']),
+				array($fkReserveProduct, $outlangs->transnoentities('HvLineReserve', $building ? $outlangs->transnoentities('HvBuildingNo', preg_replace('/\D/', '', $building->ref) ?: $building->ref) : '', $mlabel), $r['reserve_rate']),
+				array($pAdmin->id, $outlangs->transnoentities('HvLineAdmin', $mlabel), $r['admin_rate']),
 			);
 			foreach ($lines as $l) {
 				if ($err) {
@@ -292,7 +292,7 @@ class HvInvoicer
 				if ((float) $l[2] == 0) {
 					continue;
 				}
-				$res = $f->addline($l[1], $l[2], 1, $vat, 0, 0, (int) $l[0], 0, $date, dol_get_last_day($year, $month), 0, 0, 0, 'HT', 0, 1);
+				$res = $f->addline($l[1], $l[2], (float) $r['area'], $vat, 0, 0, (int) $l[0], 0, $date, dol_get_last_day($year, $month), 0, 0, 0, 'HT', 0, 1);
 				if ($res <= 0) {
 					$err = true;
 				}

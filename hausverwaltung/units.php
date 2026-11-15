@@ -94,7 +94,7 @@ if ($canwrite && in_array($action, array('create', 'edit'))) {
 	print '<tr><td class="titlefield fieldrequired">'.$langs->trans('Ref').'</td><td><input name="ref" value="'.dol_escape_htmltag($u->ref).'" maxlength="32"></td></tr>';
 	print '<tr><td class="fieldrequired">'.$langs->trans('HvBuilding').'</td><td>'.hvSelectBuilding('fk_building', $u->fk_building, $buildings).'</td></tr>';
 	print '<tr><td>'.$langs->trans('HvOwner').'</td><td>'.$form->select_company($u->fk_soc, 'fk_soc', '', 1, 0, 0, array(), 0, 'minwidth300').'</td></tr>';
-	print '<tr><td class="fieldrequired">'.$langs->trans('HvArea').'</td><td><input name="area" class="width75" value="'.dol_escape_htmltag(price2num($u->area)).'"></td></tr>';
+	print '<tr><td class="fieldrequired">'.$langs->trans('HvArea').'</td><td><input name="area" class="width75" value="'.dol_escape_htmltag(price2num($u->area_module ?? $u->area)).'">'.(!empty($u->area_from_soc) ? ' <span class="opacitymedium">'.$langs->trans('HvAreaFromThirdpartyHelp', price($u->area)).'</span>' : '').'</td></tr>';
 	print '<tr><td>'.$langs->trans('HvReserveRate').'</td><td><input name="reserve_rate" class="width75" value="'.dol_escape_htmltag(price2num($u->reserve_rate)).'"> € / m² / Monat</td></tr>';
 	print '<tr><td>'.$langs->trans('HvAdminRate').'</td><td><input name="admin_rate" class="width75" value="'.dol_escape_htmltag(price2num($u->admin_rate)).'"> € / m² / Monat</td></tr>';
 	print '<tr><td>'.$langs->trans('Position').'</td><td><input name="position" class="width50" value="'.((int) $u->position).'"></td></tr>';
@@ -108,7 +108,7 @@ print '<tr class="liste_titre"><th>'.$langs->trans('Ref').'</th><th>'.$langs->tr
 foreach ($units as $u) {
 	print '<tr class="oddeven"><td>'.dol_escape_htmltag($u->ref).'</td><td>'.dol_escape_htmltag(hvBuildingLabel($u->fk_building, $buildings)).'</td>';
 	print '<td>'.($u->fk_soc ? '<a href="'.DOL_URL_ROOT.'/societe/card.php?socid='.$u->fk_soc.'">'.dol_escape_htmltag($u->socname).'</a>' : '<span class="warning">'.$langs->trans('HvNoThirdparty').'</span>').'</td>';
-	print '<td class="right">'.price($u->area, 0, $langs, 1, 2, 2).'</td><td class="right">'.price($u->reserve_rate, 0, $langs, 1, 2, 4).'</td><td class="right">'.price($u->admin_rate, 0, $langs, 1, 2, 4).'</td>';
+	print '<td class="right">'.price($u->area, 0, $langs, 1, 2, 2).(!empty($u->area_from_soc) ? ' '.img_picto($langs->trans('HvAreaFromThirdparty'), 'company') : '').'</td><td class="right">'.price($u->reserve_rate, 0, $langs, 1, 2, 4).'</td><td class="right">'.price($u->admin_rate, 0, $langs, 1, 2, 4).'</td>';
 	print '<td class="center">'.yn($u->active).'</td><td class="right nowraponall">';
 	if ($canwrite) {
 		print '<a class="editfielda paddingright" href="'.$_SERVER['PHP_SELF'].'?action=edit&id='.$u->rowid.'">'.img_edit().'</a>';
