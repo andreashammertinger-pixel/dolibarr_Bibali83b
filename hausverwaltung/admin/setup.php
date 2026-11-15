@@ -79,6 +79,21 @@ if ($action === 'importseed') {
 			$n[1]++;
 		}
 	}
+	// Geschäftspartner automatisch zuordnen: Name endet auf "Apt 1.1" / "Apartment 1.1"
+	$socByUnit = array();
+	$res = $db->query("SELECT rowid, nom FROM ".$db->prefix()."societe WHERE entity = ".((int) $conf->entity)." AND client IN (1,3)");
+	while ($res && ($o = $db->fetch_object($res))) {
+		if (preg_match('/\b(?:apt|apartment|apartman)\.?\s*(\d+\.\d+)\s*$/i', $o->nom, $mm)) {
+			$socByUnit[$mm[1]] = (int) $o->rowid;
+		}
+	}
+	$linked = 0;
+	foreach ($repo->getUnits(false) as $u) {
+		if (empty($u->fk_soc) && isset($socByUnit[$u->ref])) {
+			$db->query("UPDATE ".$db->prefix()."hv_unit SET fk_soc = ".$socByUnit[$u->ref]." WHERE rowid = ".((int) $u->rowid));
+			$linked++;
+		}
+	}
 	if (count($repo->getCostItems(false)) == 0) {
 		foreach ($data['costitems'] as $i => $c) {
 			$repo->save('hv_costitem', array('label' => $c['label'], 'fk_building' => $c['building'] ? (int) $bmap[$c['building']] : 0, 'period_months' => (int) $c['period'], 'amount_net' => (float) $c['net'], 'vat_rate' => (float) $c['vat'], 'reference' => $c['reference'] ?? '', 'note' => $c['note'] ?? '', 'position' => $i + 1, 'active' => 1));
@@ -91,7 +106,7 @@ if ($action === 'importseed') {
 	foreach ($repo->getBuildings(false) as $b) {
 		$inv->ensureReserveProduct($user, $b);
 	}
-	setEventMessages($langs->trans('HvBuildings').': '.$n[0].', '.$langs->trans('HvUnits').': '.$n[1].', '.$langs->trans('HvCostPlan').': '.$n[2], null);
+	setEventMessages($langs->trans('HvBuildings').': '.$n[0].', '.$langs->trans('HvUnits').': '.$n[1].', '.$langs->trans('HvCostPlan').': '.$n[2].', '.$langs->trans('HvOwner').': '.$linked, null);
 	header('Location: '.$_SERVER['PHP_SELF']);
 	exit;
 }
