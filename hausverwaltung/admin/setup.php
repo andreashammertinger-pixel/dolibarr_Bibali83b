@@ -37,6 +37,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 dol_include_once('/hausverwaltung/lib/hausverwaltung.lib.php');
 dol_include_once('/hausverwaltung/class/hvinvoicer.class.php');
+require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 
 $langs->loadLangs(array('admin', 'banks', 'bills', 'hausverwaltung@hausverwaltung'));
 if (!$user->admin) {
@@ -105,7 +106,16 @@ if ($action === 'importseed') {
 	// Leistungen anlegen
 	$inv = new HvInvoicer($db);
 	$inv->ensureBaseProducts($user);
+	// Rücklage-Leistung je Gebäude: vorhandene Leistung verwenden (Standard-Muster L_Rue_<Gebäude>, z. B. L_Rue_H1), sonst HV-RL-<Gebäude> anlegen
+	$pattern = getDolGlobalString('HAUSVERWALTUNG_RESERVE_PRODUCT_REF', 'L_Rue_%s');
 	foreach ($repo->getBuildings(false) as $b) {
+		if (empty($b->fk_product_reserve)) {
+			$cand = new Product($db);
+			if ($cand->fetch(0, sprintf($pattern, $b->ref)) > 0) {
+				$db->query("UPDATE ".$db->prefix()."hv_building SET fk_product_reserve = ".((int) $cand->id)." WHERE rowid = ".((int) $b->rowid));
+				$b->fk_product_reserve = $cand->id;
+			}
+		}
 		$inv->ensureReserveProduct($user, $b);
 	}
 	setEventMessages($langs->trans('HvBuildings').': '.$n[0].', '.$langs->trans('HvUnits').': '.$n[1].', '.$langs->trans('HvCostPlan').': '.$n[2].', '.$langs->trans('HvOwner').': '.$linked, null);
