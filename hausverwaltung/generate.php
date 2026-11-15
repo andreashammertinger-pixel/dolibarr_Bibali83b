@@ -34,6 +34,7 @@ if (!$res) {
 }
 
 require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php';
 dol_include_once('/hausverwaltung/lib/hausverwaltung.lib.php');
 dol_include_once('/hausverwaltung/class/hvinvoicer.class.php');
 
@@ -48,6 +49,7 @@ if (!preg_match('/^\d{4}-\d{2}$/', (string) $period)) {
 	$period = dol_print_date(dol_now(), '%Y-%m');
 }
 $validate = GETPOSTINT('validate') ? true : false;
+$withfee = ($action === '' || $action === 'preview') ? (getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID') > 0) : (GETPOSTINT('withfee') ? true : false);
 
 $inv = new HvInvoicer($db);
 $calc = new HvCalculator($db);
@@ -55,6 +57,11 @@ $rows = $calc->compute();
 $log = array();
 if ($action === 'generate') {
 	$log = $inv->generate($user, $period, $validate);
+	if ($withfee) {
+		$fee = $inv->generateManagerFee($user, $period);
+		$fee['unit'] = $langs->transnoentities('HvManagerFee');
+		$log[] = $fee;
+	}
 }
 $preview = $inv->generate($user, $period, false, array(), true);
 $status = array();
@@ -69,6 +76,7 @@ print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden
 print '<div class="inline-block marginrightonly">'.$langs->trans('HvPeriod').': <input type="month" name="period" value="'.dol_escape_htmltag($period).'"></div>';
 print '<button class="button" name="action" value="preview">'.$langs->trans('HvPreview').'</button> ';
 print '<label class="marginleftonly"><input type="checkbox" name="validate" value="1"'.($validate ? ' checked' : '').'> '.$langs->trans('HvValidateDirectly').'</label> ';
+print '<label class="marginleftonly"><input type="checkbox" name="withfee" value="1"'.($withfee ? ' checked' : '').(getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID') > 0 ? '' : ' disabled').'> '.$langs->trans('HvCreateManagerFee').'</label> ';
 print '<button class="button button-save" name="action" value="generate">'.$langs->trans('HvCreateInvoices').'</button>';
 print '</form><br>';
 
@@ -76,7 +84,11 @@ if ($log) {
 	print '<table class="noborder centpercent"><tr class="liste_titre"><th>'.$langs->trans('HvUnit').'</th><th>'.$langs->trans('Status').'</th><th>'.$langs->trans('Invoice').'</th><th class="right">'.$langs->trans('Amount').'</th></tr>';
 	foreach ($log as $l) {
 		$link = '';
-		if ($l['invoice_id']) {
+		if ($l['invoice_id'] && $l['unit'] === $langs->transnoentities('HvManagerFee')) {
+			$f = new FactureFournisseur($db);
+			$f->fetch($l['invoice_id']);
+			$link = $f->getNomUrl(1);
+		} elseif ($l['invoice_id']) {
 			$f = new Facture($db);
 			$f->fetch($l['invoice_id']);
 			$link = $f->getNomUrl(1);

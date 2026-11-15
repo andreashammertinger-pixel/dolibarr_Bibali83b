@@ -11,7 +11,9 @@ dol_include_once('/hausverwaltung/class/hvrepository.class.php');
  *  Kosten mit Gebäude n  -> Verteilung nach m² nur über Einheiten in Gebäude n
  *  Monatsanteil einer Kostenposition = Brutto / Periode (12, 6, 3, 1 Monate)
  *  Rücklage   = m² × Rücklage-Satz €/m² (Satz je Einheit, typ. je Gebäude unterschiedlich)
- *  Verwaltung = m² × Verwaltungs-Satz €/m²
+ *  Verwaltung = m² × Verwaltungs-Satz €/m² (netto) × (1 + USt Honorar)
+ *    Der Verwalter stellt sein Honorar mit USt in Rechnung; die Gemeinschaft kann keine
+ *    Vorsteuer abziehen, daher wird der Bruttobetrag vorgeschrieben.
  */
 class HvCalculator
 {
@@ -32,6 +34,12 @@ class HvCalculator
 		$this->buildings = $buildings;
 		$this->units = $units;
 		$this->costitems = $costitems;
+	}
+
+	/** USt-Satz auf das Verwaltungshonorar (%) */
+	public static function adminVatRate()
+	{
+		return (float) getDolGlobalString('HAUSVERWALTUNG_ADMIN_VAT_RATE', '25');
 	}
 
 	public static function gross($c)
@@ -96,7 +104,8 @@ class HvCalculator
 			$bkB = ($mc[$b] ?? 0) * $shareB;
 			$bk = round($bkAll + $bkB, 2);
 			$reserve = round($area * (float) $u->reserve_rate, 2);
-			$admin = round($area * (float) $u->admin_rate, 2);
+			$adminNet = round($area * (float) $u->admin_rate, 2);
+			$admin = round($adminNet * (1 + self::adminVatRate() / 100), 2);
 			$out[$id] = array(
 				'unit' => $u,
 				'share_all' => $shareAll,
@@ -105,6 +114,7 @@ class HvCalculator
 				'bk_building' => $bkB,
 				'bk' => $bk,
 				'reserve' => $reserve,
+				'admin_net' => $adminNet,
 				'admin' => $admin,
 				'total' => round($bk + $reserve + $admin, 2),
 			);

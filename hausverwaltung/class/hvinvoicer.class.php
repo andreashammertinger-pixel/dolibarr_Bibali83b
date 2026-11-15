@@ -5,6 +5,7 @@ dol_include_once('/hausverwaltung/class/hvcalculator.class.php');
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
+require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php';
 
 /**
  * Erzeugt die monatlichen Vorschreibungen (Kundenrechnungen) je Einheit
@@ -82,6 +83,64 @@ class HvInvoicer
 			$building->fk_product_reserve = $id;
 		}
 		return $id;
+	}
+
+	/**
+	 * Eingangsrechnung (Entwurf) des Hausverwalters über das Monatshonorar anlegen.
+	 * Lieferant = HAUSVERWALTUNG_MANAGER_SOCID, Betrag = Summe m² × Satz (netto) + USt.
+	 * Die Rechnungsnummer des Verwalters wird beim Erhalt der echten Rechnung nachgetragen.
+	 *
+	 * @return array{status:string,message:string,invoice_id:int,total:float}
+	 */
+	public function generateManagerFee(User $user, $period)
+	{
+		global $conf, $langs;
+		$res = array('status' => 'skip', 'message' => '', 'invoice_id' => 0, 'total' => 0);
+		$socid = getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID');
+		if ($socid <= 0 || !preg_match('/^(\d{4})-(\d{2})$/', $period, $m)) {
+			$res['message'] = $langs->trans('HvNoManager');
+			return $res;
+		}
+		$refsupplier = 'HON-'.$period;
+		$sql = "SELECT rowid FROM ".$this->db->prefix()."facture_fourn WHERE entity = ".((int) $conf->entity)." AND fk_soc = ".$socid." AND ref_supplier = '".$this->db->escape($refsupplier)."'";
+		$q = $this->db->query($sql);
+		if ($q && ($o = $this->db->fetch_object($q))) {
+			$res['message'] = $langs->trans('HvAlreadyExists');
+			$res['invoice_id'] = (int) $o->rowid;
+			return $res;
+		}
+		$calc = new HvCalculator($this->db);
+		$net = 0;
+		foreach ($calc->compute() as $r) {
+			$net += $r['admin_net'];
+		}
+		$vat = HvCalculator::adminVatRate();
+		$mlabel = sprintf('%02d/%04d', (int) $m[2], (int) $m[1]);
+		$this->db->begin();
+		$ff = new FactureFournisseur($this->db);
+		$ff->socid = $socid;
+		$ff->ref_supplier = $refsupplier;
+		$ff->date = dol_mktime(12, 0, 0, (int) $m[2], 1, (int) $m[1]);
+		$ff->type = FactureFournisseur::TYPE_STANDARD;
+		$ff->label = $langs->transnoentities('HvManagerFeeLabel', $mlabel);
+		$ff->note_private = $langs->transnoentities('HvManagerFeeNote');
+		$ff->array_options = array('options_hv_costitem' => null, 'options_hv_reserve' => 0);
+		$id = $ff->create($user);
+		if ($id > 0 && $ff->addline($ff->label, price2num($net, 'MU'), $vat, 0, 0, 1, 0, 0, 0, 0, 0, 0, 'HT', 1) <= 0) {
+			$id = -1;
+		}
+		if ($id <= 0) {
+			$this->db->rollback();
+			$res['status'] = 'error';
+			$res['message'] = $ff->error.' '.implode(', ', $ff->errors);
+			return $res;
+		}
+		$this->db->commit();
+		$ff->fetch($id);
+		$res['status'] = 'ok';
+		$res['invoice_id'] = (int) $id;
+		$res['total'] = (float) $ff->total_ttc;
+		return $res;
 	}
 
 	/** Existiert für Einheit + Periode bereits eine (nicht stornierte) Vorschreibung? */

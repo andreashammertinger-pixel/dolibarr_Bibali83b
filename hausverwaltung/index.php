@@ -65,10 +65,10 @@ print '<tr class="liste_total"><td>'.$langs->trans('Total').'</td><td class="rig
 print '</table></div><br>';
 
 // Verteilung je Apartment
-$t = array('bk' => 0, 'reserve' => 0, 'admin' => 0, 'total' => 0, 'bk_all' => 0, 'bk_building' => 0);
+$t = array('bk' => 0, 'reserve' => 0, 'admin_net' => 0, 'admin' => 0, 'total' => 0, 'bk_all' => 0, 'bk_building' => 0);
 print '<div class="div-table-responsive"><table class="noborder centpercent">';
 print '<tr class="liste_titre">';
-foreach (array('HvUnit' => '', 'HvBuilding' => '', 'HvOwner' => '', 'HvArea' => 'right', 'HvShareAll' => 'right', 'HvShareBuilding' => 'right', 'HvBkAll' => 'right', 'HvBkBuilding' => 'right', 'HvBk' => 'right', 'HvReserve' => 'right', 'HvAdmin' => 'right', 'HvTotalMonth' => 'right', 'HvTotalYear' => 'right') as $k => $c) {
+foreach (array('HvUnit' => '', 'HvBuilding' => '', 'HvOwner' => '', 'HvArea' => 'right', 'HvShareAll' => 'right', 'HvShareBuilding' => 'right', 'HvBkAll' => 'right', 'HvBkBuilding' => 'right', 'HvBk' => 'right', 'HvReserve' => 'right', 'HvAdminNet' => 'right', 'HvAdmin' => 'right', 'HvTotalMonth' => 'right', 'HvTotalYear' => 'right') as $k => $c) {
 	print '<th class="'.$c.'">'.$langs->trans($k).'</th>';
 }
 print '</tr>';
@@ -85,6 +85,7 @@ foreach ($rows as $r) {
 	print '<td class="right">'.hvMoney($r['bk_building']).'</td>';
 	print '<td class="right">'.hvMoney($r['bk']).'</td>';
 	print '<td class="right">'.hvMoney($r['reserve']).'</td>';
+	print '<td class="right opacitymedium">'.hvMoney($r['admin_net']).'</td>';
 	print '<td class="right">'.hvMoney($r['admin']).'</td>';
 	print '<td class="right"><strong>'.hvMoney($r['total']).'</strong></td>';
 	print '<td class="right">'.hvMoney($r['total'] * 12).'</td>';
@@ -94,7 +95,7 @@ foreach ($rows as $r) {
 	}
 }
 print '<tr class="liste_total"><td colspan="3">'.$langs->trans('Total').'</td><td class="right">'.price($areas[0], 0, $langs, 1, 2, 2).'</td><td class="right">100 %</td><td></td>';
-print '<td class="right">'.hvMoney($t['bk_all']).'</td><td class="right">'.hvMoney($t['bk_building']).'</td><td class="right">'.hvMoney($t['bk']).'</td><td class="right">'.hvMoney($t['reserve']).'</td><td class="right">'.hvMoney($t['admin']).'</td><td class="right">'.hvMoney($t['total']).'</td><td class="right">'.hvMoney($t['total'] * 12).'</td></tr>';
+print '<td class="right">'.hvMoney($t['bk_all']).'</td><td class="right">'.hvMoney($t['bk_building']).'</td><td class="right">'.hvMoney($t['bk']).'</td><td class="right">'.hvMoney($t['reserve']).'</td><td class="right opacitymedium">'.hvMoney($t['admin_net']).'</td><td class="right">'.hvMoney($t['admin']).'</td><td class="right">'.hvMoney($t['total']).'</td><td class="right">'.hvMoney($t['total'] * 12).'</td></tr>';
 print '</table></div>';
 
 $diff = round($t['bk'] - array_sum($mc), 2);

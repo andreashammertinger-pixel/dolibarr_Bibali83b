@@ -17,11 +17,18 @@ Bildet die Logik der Excel-Vorlage `Bibali83B_Betriebskosten_Template.xlsx` in D
 | **Jahresabrechnung** | Plan vs. Ist je Kostenart, Ist-Anteil je Apartment vs. vorgeschriebene Akonto-BK → Saldo |
 | **Mobil** | `/custom/hausverwaltung/mobile.php`: Beleg fotografieren, Kostenart wählen (Lieferant und MwSt werden vorbelegt), Betrag → Lieferantenrechnung im Entwurf inkl. Foto. Außerdem offene Vorschreibungen und Rücklagenstände |
 
+### Festgelegte Struktur (Entscheidungen)
+* **Firma 5 „Bibali 83B“ (Zgrada Bibali 83B)** stellt die Vorschreibung aus; Zahlungseingang auf das Gemeinschaftskonto `1200` RBA-Bibali83B, Rücklagenkonten `2801–2803`.
+* **Vorschreibung kompakt** ohne USt-Ausweis: Betriebskosten / Rücklage / Verwaltung. Details folgen in der Jahresabrechnung.
+* **Verwaltungshonorar:** 0,30 €/m² **netto**. Green Villa and Apartment Resorts d.o.o. verrechnet es der Gemeinschaft mit 25 % USt. Da die Gemeinschaft keine Vorsteuer abziehen kann, wird **brutto** (0,375 €/m²) vorgeschrieben.
+  Beim Erzeugen der Vorschreibungen legt das Modul die Honorar-Eingangsrechnung (Entwurf, Ref. `HON-JJJJ-MM`) automatisch an – die Summe entspricht exakt der vorgeschriebenen Verwaltung.
+  Green Resorts stellt die Ausgangsrechnung in seiner eigenen Firma (z. B. als wiederkehrende Rechnungsvorlage).
+
 ### Berechnungslogik (wie Excel)
 * Monatsanteil einer Kostenart = Brutto ÷ Rhythmus (Monate)
 * Kostenart *alle Gebäude* → Anteil = m² Apartment ÷ m² aller Apartments
 * Kostenart *Gebäude n* → Anteil = m² Apartment ÷ m² der Apartments in Gebäude n
-* Rücklage = m² × Rücklage-Satz, Verwaltung = m² × Verwaltungs-Satz
+* Rücklage = m² × Rücklage-Satz, Verwaltung = m² × Verwaltungs-Satz (netto) × (1 + USt Honorar)
 
 ## Installation
 1. **Backup** von Datenbank und Dokumentenverzeichnis.
@@ -29,10 +36,11 @@ Bildet die Logik der Excel-Vorlage `Bibali83B_Betriebskosten_Template.xlsx` in D
 3. Dolibarr: *Einstellungen → Module → Externes Modul bereitstellen* → ZIP hochladen
    (alternativ Ordner `hausverwaltung/` nach `htdocs/custom/` kopieren).
 4. In der Firma (Multicompany-Entität) der Hausverwaltung das Modul **Hausverwaltung** aktivieren.
-5. *Einstellungen* des Moduls: Betriebskonto, Fälligkeitstag (5.), MwSt auf Vorschreibung (0 %).
+5. *Einstellungen* des Moduls (in Firma 5): Betriebskonto `1200`, Fälligkeitstag (5.), MwSt auf Vorschreibung (0 %), Hausverwalter = Green Villa…, USt auf Honorar (25 %).
 6. **Startdaten Bibali 83b importieren** (Gebäude, 11 Apartments, Kostenplan aus der Excel-Vorlage).
 7. *Gebäude*: je Gebäude das Rücklagen-Bankkonto zuordnen (vorher unter *Bank* anlegen).
-8. *Apartments*: jedem Apartment den Geschäftspartner zuordnen (Geschäftspartner muss „Kunde“ sein).
+8. *Apartments*: Geschäftspartner „Bibali 83 B - Apt x.y“ werden beim Import automatisch zugeordnet – bitte kontrollieren.
+   Bei *Gebäude* die vorhandenen Rücklage-Leistungen `L_Rue_H1–H3` auswählen (sonst legt das Modul `HV-RL-…` an).
 9. Benutzerrechte *Hausverwaltung* vergeben.
 
 ## Hinweise zur Excel-Vorlage (beim Übertragen gefunden)
