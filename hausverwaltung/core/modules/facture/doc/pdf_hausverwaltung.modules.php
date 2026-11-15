@@ -191,21 +191,47 @@ class pdf_hausverwaltung extends ModelePDFFactures
 				$contacts[] = $c;
 			}
 		}
+		// Postanschrift (nur postrelevante Angaben), darunter mit Abstand OIB + E-Mail je Eigentümer
 		$toLines = array();
+		$infoLines = array();
+		$multi = count($contacts) > 1;
 		if ($contacts) {
 			foreach ($contacts as $c) {
-				$oib = hvOib($c) ?: (count($contacts) == 1 ? hvOib($object->thirdparty) : '');
-				$toLines[] = $c->getFullName($outputlangs, 1).($oib ? ', OIB: '.$oib : '');
+				$name = $c->getFullName($outputlangs, 1);
+				$toLines[] = $name;
+				$oib = hvOib($c) ?: (!$multi ? hvOib($object->thirdparty) : '');
+				$mail = !empty($c->email) ? $c->email : (!$multi ? (string) $object->thirdparty->email : '');
+				if ($multi) {
+					$infoLines[] = $name.':';
+				}
+				if ($oib) {
+					$infoLines[] = ($multi ? '   ' : '').'OIB: '.$oib;
+				}
+				if ($mail) {
+					$infoLines[] = ($multi ? '   ' : '').$outputlangs->transnoentities('Email').': '.$mail;
+				}
 			}
 			$src = (!empty($contacts[0]->address) || !empty($contacts[0]->town)) ? $contacts[0] : $object->thirdparty;
 		} else {
+			$toLines[] = $object->thirdparty->name;
 			$oib = hvOib($object->thirdparty);
-			$toLines[] = $object->thirdparty->name.($oib ? ', OIB: '.$oib : '');
+			if ($oib) {
+				$infoLines[] = 'OIB: '.$oib;
+			}
+			if (!empty($object->thirdparty->email)) {
+				$infoLines[] = $outputlangs->transnoentities('Email').': '.$object->thirdparty->email;
+			}
 			$src = $object->thirdparty;
 		}
 		$pdf->SetFont('', '', $fs);
 		$pdf->SetXY($L, $yAddr);
 		$pdf->MultiCell(85, 5, $outputlangs->convToOutputCharset(implode("\n", $toLines)."\n".$this->addressLines($src)), 0, 'L');
+		if ($infoLines) {
+			$pdf->SetFont('', '', $fs - 2);
+			$pdf->SetXY($L, $pdf->GetY() + 8);
+			$pdf->MultiCell(85, 4.2, $outputlangs->convToOutputCharset(implode("\n", $infoLines)), 0, 'L');
+		}
+		$yAfterTo = $pdf->GetY();
 
 		// Absender: Gemeinschaft (Name, OIB, Adresse, Kontakt) + Verwalter (Name, OIB, Kontakt)
 		$oib = hvOib($mysoc);
@@ -233,7 +259,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$yAfterFrom = $pdf->GetY();
 
 		// --- Betreff
-		$y = max(110, $yAfterFrom + 6);
+		$y = max(110, $yAfterFrom + 6, $yAfterTo + 6);
 		$period = $object->array_options['options_hv_period'] ?? '';
 		$plabel = $period ? substr($period, 5, 2).'/'.substr($period, 0, 4) : dol_print_date($object->date, '%m/%Y');
 		$unitInfo = $this->unitInfo($object);
