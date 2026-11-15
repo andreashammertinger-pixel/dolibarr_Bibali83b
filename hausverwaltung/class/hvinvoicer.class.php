@@ -36,7 +36,7 @@ class HvInvoicer
 	 *
 	 * @return int product id
 	 */
-	public function ensureProduct(User $user, $ref, $label, $description = '')
+	public function ensureProduct(User $user, $ref, $label, $description = '', $kpd = '')
 	{
 		$p = new Product($this->db);
 		if ($p->fetch(0, $ref) > 0) {
@@ -52,6 +52,9 @@ class HvInvoicer
 		$p->price = 0;
 		$p->price_base_type = 'HT';
 		$p->tva_tx = self::vatRate();
+		if ($kpd !== '') {
+			$p->array_options = array('options_kpd' => $kpd);
+		}
 		$id = $p->create($user);
 		if ($id <= 0) {
 			$this->error = $p->error;
@@ -64,7 +67,8 @@ class HvInvoicer
 	public function ensureBaseProducts(User $user)
 	{
 		$a = $this->ensureProduct($user, self::REF_BK, 'Betriebskosten lt. Aufstellung (Akonto)', 'Monatliche Akontozahlung Betriebskosten, Verteilung nach Wohnfläche');
-		$b = $this->ensureProduct($user, self::REF_ADMIN, 'Verwaltungskosten', 'Verwaltungshonorar je m² Wohnfläche');
+		// KPD 68.32.01 = Verwaltung von Wohnimmobilien gegen Entgelt (Vorschlag, vom Steuerberater bestätigen lassen)
+		$b = $this->ensureProduct($user, self::REF_ADMIN, 'Verwaltungskosten', 'Verwaltungshonorar je m² Wohnfläche', '68.32.01');
 		return ($a > 0 && $b > 0) ? 1 : -1;
 	}
 

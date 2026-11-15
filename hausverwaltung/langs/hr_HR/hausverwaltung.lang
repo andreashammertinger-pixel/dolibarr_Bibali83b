@@ -105,5 +105,5 @@ HvBuildingNo = Kuća %s
 HvPdfCopy = KOPIJA – Prijevod
 HvPdfCopyNote = Ovaj prijevod služi samo za informaciju. Pravno je mjerodavan hrvatski izvornik.
 HvKpd = KPD 2025
-HvKpdHelp = KPD klasifikacija (6 znamenki, npr. 68.32.11). Obvezno po stavci eRačuna (Fiskalizacija 2.0).
+HvKpdHelp = KPD 2025 klasifikacija (6 znamenki). Upišite šifru ili pojam i odaberite. Obvezno po stavci eRačuna (Fiskalizacija 2.0).
 HvKpdMissing = Usluge bez KPD šifre

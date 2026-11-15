@@ -133,7 +133,14 @@ class modHausverwaltung extends DolibarrModules
 		// Lieferantenrechnung (Eingangsrechnung)
 		$ef->addExtraField('hv_costitem', 'HvCostItem', 'sellist', 100, '', 'facture_fourn', 0, 0, '', array('options' => array('hv_costitem:label:rowid::entity=$ENTITY$ AND active=1' => null)), 1, '', '1', 'HvCostItemHelp', '', '0', $lf, $en);
 		// KPD 2025 (Klasifikacija proizvoda po djelatnostima) je Produkt/Leistung – Pflichtangabe je Position auf eRačun (Fiskalizacija 2.0)
-		$ef->addExtraField('kpd', 'HvKpd', 'varchar', 50, 12, 'product', 0, 0, '', '', 1, '', '1', 'HvKpdHelp', '', '0', $lf, '1');
+		// Auswahl aus der KPD-Tabelle (nur gültige 6-stellige Codes), Anzeige Code + deutscher + kroatischer Name
+		$kpdparam = array('options' => array('c_hv_kpd:code|label_de|label_hr:code::active=1' => null));
+		$ef->addExtraField('kpd', 'HvKpd', 'sellist', 50, '', 'product', 0, 0, '', $kpdparam, 1, '', '1', 'HvKpdHelp', '', '0', $lf, '1');
+		// Ältere Installation (Freitextfeld) auf Auswahlliste umstellen
+		$resk = $this->db->query("SELECT type FROM ".$this->db->prefix()."extrafields WHERE name = 'kpd' AND elementtype = 'product'");
+		if ($resk && ($ok = $this->db->fetch_object($resk)) && $ok->type !== 'sellist') {
+			$ef->update('kpd', 'HvKpd', 'sellist', '', 'product', 0, 0, 50, $kpdparam, 1, '', '1', 'HvKpdHelp', '', '', '0', $lf, '1');
+		}
 		$ef->addExtraField('hv_reserve', 'HvPaidFromReserve', 'boolean', 101, '', 'facture_fourn', 0, 0, '', '', 1, '', '1', 'HvPaidFromReserveHelp', '', '0', $lf, $en);
 
 		dol_include_once('/hausverwaltung/class/hvinvoicer.class.php');

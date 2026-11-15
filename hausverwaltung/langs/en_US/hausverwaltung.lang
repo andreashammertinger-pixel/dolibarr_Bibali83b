@@ -105,5 +105,5 @@ HvBuildingNo = House %s
 HvPdfCopy = COPY – Translation
 HvPdfCopyNote = This translation is for information only. The Croatian original is legally binding.
 HvKpd = KPD 2025
-HvKpdHelp = KPD classification (6 digits, e.g. 68.32.11). Mandatory per line on eRačun (Fiscalization 2.0).
+HvKpdHelp = KPD 2025 classification (6 digits). Type a code or term and select. Mandatory per line on eRačun (Fiscalization 2.0).
 HvKpdMissing = Services without KPD code

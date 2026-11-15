@@ -35,6 +35,8 @@ Layout nach Excel-Blatt *Rechnung*: Titel „Vorschreibung“, Datum/Fälligkeit
 
 ### KPD 2025 (Fiskalizacija 2.0)
 * Neues Feld **KPD 2025** an jedem Produkt / jeder Leistung (Extrafeld `kpd`, für alle Firmen – auch Green Resorts nutzbar).
+  Auswahlliste aus Tabelle `llx_c_hv_kpd` mit allen **3.359 gültigen 6-stelligen KPD-2025-Codes** (kroatisch + deutsch), Quelle [kpd.informacija.hr](https://kpd.informacija.hr/).
+* Leistung *Verwaltungskosten* (`HV-VW`) wird mit **68.32.01** (Verwaltung von Wohnimmobilien gegen Entgelt) angelegt – Vorschlag, bitte bestätigen.
 * Wird auf der Vorschreibung unter der Position gedruckt (`KPD xx.xx.xx`).
 * Die Seite *Vorschreibung erstellen* warnt, solange eine verwendete Leistung keinen KPD-Code hat.
 * Die konkreten Codes bitte über die KPD-2025-Suche der Porezna uprava / DZS bestimmen und vom Steuerberater bestätigen lassen.
