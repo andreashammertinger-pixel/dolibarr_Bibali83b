@@ -102,3 +102,5 @@ HvPdfPayBy = Please pay by bank transfer to the following account:
 HvPdfAccountHolder = Account holder
 HvPdfPaymentRef = Payment reference
 HvBuildingNo = House %s
+HvPdfCopy = COPY – Translation
+HvPdfCopyNote = This translation is for information only. The Croatian original is legally binding.

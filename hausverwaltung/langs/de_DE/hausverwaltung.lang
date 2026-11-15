@@ -103,3 +103,5 @@ HvPdfPayBy = Zahlung per Überweisung bitte auf folgendes Konto:
 HvPdfAccountHolder = Kontoinhaber
 HvPdfPaymentRef = Zahlungsreferenz
 HvBuildingNo = Haus %s
+HvPdfCopy = KOPIE – Übersetzung
+HvPdfCopyNote = Diese Übersetzung dient nur zur Information. Rechtlich maßgeblich ist das kroatische Original.

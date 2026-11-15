@@ -102,3 +102,5 @@ HvPdfPayBy = Molimo uplatu na sljedeći račun:
 HvPdfAccountHolder = Vlasnik računa
 HvPdfPaymentRef = Poziv na broj
 HvBuildingNo = Kuća %s
+HvPdfCopy = KOPIJA – Prijevod
+HvPdfCopyNote = Ovaj prijevod služi samo za informaciju. Pravno je mjerodavan hrvatski izvornik.

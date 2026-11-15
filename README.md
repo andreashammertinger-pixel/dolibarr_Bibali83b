@@ -26,7 +26,9 @@ Bildet die Logik der Excel-Vorlage `Bibali83B_Betriebskosten_Template.xlsx` in D
 
 ### Sprachen
 * **Oberfläche:** Deutsch, Kroatisch, Englisch vollständig. Dolibarr zeigt die Sprache des Browsers, wenn unter *Einstellungen → Benutzeroberfläche* die Standardsprache auf **„Automatisch (Browsersprache)“** steht und beim Benutzer keine eigene Sprache gesetzt ist.
-* **Vorschreibung (PDF + Positionstexte):** in der Sprache des Geschäftspartners (Apartment → Feld *Standardsprache*): de, hr, sl, uk, en. Andere Sprachen fallen auf Englisch zurück.
+* **Vorschreibung:** Das **Original ist immer kroatisch** (`IN….pdf`, Positionstexte in der Datenbank ebenfalls kroatisch) – das ist das Dokument für Finanz und Steuerberater.
+  Ist die *Standardsprache* des Apartments nicht Kroatisch, wird automatisch zusätzlich eine **Übersetzungskopie** `IN…_de_DE.pdf` (de, sl, uk, en) erzeugt, deutlich markiert „KOPIE – Übersetzung, maßgeblich ist das kroatische Original“.
+  Kroatische Eigentümer erhalten nur das Original. Einstellung `HAUSVERWALTUNG_ORIGINAL_LANG` (Standard `hr_HR`).
 
 ### PDF-Vorlage „hausverwaltung“
 Layout nach Excel-Blatt *Rechnung*: Titel „Vorschreibung“, Datum/Fälligkeit, Empfänger (An) = Kontakt mit Funktion **Eigentümer** (sonst Adresse des Geschäftspartners), Absender (Von) = Gemeinschaft + Verwalter, Positionen, Gesamtbetrag ohne USt-Ausweis, Bankverbindung des Betriebskontos mit Zahlungsreferenz, Fußzeile mit OIB.

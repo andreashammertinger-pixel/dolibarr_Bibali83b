@@ -247,7 +247,8 @@ class HvInvoicer
 			$soc = new Societe($this->db);
 			$soc->fetch((int) $u->fk_soc);
 			$outlangs = new Translate('', $conf);
-			$outlangs->setDefaultLang(!empty($soc->default_lang) ? $soc->default_lang : $langs->defaultlang);
+			// Rechnungstexte immer in der Originalsprache (Kroatien: hr_HR); Kopie in Eigentümersprache erzeugt die PDF-Vorlage
+			$outlangs->setDefaultLang(getDolGlobalString('HAUSVERWALTUNG_ORIGINAL_LANG', 'hr_HR'));
 			$outlangs->loadLangs(array('main', 'bills', 'hausverwaltung@hausverwaltung'));
 			$mlabel = sprintf('%02d/%04d', $month, $year);
 

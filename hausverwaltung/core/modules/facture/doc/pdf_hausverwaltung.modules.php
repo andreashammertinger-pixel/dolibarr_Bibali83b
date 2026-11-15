@@ -9,6 +9,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/modules/facture/modules_facture.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 
 class pdf_hausverwaltung extends ModelePDFFactures
@@ -25,6 +26,14 @@ class pdf_hausverwaltung extends ModelePDFFactures
 	public $marge_haute;
 	public $marge_basse;
 	public $emetteur;
+	/** @var string '' = Original, sonst Sprachcode der Übersetzungskopie */
+	public $copylang = '';
+
+	/** Sprache des Originals (Kroatien: hr_HR) */
+	public static function originalLang()
+	{
+		return getDolGlobalString('HAUSVERWALTUNG_ORIGINAL_LANG', 'hr_HR');
+	}
 
 	public function __construct($db)
 	{
@@ -57,7 +66,13 @@ class pdf_hausverwaltung extends ModelePDFFactures
 	{
 		global $conf, $langs, $mysoc;
 
-		if (!is_object($outputlangs)) {
+		$object->fetch_thirdparty();
+		$orig = self::originalLang();
+		if ($this->copylang === '') {
+			// Original: immer in der Originalsprache, unabhängig von der Auswahl beim Erzeugen
+			$outputlangs = new Translate('', $conf);
+			$outputlangs->setDefaultLang($orig);
+		} elseif (!is_object($outputlangs)) {
 			$outputlangs = $langs;
 		}
 		$outputlangs->loadLangs(array('main', 'dict', 'companies', 'bills', 'banks', 'hausverwaltung@hausverwaltung'));
@@ -69,7 +84,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		}
 		$objectref = dol_sanitizeFileName($object->ref);
 		$dir = $conf->facture->multidir_output[$object->entity ?? $conf->entity].'/'.$objectref;
-		$file = $dir.'/'.$objectref.'.pdf';
+		$file = $dir.'/'.$objectref.($this->copylang ? '_'.$this->copylang : '').'.pdf';
 		if (!file_exists($dir) && dol_mkdir($dir) < 0) {
 			$this->error = $outputlangs->transnoentities('ErrorCanNotCreateDir', $dir);
 			return 0;
@@ -82,12 +97,8 @@ class pdf_hausverwaltung extends ModelePDFFactures
 			$pdf->setPrintHeader(false);
 			$pdf->setPrintFooter(false);
 		}
-		// Kyrillisch (uk, ru, bg, sr): proportionale Schrift statt Monospace
-		$font = pdf_getPDFFont($outputlangs);
-		if (preg_match('/^(uk|ru|bg|sr|mk)_/', $outputlangs->defaultlang)) {
-			$font = 'dejavusans';
-		}
-		$pdf->SetFont($font);
+		// Unicode-Schrift: č ć đ (hr), č (sl) und Kyrillisch (uk) – die Standard-Helvetica kann diese nicht
+		$pdf->SetFont(getDolGlobalString('HAUSVERWALTUNG_PDF_FONT', 'dejavusans'));
 		$pdf->Open();
 		$pdf->SetTitle($outputlangs->convToOutputCharset($object->ref));
 		$pdf->SetSubject($outputlangs->transnoentities('HvPdfTitle'));
@@ -137,8 +148,23 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$pdf->SetXY($mid, $y);
 		$pdf->Cell($R - $mid, 5, $outputlangs->transnoentities('HvPdfDueMonthly', $dueDay), 0, 1, 'R');
 
+		// Kennzeichnung der Übersetzungskopie
+		if ($this->copylang) {
+			$origlangs = new Translate('', $conf);
+			$origlangs->setDefaultLang($orig);
+			$origlangs->loadLangs(array('hausverwaltung@hausverwaltung'));
+			$pdf->SetFillColor(253, 236, 200);
+			$pdf->SetTextColor(120, 70, 0);
+			$pdf->SetFont('', 'B', $fs - 1);
+			$pdf->SetXY($L, 46);
+			$pdf->Cell($W, 6, $outputlangs->transnoentities('HvPdfCopy'), 0, 2, 'L', 1);
+			$pdf->SetFont('', '', $fs - 3);
+			$pdf->MultiCell($W, 3.8, $outputlangs->transnoentities('HvPdfCopyNote')."\n".$origlangs->transnoentities('HvPdfCopyNote'), 0, 'L', 1);
+			$pdf->SetTextColor(0, 0, 0);
+		}
+
 		// --- Adressblöcke "An" (links) / "Von" (rechts)
-		$yAddr = 58;
+		$yAddr = $this->copylang ? 76 : 58;
 		$pdf->SetFont('', 'B', $fs - 1);
 		$pdf->SetXY($L, $yAddr - 6);
 		$pdf->Cell(80, 5, $outputlangs->transnoentities('HvPdfTo'), 0, 0, 'L');
@@ -211,8 +237,8 @@ class pdf_hausverwaltung extends ModelePDFFactures
 			}
 		}
 		$cols = $showVat
-			? array(array('Description', 0.52, 'L'), array('VAT', 0.10, 'R'), array('PriceUHT', 0.14, 'R'), array('Qty', 0.08, 'R'), array('TotalHT', 0.16, 'R'))
-			: array(array('Description', 0.62, 'L'), array('PriceU', 0.14, 'R'), array('Qty', 0.08, 'R'), array('Total', 0.16, 'R'));
+			? array(array('Description', 0.45, 'L'), array('VAT', 0.10, 'R'), array('PriceUHT', 0.15, 'R'), array('Qty', 0.13, 'R'), array('TotalHT', 0.17, 'R'))
+			: array(array('Description', 0.55, 'L'), array('PriceU', 0.15, 'R'), array('Qty', 0.13, 'R'), array('Total', 0.17, 'R'));
 		$pdf->SetFillColor($dark[0], $dark[1], $dark[2]);
 		$pdf->SetTextColor(255, 255, 255);
 		$pdf->SetFont('', 'B', $fs - 1);
@@ -224,8 +250,9 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$pdf->SetTextColor(0, 0, 0);
 		$pdf->SetFont('', '', $fs - 1);
 		$i = 0;
+		$lineText = $this->copylang ? $this->translatedLineTexts($object, $outputlangs) : array();
 		foreach ($object->lines as $l) {
-			$desc = $l->desc ?: $l->product_label;
+			$desc = $lineText[(int) $l->fk_product] ?? ($l->desc ?: $l->product_label);
 			$vals = $showVat
 				? array($desc, vatrate($l->tva_tx, true), price($l->subprice, 0, $outputlangs, 1, 2, 2), (float) $l->qty, price($l->total_ht, 0, $outputlangs, 1, 2, 2))
 				: array($desc, price($l->subprice * (1 + $l->tva_tx / 100), 0, $outputlangs, 1, 2, 2), (float) $l->qty, price($l->total_ttc, 0, $outputlangs, 1, 2, 2));
@@ -329,7 +356,64 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$pdf->Output($file, 'F');
 		dolChmod($file);
 		$this->result = array('fullpath' => $file);
+
+		// Original erzeugt -> Übersetzungskopie für nicht-kroatische Eigentümer
+		if ($this->copylang === '') {
+			$ownerlang = !empty($object->thirdparty->default_lang) ? $object->thirdparty->default_lang : '';
+			foreach (glob($dir.'/'.$objectref.'_??_??.pdf') ?: array() as $old) {
+				dol_delete_file($old, 0, 0, 0, null, false, 0);
+			}
+			if ($ownerlang && substr($ownerlang, 0, 2) !== substr($orig, 0, 2)) {
+				$copy = new self($this->db);
+				$copy->copylang = $ownerlang;
+				$cl = new Translate('', $conf);
+				$cl->setDefaultLang($ownerlang);
+				if ($copy->write_file($object, $cl) <= 0) {
+					dol_syslog('pdf_hausverwaltung: copy failed '.$copy->error, LOG_WARNING);
+				}
+			}
+			$this->result = array('fullpath' => $file);
+		}
 		return 1;
+	}
+
+	/**
+	 * Positionstexte der Vorschreibung in der Sprache der Kopie neu aufbauen
+	 * (gespeichert sind sie in der Originalsprache).
+	 *
+	 * @return array<int,string> fk_product => Text
+	 */
+	protected function translatedLineTexts($object, $outputlangs)
+	{
+		$out = array();
+		if (empty($object->array_options)) {
+			$object->fetch_optionals();
+		}
+		$period = $object->array_options['options_hv_period'] ?? '';
+		$unitId = (int) ($object->array_options['options_hv_unit'] ?? 0);
+		if (!$period || !$unitId) {
+			return $out;
+		}
+		$mlabel = substr($period, 5, 2).'/'.substr($period, 0, 4);
+		$sql = "SELECT u.ref as uref, b.ref as bref, b.fk_product_reserve FROM ".$this->db->prefix()."hv_unit u LEFT JOIN ".$this->db->prefix()."hv_building b ON b.rowid = u.fk_building WHERE u.rowid = ".$unitId;
+		$res = $this->db->query($sql);
+		$o = $res ? $this->db->fetch_object($res) : null;
+		if (!$o) {
+			return $out;
+		}
+		require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+		$p = new Product($this->db);
+		if ($p->fetch(0, 'HV-BK') > 0) {
+			$out[(int) $p->id] = $outputlangs->transnoentities('HvLineBk', $mlabel, $o->uref);
+		}
+		$p = new Product($this->db);
+		if ($p->fetch(0, 'HV-VW') > 0) {
+			$out[(int) $p->id] = $outputlangs->transnoentities('HvLineAdmin', $mlabel);
+		}
+		if (!empty($o->fk_product_reserve)) {
+			$out[(int) $o->fk_product_reserve] = $outputlangs->transnoentities('HvLineReserve', $outputlangs->transnoentities('HvBuildingNo', preg_replace('/\D/', '', $o->bref) ?: $o->bref), $mlabel);
+		}
+		return $out;
 	}
 
 	/** OIB: idprof1, sonst USt-ID ohne Länderkennung */

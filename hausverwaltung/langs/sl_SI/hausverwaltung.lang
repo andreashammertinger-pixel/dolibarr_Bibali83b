@@ -19,3 +19,5 @@ HvLineReserve = Rezervni sklad %s – %s
 HvLineAdmin = Stroški upravljanja %s
 HvUnit = Apartma
 HvBuildingNo = Stavba %s
+HvPdfCopy = KOPIJA – Prevod
+HvPdfCopyNote = Ta prevod je zgolj informativen. Pravno zavezujoč je hrvaški izvirnik.
