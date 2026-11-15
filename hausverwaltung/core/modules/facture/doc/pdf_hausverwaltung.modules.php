@@ -261,7 +261,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 			}
 			$vals = $showVat
 				? array($desc, vatrate($l->tva_tx, true), price($l->subprice, 0, $outputlangs, 1, 2, 2), (float) $l->qty, price($l->total_ht, 0, $outputlangs, 1, 2, 2))
-				: array($desc, price($l->subprice * (1 + $l->tva_tx / 100), 0, $outputlangs, 1, 2, 5), price($l->qty, 0, $outputlangs, 1, 2, 2), price($l->total_ttc, 0, $outputlangs, 1, 2, 2));
+				: array($desc, price($l->subprice * (1 + $l->tva_tx / 100), 0, $outputlangs, 1, 2, getDolGlobalInt('HAUSVERWALTUNG_RATE_DECIMALS', 2)), price($l->qty, 0, $outputlangs, 1, 2, 2), price($l->total_ttc, 0, $outputlangs, 1, 2, 2));
 			$pdf->SetFillColor(240, 244, 241);
 			$fill = ($i++ % 2) ? 1 : 0;
 			$yl = $pdf->GetY();

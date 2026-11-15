@@ -102,10 +102,11 @@ class HvCalculator
 			$shareB = !empty($areas[$b]) ? $area / $areas[$b] : 0;
 			$bkAll = ($mc[0] ?? 0) * $shareAll;
 			$bkB = ($mc[$b] ?? 0) * $shareB;
-			// Je m²-Sätze (wie auf der Vorschreibung: Einzelpreis = €/m², Menge = m²)
-			$bkRate = $area > 0 ? round(($bkAll + $bkB) / $area, 5) : 0;
-			$reserveRate = round((float) $u->reserve_rate, 5);
-			$adminRate = round((float) $u->admin_rate * (1 + self::adminVatRate() / 100), 5);
+			// Je m²-Sätze (wie auf der Vorschreibung: Einzelpreis = €/m², Menge = m²), gerundet auf HAUSVERWALTUNG_RATE_DECIMALS (Standard 2)
+			$dec = getDolGlobalInt('HAUSVERWALTUNG_RATE_DECIMALS', 2);
+			$bkRate = $area > 0 ? round(($bkAll + $bkB) / $area, $dec) : 0;
+			$reserveRate = round((float) $u->reserve_rate, $dec);
+			$adminRate = round((float) $u->admin_rate * (1 + self::adminVatRate() / 100), $dec);
 			$bk = round($bkRate * $area, 2);
 			$reserve = round($reserveRate * $area, 2);
 			$adminNet = round($area * (float) $u->admin_rate, 2);
