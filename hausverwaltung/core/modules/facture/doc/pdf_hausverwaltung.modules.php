@@ -251,8 +251,12 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$pdf->SetFont('', '', $fs - 1);
 		$i = 0;
 		$lineText = $this->copylang ? $this->translatedLineTexts($object, $outputlangs) : array();
+		$kpd = $this->kpdCodes($object);
 		foreach ($object->lines as $l) {
 			$desc = $lineText[(int) $l->fk_product] ?? ($l->desc ?: $l->product_label);
+			if (!empty($kpd[(int) $l->fk_product])) {
+				$desc .= "\n".'KPD '.$kpd[(int) $l->fk_product];
+			}
 			$vals = $showVat
 				? array($desc, vatrate($l->tva_tx, true), price($l->subprice, 0, $outputlangs, 1, 2, 2), (float) $l->qty, price($l->total_ht, 0, $outputlangs, 1, 2, 2))
 				: array($desc, price($l->subprice * (1 + $l->tva_tx / 100), 0, $outputlangs, 1, 2, 2), (float) $l->qty, price($l->total_ttc, 0, $outputlangs, 1, 2, 2));
@@ -412,6 +416,28 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		}
 		if (!empty($o->fk_product_reserve)) {
 			$out[(int) $o->fk_product_reserve] = $outputlangs->transnoentities('HvLineReserve', $outputlangs->transnoentities('HvBuildingNo', preg_replace('/\D/', '', $o->bref) ?: $o->bref), $mlabel);
+		}
+		return $out;
+	}
+
+	/** @return array<int,string> fk_product => KPD-Code */
+	protected function kpdCodes($object)
+	{
+		$ids = array();
+		foreach ($object->lines as $l) {
+			if (!empty($l->fk_product)) {
+				$ids[] = (int) $l->fk_product;
+			}
+		}
+		$out = array();
+		if (!$ids) {
+			return $out;
+		}
+		$res = $this->db->query("SELECT fk_object, kpd FROM ".$this->db->prefix()."product_extrafields WHERE fk_object IN (".implode(',', $ids).")");
+		while ($res && ($o = $this->db->fetch_object($res))) {
+			if (!empty($o->kpd)) {
+				$out[(int) $o->fk_object] = $o->kpd;
+			}
 		}
 		return $out;
 	}

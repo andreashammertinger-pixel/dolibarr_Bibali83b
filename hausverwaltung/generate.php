@@ -72,6 +72,19 @@ foreach ($preview as $p) {
 llxHeader('', $langs->trans('HvGenerate'), '', '', 0, 0, '', '', '', 'mod-hausverwaltung');
 print load_fiche_titre($langs->trans('HvGenerate'), '', 'bill');
 
+// Prüfung: KPD-Code bei allen Vorschreibungs-Leistungen hinterlegt?
+$missing = array();
+$sqlk = "SELECT p.rowid, p.ref FROM ".$db->prefix()."product p LEFT JOIN ".$db->prefix()."product_extrafields pe ON pe.fk_object = p.rowid";
+$sqlk .= " WHERE (p.ref IN ('".HvInvoicer::REF_BK."', '".HvInvoicer::REF_ADMIN."') OR p.rowid IN (SELECT fk_product_reserve FROM ".$db->prefix()."hv_building WHERE entity = ".((int) $conf->entity)."))";
+$sqlk .= " AND p.entity IN (".getEntity('product').") AND (pe.kpd IS NULL OR pe.kpd = '')";
+$resk = $db->query($sqlk);
+while ($resk && ($o = $db->fetch_object($resk))) {
+	$missing[] = '<a href="'.DOL_URL_ROOT.'/product/card.php?id='.$o->rowid.'">'.dol_escape_htmltag($o->ref).'</a>';
+}
+if ($missing) {
+	print info_admin($langs->trans('HvKpdMissing').': '.implode(', ', $missing), 0, 0, 'warning');
+}
+
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'">';
 print '<div class="inline-block marginrightonly">'.$langs->trans('HvPeriod').': <input type="month" name="period" value="'.dol_escape_htmltag($period).'"></div>';
 print '<button class="button" name="action" value="preview">'.$langs->trans('HvPreview').'</button> ';

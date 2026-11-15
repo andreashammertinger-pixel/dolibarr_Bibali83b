@@ -33,6 +33,12 @@ Bildet die Logik der Excel-Vorlage `Bibali83B_Betriebskosten_Template.xlsx` in D
 ### PDF-Vorlage „hausverwaltung“
 Layout nach Excel-Blatt *Rechnung*: Titel „Vorschreibung“, Datum/Fälligkeit, Empfänger (An) = Kontakt mit Funktion **Eigentümer** (sonst Adresse des Geschäftspartners), Absender (Von) = Gemeinschaft + Verwalter, Positionen, Gesamtbetrag ohne USt-Ausweis, Bankverbindung des Betriebskontos mit Zahlungsreferenz, Fußzeile mit OIB.
 
+### KPD 2025 (Fiskalizacija 2.0)
+* Neues Feld **KPD 2025** an jedem Produkt / jeder Leistung (Extrafeld `kpd`, für alle Firmen – auch Green Resorts nutzbar).
+* Wird auf der Vorschreibung unter der Position gedruckt (`KPD xx.xx.xx`).
+* Die Seite *Vorschreibung erstellen* warnt, solange eine verwendete Leistung keinen KPD-Code hat.
+* Die konkreten Codes bitte über die KPD-2025-Suche der Porezna uprava / DZS bestimmen und vom Steuerberater bestätigen lassen.
+
 ### Berechnungslogik (wie Excel)
 * Monatsanteil einer Kostenart = Brutto ÷ Rhythmus (Monate)
 * Kostenart *alle Gebäude* → Anteil = m² Apartment ÷ m² aller Apartments

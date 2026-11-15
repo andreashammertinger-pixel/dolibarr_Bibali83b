@@ -21,3 +21,6 @@ HvUnit = Апартамент
 HvBuildingNo = Будинок %s
 HvPdfCopy = КОПІЯ – Переклад
 HvPdfCopyNote = Цей переклад надається лише для інформації. Юридичну силу має хорватський оригінал.
+HvKpd = KPD 2025
+HvKpdHelp = KPD
+HvKpdMissing = Без KPD
