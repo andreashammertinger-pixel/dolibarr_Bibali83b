@@ -1,0 +1,358 @@
+<?php
+/* Copyright (C) 2026 Green Villa and Apartment Resorts d.o.o. — GPL v3+ */
+
+/**
+ * PDF-Vorlage "Vorschreibung" – Layout nach Excel-Blatt "Rechnung" (Bibali83B_Betriebskosten_Template.xlsx).
+ * Sprache = Sprache des Eigentümers (Geschäftspartner), wird von generateDocument() übergeben.
+ */
+require_once DOL_DOCUMENT_ROOT.'/core/modules/facture/modules_facture.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
+
+class pdf_hausverwaltung extends ModelePDFFactures
+{
+	public $db;
+	public $name;
+	public $description;
+	public $type;
+	public $page_largeur;
+	public $page_hauteur;
+	public $format;
+	public $marge_gauche;
+	public $marge_droite;
+	public $marge_haute;
+	public $marge_basse;
+	public $emetteur;
+
+	public function __construct($db)
+	{
+		global $langs, $mysoc;
+		$langs->loadLangs(array('main', 'bills'));
+		$this->db = $db;
+		$this->name = 'hausverwaltung';
+		$this->description = 'Vorschreibung Hausverwaltung (Layout Bibali 83b)';
+		$this->update_main_doc_field = 1;
+		$this->type = 'pdf';
+		$formatarray = pdf_getFormat();
+		$this->page_largeur = $formatarray['width'];
+		$this->page_hauteur = $formatarray['height'];
+		$this->format = array($this->page_largeur, $this->page_hauteur);
+		$this->marge_gauche = 18;
+		$this->marge_droite = 15;
+		$this->marge_haute = 15;
+		$this->marge_basse = 12;
+		$this->option_logo = 1;
+		$this->option_multilang = 1;
+		$this->option_draft_watermark = 1;
+		$this->emetteur = $mysoc;
+	}
+
+	/**
+	 * @param Facture   $object
+	 * @param Translate $outputlangs
+	 */
+	public function write_file($object, $outputlangs, $srctemplatepath = '', $hidedetails = 0, $hidedesc = 0, $hideref = 0)
+	{
+		global $conf, $langs, $mysoc;
+
+		if (!is_object($outputlangs)) {
+			$outputlangs = $langs;
+		}
+		$outputlangs->loadLangs(array('main', 'dict', 'companies', 'bills', 'banks', 'hausverwaltung@hausverwaltung'));
+		$this->emetteur = $mysoc;
+
+		$object->fetch_thirdparty();
+		if (empty($object->lines)) {
+			$object->fetch_lines();
+		}
+		$objectref = dol_sanitizeFileName($object->ref);
+		$dir = $conf->facture->multidir_output[$object->entity ?? $conf->entity].'/'.$objectref;
+		$file = $dir.'/'.$objectref.'.pdf';
+		if (!file_exists($dir) && dol_mkdir($dir) < 0) {
+			$this->error = $outputlangs->transnoentities('ErrorCanNotCreateDir', $dir);
+			return 0;
+		}
+
+		$pdf = pdf_getInstance($this->format);
+		$fs = pdf_getPDFFontSize($outputlangs);
+		$pdf->SetAutoPageBreak(1, 0);
+		if (class_exists('TCPDF')) {
+			$pdf->setPrintHeader(false);
+			$pdf->setPrintFooter(false);
+		}
+		// Kyrillisch (uk, ru, bg, sr): proportionale Schrift statt Monospace
+		$font = pdf_getPDFFont($outputlangs);
+		if (preg_match('/^(uk|ru|bg|sr|mk)_/', $outputlangs->defaultlang)) {
+			$font = 'dejavusans';
+		}
+		$pdf->SetFont($font);
+		$pdf->Open();
+		$pdf->SetTitle($outputlangs->convToOutputCharset($object->ref));
+		$pdf->SetSubject($outputlangs->transnoentities('HvPdfTitle'));
+		$pdf->SetCreator('Dolibarr '.DOL_VERSION);
+		$pdf->SetAuthor($outputlangs->convToOutputCharset($mysoc->name));
+		$pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
+		$pdf->AddPage();
+
+		$L = $this->marge_gauche;
+		$W = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
+		$R = $this->page_largeur - $this->marge_droite;
+		$mid = $L + $W * 0.55;
+		$dark = array(46, 90, 63);
+
+		// --- Logo (Firma der Gemeinschaft)
+		$logo = '';
+		if (!empty($mysoc->logo)) {
+			$logodir = !empty($conf->mycompany->multidir_output[$object->entity ?? $conf->entity]) ? $conf->mycompany->multidir_output[$object->entity ?? $conf->entity] : $conf->mycompany->dir_output;
+			$logo = $logodir.'/logos/'.$mysoc->logo;
+		}
+		if ($logo && is_readable($logo)) {
+			$h = min(18, pdf_getHeightForLogo($logo));
+			$pdf->Image($logo, $L, $this->marge_haute, 0, $h);
+		}
+
+		// --- Titel "Vorschreibung" + Datum / Fälligkeit (rechts)
+		$pdf->SetTextColor($dark[0], $dark[1], $dark[2]);
+		$pdf->SetFont('', 'B', $fs + 10);
+		$pdf->SetXY($mid, $this->marge_haute);
+		$pdf->Cell($R - $mid, 10, $outputlangs->transnoentities('HvPdfTitle'), 0, 1, 'R');
+		$pdf->SetTextColor(0, 0, 0);
+		$pdf->SetFont('', '', $fs - 1);
+		$y = $this->marge_haute + 12;
+		$rows = array(
+			array($outputlangs->transnoentities('Date').':', dol_print_date($object->date, 'day', false, $outputlangs, true)),
+			array($outputlangs->transnoentities('DateDue').':', dol_print_date($object->date_lim_reglement, 'day', false, $outputlangs, true)),
+			array($outputlangs->transnoentities('Ref').':', $object->ref),
+		);
+		foreach ($rows as $r) {
+			$pdf->SetXY($mid, $y);
+			$pdf->Cell(($R - $mid) * 0.5, 5, $r[0], 0, 0, 'R');
+			$pdf->Cell(($R - $mid) * 0.5, 5, $r[1], 0, 1, 'R');
+			$y += 5;
+		}
+		$dueDay = getDolGlobalInt('HAUSVERWALTUNG_DUE_DAY', 5);
+		$pdf->SetFont('', 'I', $fs - 2);
+		$pdf->SetXY($mid, $y);
+		$pdf->Cell($R - $mid, 5, $outputlangs->transnoentities('HvPdfDueMonthly', $dueDay), 0, 1, 'R');
+
+		// --- Adressblöcke "An" (links) / "Von" (rechts)
+		$yAddr = 58;
+		$pdf->SetFont('', 'B', $fs - 1);
+		$pdf->SetXY($L, $yAddr - 6);
+		$pdf->Cell(80, 5, $outputlangs->transnoentities('HvPdfTo'), 0, 0, 'L');
+		$pdf->SetXY($mid, $yAddr - 6);
+		$pdf->Cell($R - $mid, 5, $outputlangs->transnoentities('HvPdfFrom'), 0, 0, 'L');
+
+		// Empfänger: Rechnungskontakt (Eigentümer) wenn vorhanden, sonst Geschäftspartner
+		$contact = null;
+		$ids = $object->getIdContact('external', 'BILLING');
+		if (count($ids)) {
+			$object->fetch_contact($ids[0]);
+			$contact = $object->contact;
+		}
+		$toName = $contact ? $contact->getFullName($outputlangs, 1) : $object->thirdparty->name;
+		$toAddr = pdf_build_address($outputlangs, $mysoc, $object->thirdparty, $contact ?: '', $contact ? 1 : 0, 'target', $object);
+		// Adressblock enthält bei Kontakten bereits den Namen in der ersten Zeile
+		$addrLines = explode("\n", $toAddr);
+		if (trim($addrLines[0]) === trim($toName)) {
+			array_shift($addrLines);
+			$toAddr = implode("\n", $addrLines);
+		}
+		$pdf->SetFont('', 'B', $fs);
+		$pdf->SetXY($L, $yAddr);
+		$pdf->MultiCell(80, 5, $outputlangs->convToOutputCharset($toName), 0, 'L');
+		$pdf->SetFont('', '', $fs - 1);
+		$pdf->SetX($L);
+		$pdf->MultiCell(80, 4.5, $toAddr, 0, 'L');
+		$pdf->SetX($L);
+		$pdf->SetFont('', '', $fs - 2);
+		$pdf->MultiCell(80, 4.5, $outputlangs->transnoentities('HvUnit').': '.$object->thirdparty->name, 0, 'L');
+
+		// Absender: Gemeinschaft + Verwalter
+		$from = $mysoc->name."\n".pdf_build_address($outputlangs, $mysoc, $object->thirdparty, '', 0, 'source', $object);
+		$oib = $this->oib($mysoc);
+		if ($oib && strpos($from, $oib) === false) {
+			$from .= "\nOIB: ".$oib;
+		}
+		$mgr = $this->manager();
+		if ($mgr) {
+			$from .= "\n\n".$outputlangs->transnoentities('HvPdfManagedBy').":\n".$mgr->name;
+			if (!empty($mgr->email)) {
+				$from .= "\n".$outputlangs->transnoentities('Email').': '.$mgr->email;
+			}
+			if (!empty($mgr->url)) {
+				$from .= "\n".$outputlangs->transnoentities('Web').': '.$mgr->url;
+			}
+		}
+		$pdf->SetFont('', '', $fs - 2);
+		$pdf->SetXY($mid, $yAddr);
+		$pdf->MultiCell($R - $mid, 4.2, $outputlangs->convToOutputCharset($from), 0, 'L');
+		$yAfterFrom = $pdf->GetY();
+
+		// --- Betreff
+		$y = max(110, $yAfterFrom + 6);
+		$period = $object->array_options['options_hv_period'] ?? '';
+		$plabel = $period ? substr($period, 5, 2).'/'.substr($period, 0, 4) : dol_print_date($object->date, '%m/%Y');
+		$pdf->SetFont('', 'B', $fs + 1);
+		$pdf->SetXY($L, $y);
+		$pdf->Cell($W, 6, $outputlangs->transnoentities('HvPdfSubject', $mysoc->name), 0, 1, 'L');
+		$pdf->SetFont('', '', $fs - 1);
+		$pdf->SetX($L);
+		$pdf->Cell($W, 5, $outputlangs->transnoentities('HvPdfSubline', $plabel, $dueDay), 0, 1, 'L');
+		$y = $pdf->GetY() + 4;
+
+		// --- Positionstabelle
+		$showVat = false;
+		foreach ($object->lines as $l) {
+			if ((float) $l->tva_tx != 0.0) {
+				$showVat = true;
+			}
+		}
+		$cols = $showVat
+			? array(array('Description', 0.52, 'L'), array('VAT', 0.10, 'R'), array('PriceUHT', 0.14, 'R'), array('Qty', 0.08, 'R'), array('TotalHT', 0.16, 'R'))
+			: array(array('Description', 0.62, 'L'), array('PriceU', 0.14, 'R'), array('Qty', 0.08, 'R'), array('Total', 0.16, 'R'));
+		$pdf->SetFillColor($dark[0], $dark[1], $dark[2]);
+		$pdf->SetTextColor(255, 255, 255);
+		$pdf->SetFont('', 'B', $fs - 1);
+		$pdf->SetXY($L, $y);
+		foreach ($cols as $c) {
+			$pdf->Cell($W * $c[1], 7, $outputlangs->transnoentities($c[0]), 0, 0, $c[2], 1);
+		}
+		$pdf->Ln();
+		$pdf->SetTextColor(0, 0, 0);
+		$pdf->SetFont('', '', $fs - 1);
+		$i = 0;
+		foreach ($object->lines as $l) {
+			$desc = $l->desc ?: $l->product_label;
+			$vals = $showVat
+				? array($desc, vatrate($l->tva_tx, true), price($l->subprice, 0, $outputlangs, 1, 2, 2), (float) $l->qty, price($l->total_ht, 0, $outputlangs, 1, 2, 2))
+				: array($desc, price($l->subprice * (1 + $l->tva_tx / 100), 0, $outputlangs, 1, 2, 2), (float) $l->qty, price($l->total_ttc, 0, $outputlangs, 1, 2, 2));
+			$pdf->SetFillColor(240, 244, 241);
+			$fill = ($i++ % 2) ? 1 : 0;
+			$yl = $pdf->GetY();
+			$pdf->SetX($L);
+			$pdf->MultiCell($W * $cols[0][1], 6.5, $outputlangs->convToOutputCharset(dol_htmlentitiesbr_decode(strip_tags($desc))), 0, 'L', $fill, 1, '', '', true, 0, false, true, 0, 'T');
+			$h = $pdf->GetY() - $yl;
+			$x = $L + $W * $cols[0][1];
+			for ($k = 1; $k < count($cols); $k++) {
+				$pdf->SetXY($x, $yl);
+				$pdf->Cell($W * $cols[$k][1], 6.5, $vals[$k], 0, 0, $cols[$k][2], $fill, '', 0, false, 'T', 'T');
+				if ($h > 6.5 && $fill) {
+					$pdf->SetXY($x, $yl + 6.5);
+					$pdf->Cell($W * $cols[$k][1], $h - 6.5, '', 0, 0, 'L', 1);
+				}
+				$x += $W * $cols[$k][1];
+			}
+			$pdf->SetY($yl + $h);
+		}
+		$pdf->SetDrawColor($dark[0], $dark[1], $dark[2]);
+		$pdf->Line($L, $pdf->GetY(), $R, $pdf->GetY());
+
+		// --- Summen
+		$y = $pdf->GetY() + 3;
+		$tw = $W * 0.40;
+		$tx = $R - $tw;
+		$tot = $showVat
+			? array(array('TotalHT', $object->total_ht, ''), array('TotalVAT', $object->total_tva, ''), array('TotalTTC', $object->total_ttc, 'B'))
+			: array(array('HvPdfTotal', $object->total_ttc, 'B'));
+		foreach ($tot as $t) {
+			$pdf->SetFont('', $t[2], $t[2] ? $fs + 1 : $fs - 1);
+			$pdf->SetXY($tx, $y);
+			$pdf->Cell($tw * 0.55, 6, $outputlangs->transnoentities($t[0]), 0, 0, 'L');
+			$pdf->Cell($tw * 0.45, 6, price($t[1], 0, $outputlangs, 1, 2, 2, $conf->currency), 0, 1, 'R');
+			$y += 6.5;
+		}
+		if (!$showVat) {
+			$pdf->SetFont('', 'I', $fs - 3);
+			$pdf->SetXY($tx, $y);
+			$pdf->MultiCell($tw, 4, $outputlangs->transnoentities('HvPdfNoVat'), 0, 'R');
+			$y = $pdf->GetY();
+		}
+
+		// --- Zahlungsbedingungen / Bankverbindung
+		$y = max($y + 8, 200);
+		$pdf->SetFont('', 'B', $fs - 1);
+		$pdf->SetXY($L, $y);
+		$pdf->Cell($W, 5, $outputlangs->transnoentities('HvPdfPaymentTerms'), 0, 1, 'L');
+		$pdf->SetFont('', '', $fs - 1);
+		$pdf->SetX($L);
+		$pdf->Cell($W, 5, $outputlangs->transnoentities('HvPdfPayBy'), 0, 1, 'L');
+		$acc = null;
+		if (!empty($object->fk_account)) {
+			$acc = new Account($this->db);
+			if ($acc->fetch($object->fk_account) <= 0) {
+				$acc = null;
+			}
+		}
+		$bank = array(
+			array('HvPdfAccountHolder', $acc && $acc->owner_name ? $acc->owner_name : ($acc && !empty($acc->proprio) ? $acc->proprio : $mysoc->name)),
+			array('IBAN', $acc ? $acc->iban : ''),
+			array('BIC', $acc ? $acc->bic : ''),
+			array('HvPdfPaymentRef', $object->ref),
+		);
+		foreach ($bank as $b) {
+			if ($b[1] === '' || $b[1] === null) {
+				continue;
+			}
+			$pdf->SetX($L + 4);
+			$pdf->SetFont('', '', $fs - 1);
+			$pdf->Cell(42, 5, $outputlangs->transnoentities($b[0]).':', 0, 0, 'L');
+			$pdf->SetFont('', 'B', $fs - 1);
+			$pdf->Cell($W - 46, 5, $outputlangs->convToOutputCharset($b[1]), 0, 1, 'L');
+		}
+
+		// --- Fußzeile
+		$parts = array($mysoc->name);
+		foreach (array($mysoc->url, $mysoc->email) as $p) {
+			if (!empty($p)) {
+				$parts[] = $p;
+			}
+		}
+		if ($oib) {
+			$parts[] = 'OIB '.$oib;
+		}
+		$pdf->SetDrawColor($dark[0], $dark[1], $dark[2]);
+		$pdf->Line($L, $this->page_hauteur - $this->marge_basse - 7, $R, $this->page_hauteur - $this->marge_basse - 7);
+		$pdf->SetFont('', '', $fs - 3);
+		$pdf->SetTextColor(90, 90, 90);
+		$pdf->SetXY($L, $this->page_hauteur - $this->marge_basse - 6);
+		$pdf->Cell($W, 4, $outputlangs->convToOutputCharset(implode('  |  ', $parts)), 0, 0, 'C');
+		$pdf->SetTextColor(0, 0, 0);
+
+		if ($object->statut == Facture::STATUS_DRAFT) {
+			pdf_watermark($pdf, $outputlangs, $this->page_hauteur, $this->page_largeur, 'mm', $outputlangs->transnoentities('Draft'));
+		}
+
+		$pdf->Close();
+		$pdf->Output($file, 'F');
+		dolChmod($file);
+		$this->result = array('fullpath' => $file);
+		return 1;
+	}
+
+	/** OIB: idprof1, sonst USt-ID ohne Länderkennung */
+	protected function oib($soc)
+	{
+		if (!empty($soc->idprof1)) {
+			return preg_replace('/^OIB:?\s*/i', '', $soc->idprof1);
+		}
+		if (!empty($soc->tva_intra)) {
+			return preg_replace('/^HR/i', '', $soc->tva_intra);
+		}
+		return '';
+	}
+
+	/** Hausverwalter (Lieferant aus den Moduleinstellungen) */
+	protected function manager()
+	{
+		$id = getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID');
+		if ($id <= 0) {
+			return null;
+		}
+		require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
+		$s = new Societe($this->db);
+		return $s->fetch($id) > 0 ? $s : null;
+	}
+}

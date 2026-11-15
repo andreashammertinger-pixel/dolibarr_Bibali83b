@@ -1,0 +1,21 @@
+# Hausverwaltung – Українська
+HvPdfTitle = Рахунок на оплату
+HvPdfDueMonthly = щомісяця, не пізніше %s числа кожного місяця
+HvPdfTo = Кому
+HvPdfFrom = Від
+HvPdfManagedBy = Управитель
+HvPdfSubject = Рахунок за експлуатаційні витрати %s
+HvPdfSubline = Рахунок %s – оплата щомісяця до %s числа
+HvPdfTotal = Загальна сума
+HvPdfNoVat = Рахунок спільноти власників – без ПДВ.
+HvPdfPaymentTerms = Умови оплати:
+HvPdfPayBy = Будь ласка, оплатіть на такий рахунок:
+HvPdfAccountHolder = Власник рахунку
+HvPdfPaymentRef = Призначення платежу
+HvInvoiceRefClient = Апт. %s – Витрати %s
+HvInvoiceNote = Аванс експлуатаційних витрат %s. Будь ласка, оплатіть до %s.
+HvLineBk = Експлуатаційні витрати згідно з розрахунком %s (Апт. %s)
+HvLineReserve = Резервний фонд %s – %s
+HvLineAdmin = Плата за управління %s
+HvUnit = Апартамент
+HvBuildingNo = Будинок %s

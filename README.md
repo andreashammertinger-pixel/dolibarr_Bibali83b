@@ -24,6 +24,13 @@ Bildet die Logik der Excel-Vorlage `Bibali83B_Betriebskosten_Template.xlsx` in D
   Beim Erzeugen der Vorschreibungen legt das Modul die Honorar-Eingangsrechnung (Entwurf, Ref. `HON-JJJJ-MM`) automatisch an – die Summe entspricht exakt der vorgeschriebenen Verwaltung.
   Green Resorts stellt die Ausgangsrechnung in seiner eigenen Firma (z. B. als wiederkehrende Rechnungsvorlage).
 
+### Sprachen
+* **Oberfläche:** Deutsch, Kroatisch, Englisch vollständig. Dolibarr zeigt die Sprache des Browsers, wenn unter *Einstellungen → Benutzeroberfläche* die Standardsprache auf **„Automatisch (Browsersprache)“** steht und beim Benutzer keine eigene Sprache gesetzt ist.
+* **Vorschreibung (PDF + Positionstexte):** in der Sprache des Geschäftspartners (Apartment → Feld *Standardsprache*): de, hr, sl, uk, en. Andere Sprachen fallen auf Englisch zurück.
+
+### PDF-Vorlage „hausverwaltung“
+Layout nach Excel-Blatt *Rechnung*: Titel „Vorschreibung“, Datum/Fälligkeit, Empfänger (An) = Kontakt mit Funktion **Eigentümer** (sonst Adresse des Geschäftspartners), Absender (Von) = Gemeinschaft + Verwalter, Positionen, Gesamtbetrag ohne USt-Ausweis, Bankverbindung des Betriebskontos mit Zahlungsreferenz, Fußzeile mit OIB.
+
 ### Berechnungslogik (wie Excel)
 * Monatsanteil einer Kostenart = Brutto ÷ Rhythmus (Monate)
 * Kostenart *alle Gebäude* → Anteil = m² Apartment ÷ m² aller Apartments

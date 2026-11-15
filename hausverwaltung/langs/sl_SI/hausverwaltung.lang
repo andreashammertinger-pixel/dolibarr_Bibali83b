@@ -1,0 +1,21 @@
+# Hausverwaltung – Slovenščina
+HvPdfTitle = Obremenitev
+HvPdfDueMonthly = mesečno, najkasneje do %s. v mesecu
+HvPdfTo = Za
+HvPdfFrom = Od
+HvPdfManagedBy = Upravnik
+HvPdfSubject = Obremenitev obratovalnih stroškov %s
+HvPdfSubline = Obremenitev %s – plačilo mesečno do %s. v mesecu
+HvPdfTotal = Skupni znesek
+HvPdfNoVat = Obremenitev skupnosti lastnikov – brez izkazanega DDV.
+HvPdfPaymentTerms = Plačilni pogoji:
+HvPdfPayBy = Prosimo, plačajte na naslednji račun:
+HvPdfAccountHolder = Imetnik računa
+HvPdfPaymentRef = Sklic
+HvInvoiceRefClient = Apt. %s – Stroški %s
+HvInvoiceNote = Akontacija obratovalnih stroškov %s. Prosimo, plačajte do %s.
+HvLineBk = Obratovalni stroški po obračunu %s (Apt. %s)
+HvLineReserve = Rezervni sklad %s – %s
+HvLineAdmin = Stroški upravljanja %s
+HvUnit = Apartma
+HvBuildingNo = Stavba %s

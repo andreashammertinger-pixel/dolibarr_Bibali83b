@@ -35,6 +35,7 @@ class modHausverwaltung extends DolibarrModules
 
 		$this->module_parts = array(
 			'triggers' => 1,
+			'models' => 1,
 			'css' => array(),
 			'js' => array(),
 			'hooks' => array(),
@@ -138,7 +139,11 @@ class modHausverwaltung extends DolibarrModules
 		$inv->ensureBaseProducts($user);
 
 		$this->remove($options);
-		$sql = array();
+		// PDF-Vorlage "hausverwaltung" für Kundenrechnungen aktivieren
+		$sql = array(
+			"DELETE FROM ".$this->db->prefix()."document_model WHERE nom = 'hausverwaltung' AND type = 'invoice' AND entity = ".((int) $conf->entity),
+			"INSERT INTO ".$this->db->prefix()."document_model (nom, type, entity) VALUES ('hausverwaltung', 'invoice', ".((int) $conf->entity).")",
+		);
 		return $this->_init($sql, $options);
 	}
 

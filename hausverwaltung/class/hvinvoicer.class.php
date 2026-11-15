@@ -143,6 +143,24 @@ class HvInvoicer
 		return $res;
 	}
 
+	/**
+	 * Kontakte des Apartments mit Funktion Eigentümer / Vlasnik / Owner / Lastnik (in dieser Reihenfolge der Anlage).
+	 * Ohne solche Kontakte: keine (dann wird die Adresse des Geschäftspartners verwendet).
+	 *
+	 * @return int[]
+	 */
+	public function ownerContacts($socid)
+	{
+		$ids = array();
+		$res = $this->db->query("SELECT rowid, poste FROM ".$this->db->prefix()."socpeople WHERE fk_soc = ".((int) $socid)." AND statut = 1 ORDER BY rowid");
+		while ($res && ($o = $this->db->fetch_object($res))) {
+			if (preg_match('/^\s*(eigentümer|eigentuemer|vlasni|owner|lastnik|власник)/iu', (string) $o->poste)) {
+				$ids[] = (int) $o->rowid;
+			}
+		}
+		return $ids;
+	}
+
 	/** Existiert für Einheit + Periode bereits eine (nicht stornierte) Vorschreibung? */
 	public function findExisting($unitId, $period)
 	{
@@ -248,12 +266,18 @@ class HvInvoicer
 			}
 			$f->cond_reglement_id = $soc->cond_reglement_id ?: 1;
 			$f->array_options = array('options_hv_period' => $period, 'options_hv_unit' => (int) $unitId);
+			$f->model_pdf = getDolGlobalString('HAUSVERWALTUNG_PDF_MODEL', 'hausverwaltung');
 			$id = $f->create($user);
 			$err = $id <= 0;
+			if (!$err) {
+				foreach ($this->ownerContacts((int) $u->fk_soc) as $cid) {
+					$f->add_contact($cid, 'BILLING', 'external');
+				}
+			}
 
 			$lines = array(
 				array($pBk->id, $outlangs->transnoentities('HvLineBk', $mlabel, $u->ref), $r['bk']),
-				array($fkReserveProduct, $outlangs->transnoentities('HvLineReserve', $building ? $building->label : '', $mlabel), $r['reserve']),
+				array($fkReserveProduct, $outlangs->transnoentities('HvLineReserve', $building ? $outlangs->transnoentities('HvBuildingNo', preg_replace('/\D/', '', $building->ref) ?: $building->ref) : '', $mlabel), $r['reserve']),
 				array($pAdmin->id, $outlangs->transnoentities('HvLineAdmin', $mlabel), $r['admin']),
 			);
 			foreach ($lines as $l) {
@@ -285,7 +309,7 @@ class HvInvoicer
 				$this->db->commit();
 				if ($validate) {
 					$f->fetch($f->id);
-					$f->generateDocument($f->model_pdf ?: getDolGlobalString('FACTURE_ADDON_PDF', 'sponge'), $outlangs);
+					$f->generateDocument(getDolGlobalString('HAUSVERWALTUNG_PDF_MODEL', 'hausverwaltung'), $outlangs);
 				}
 				$entry['status'] = 'ok';
 				$entry['invoice_id'] = (int) $f->id;
