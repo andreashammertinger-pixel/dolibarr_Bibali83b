@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.0
+- Lese-API (nur GET, Recht „Hausverwaltung ansehen“): `/hausverwaltung/overview`, `/hausverwaltung/costitems`, `/hausverwaltung/settlement/{jahr}`
+
 ## 1.1.0
 - PDF-Vorlage „Vorschreibung“ nach Excel-Layout; kroatisches Original + markierte Übersetzungskopie (de/sl/uk/en)
 - Positionen als €/m² × m² (2 Nachkommastellen), Apartment + m² im Betreff, Land englisch

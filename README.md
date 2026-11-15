@@ -57,6 +57,9 @@ Auf der Vorschreibung: Einzelpreis = **€/m²**, Menge = **m² des Apartments**
 * Kostenart *Gebäude n* → Anteil = m² Apartment ÷ m² der Apartments in Gebäude n
 * Rücklage = m² × Rücklage-Satz, Verwaltung = m² × Verwaltungs-Satz (netto) × (1 + USt Honorar)
 
+## REST-API (nur lesend)
+`GET /api/index.php/hausverwaltung/overview` · `/costitems` · `/settlement/{jahr}` – Header `DOLAPIKEY`, bei Multicompany `DOLAPIENTITY: 5`. Erfordert das Recht *Hausverwaltung ansehen*.
+
 ## Installation
 1. **Backup** von Datenbank und Dokumentenverzeichnis.
 2. `./build.sh` → `dist/module_hausverwaltung-1.0.0.zip`
