@@ -57,6 +57,15 @@ Auf der Vorschreibung: Einzelpreis = **€/m²**, Menge = **m² des Apartments**
 * Kostenart *Gebäude n* → Anteil = m² Apartment ÷ m² der Apartments in Gebäude n
 * Rücklage = m² × Rücklage-Satz, Verwaltung = m² × Verwaltungs-Satz (netto) × (1 + USt Honorar)
 
+## OIB (Pflichtangabe)
+| Wer | Feld in Dolibarr |
+|---|---|
+| Eigentümer | Kontakt → Feld **OIB** (je Person; Fallback Prof-ID 1 / USt-ID des Apartments) |
+| Gemeinschaft (Firma 5) | *Firma/Institution* → Prof-ID 1 (oder USt-ID) |
+| Verwalter (Green Villa) | Geschäftspartner → Prof-ID 1 (oder USt-ID) |
+
+Alle OIB werden mit der Prüfziffer kontrolliert; fehlende/ungültige zeigt *Vorschreibung erstellen* als Warnung.
+
 ## REST-API (nur lesend)
 `GET /api/index.php/hausverwaltung/overview` · `/costitems` · `/settlement/{jahr}` – Header `DOLAPIKEY`, bei Multicompany `DOLAPIENTITY: 5`. Erfordert das Recht *Hausverwaltung ansehen*.
 

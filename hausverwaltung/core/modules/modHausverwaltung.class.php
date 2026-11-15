@@ -141,6 +141,8 @@ class modHausverwaltung extends DolibarrModules
 		if ($resk && ($ok = $this->db->fetch_object($resk)) && $ok->type !== 'sellist') {
 			$ef->update('kpd', 'HvKpd', 'sellist', '', 'product', 0, 0, 50, $kpdparam, 1, '', '1', 'HvKpdHelp', '', '', '0', $lf, '1');
 		}
+		// OIB je Eigentümer (Kontakt) – Pflichtangabe auf kroatischen Rechnungen
+		$ef->addExtraField('hv_oib', 'HvOib', 'varchar', 10, 20, 'contact', 0, 0, '', '', 1, '', '1', 'HvOibHelp', '', '0', $lf, '1');
 		// Nachweis Haushaltsversicherung je Apartment (Miteigentumsvertrag §10.2)
 		$ef->addExtraField('hv_hh_insurer', 'HvHhInsurer', 'varchar', 900, 128, 'thirdparty', 0, 0, '', '', 1, '', '1', 'HvHhHelp', '', '0', $lf, $en);
 		$ef->addExtraField('hv_hh_policy', 'HvHhPolicy', 'varchar', 901, 64, 'thirdparty', 0, 0, '', '', 1, '', '1', 'HvHhHelp', '', '0', $lf, $en);

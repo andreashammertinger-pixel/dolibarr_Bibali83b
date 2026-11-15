@@ -1,6 +1,8 @@
 # Changelog
 
 ## 1.2.0
+- OIB auf Vorschreibung/Rechnung: Eigentümer (neues Kontaktfeld „OIB“, alle Eigentümer), Gemeinschaft (Firma 5) und Verwalter (Green Villa) – jeweils oben in den Adressblöcken
+- OIB-Prüfung mit Prüfziffer (ISO 7064) und Warnliste auf *Vorschreibung erstellen*
 - Lese-API (nur GET, Recht „Hausverwaltung ansehen“): `/hausverwaltung/overview`, `/hausverwaltung/costitems`, `/hausverwaltung/settlement/{jahr}`
 
 ## 1.1.0

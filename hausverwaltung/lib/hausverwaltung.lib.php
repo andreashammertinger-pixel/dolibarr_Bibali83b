@@ -38,6 +38,50 @@ function hvBuildingLabel($id, $buildings)
 	return isset($buildings[(int) $id]) ? $buildings[(int) $id]->ref.' – '.$buildings[(int) $id]->label : '?';
 }
 
+/**
+ * OIB (kroatische Identifikationsnummer) aus einem Objekt lesen:
+ * Kontakt-Extrafeld hv_oib, sonst Prof-ID 1, sonst USt-ID (ohne "HR"/"OIB:").
+ *
+ * @return string 11 Ziffern oder ''
+ */
+function hvOib($o)
+{
+	if (!is_object($o)) {
+		return '';
+	}
+	if (empty($o->array_options) && method_exists($o, 'fetch_optionals')) {
+		$o->fetch_optionals();
+	}
+	foreach (array($o->array_options['options_hv_oib'] ?? '', $o->idprof1 ?? '', $o->tva_intra ?? '') as $v) {
+		$d = preg_replace('/\D/', '', (string) $v);
+		if (strlen($d) === 11) {
+			return $d;
+		}
+	}
+	return '';
+}
+
+/** Prüfziffer OIB nach ISO 7064, MOD 11,10 */
+function hvOibValid($oib)
+{
+	if (!preg_match('/^\d{11}$/', (string) $oib)) {
+		return false;
+	}
+	$a = 10;
+	for ($i = 0; $i < 10; $i++) {
+		$a = ($a + (int) $oib[$i]) % 10;
+		if ($a == 0) {
+			$a = 10;
+		}
+		$a = ($a * 2) % 11;
+	}
+	$check = 11 - $a;
+	if ($check == 10) {
+		$check = 0;
+	}
+	return $check == (int) $oib[10];
+}
+
 function hvMoney($v)
 {
 	global $langs, $conf;

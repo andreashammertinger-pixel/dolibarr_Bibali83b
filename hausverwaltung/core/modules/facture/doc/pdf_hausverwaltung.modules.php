@@ -11,6 +11,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
+dol_include_once('/hausverwaltung/lib/hausverwaltung.lib.php');
 
 class pdf_hausverwaltung extends ModelePDFFactures
 {
@@ -181,34 +182,44 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$pdf->SetXY($mid, $yAddr - 6);
 		$pdf->Cell($R - $mid, 5, $outputlangs->transnoentities('HvPdfFrom'), 0, 0, 'L');
 
-		// Empfänger: Rechnungskontakt (Eigentümer) wenn vorhanden, sonst Geschäftspartner
-		$contact = null;
-		$ids = $object->getIdContact('external', 'BILLING');
-		if (count($ids)) {
-			$object->fetch_contact($ids[0]);
-			$contact = $object->contact;
+		// Empfänger: alle Rechnungskontakte (Eigentümer) mit OIB; Adresse vom ersten. Ohne Kontakt: Geschäftspartner.
+		$contacts = array();
+		foreach ($object->getIdContact('external', 'BILLING') as $cid) {
+			require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
+			$c = new Contact($this->db);
+			if ($c->fetch($cid) > 0) {
+				$contacts[] = $c;
+			}
 		}
-		$toName = $contact ? $contact->getFullName($outputlangs, 1) : $object->thirdparty->name;
-		$src = ($contact && (!empty($contact->address) || !empty($contact->town))) ? $contact : $object->thirdparty;
+		$toLines = array();
+		if ($contacts) {
+			foreach ($contacts as $c) {
+				$oib = hvOib($c) ?: (count($contacts) == 1 ? hvOib($object->thirdparty) : '');
+				$toLines[] = $c->getFullName($outputlangs, 1).($oib ? ', OIB: '.$oib : '');
+			}
+			$src = (!empty($contacts[0]->address) || !empty($contacts[0]->town)) ? $contacts[0] : $object->thirdparty;
+		} else {
+			$oib = hvOib($object->thirdparty);
+			$toLines[] = $object->thirdparty->name.($oib ? ', OIB: '.$oib : '');
+			$src = $object->thirdparty;
+		}
 		$pdf->SetFont('', '', $fs);
 		$pdf->SetXY($L, $yAddr);
-		$pdf->MultiCell(80, 5, $outputlangs->convToOutputCharset($toName."\n".$this->addressLines($src)), 0, 'L');
+		$pdf->MultiCell(85, 5, $outputlangs->convToOutputCharset(implode("\n", $toLines)."\n".$this->addressLines($src)), 0, 'L');
 
-		// Absender: Gemeinschaft + Verwalter
-		$from = $mysoc->name."\n".$this->addressLines($mysoc)."\n";
+		// Absender: Gemeinschaft (Name, OIB, Adresse, Kontakt) + Verwalter (Name, OIB, Kontakt)
+		$oib = hvOib($mysoc);
+		$from = $mysoc->name."\n".($oib ? "OIB: ".$oib."\n" : '').$this->addressLines($mysoc)."\n";
 		if (!empty($mysoc->email)) {
 			$from .= "\n".$outputlangs->transnoentities('Email').': '.$mysoc->email;
 		}
 		if (!empty($mysoc->url)) {
 			$from .= "\n".$outputlangs->transnoentities('Web').': '.$mysoc->url;
 		}
-		$oib = $this->oib($mysoc);
-		if ($oib && strpos($from, $oib) === false) {
-			$from .= "\nOIB: ".$oib;
-		}
 		$mgr = $this->manager();
 		if ($mgr) {
-			$from .= "\n\n".$outputlangs->transnoentities('HvPdfManagedBy').":\n".$mgr->name;
+			$mgroib = hvOib($mgr);
+			$from .= "\n\n".$outputlangs->transnoentities('HvPdfManagedBy').":\n".$mgr->name.($mgroib ? "\nOIB: ".$mgroib : '');
 			if (!empty($mgr->email)) {
 				$from .= "\n".$outputlangs->transnoentities('Email').': '.$mgr->email;
 			}
@@ -356,8 +367,8 @@ class pdf_hausverwaltung extends ModelePDFFactures
 				$parts[] = $p;
 			}
 		}
-		if ($oib) {
-			$parts[] = 'OIB '.$oib;
+		if (hvOib($mysoc)) {
+			$parts[] = 'OIB '.hvOib($mysoc);
 		}
 		$pdf->SetDrawColor($dark[0], $dark[1], $dark[2]);
 		$pdf->Line($L, $this->page_hauteur - $this->marge_basse - 7, $R, $this->page_hauteur - $this->marge_basse - 7);
@@ -518,18 +529,6 @@ class pdf_hausverwaltung extends ModelePDFFactures
 			}
 		}
 		return $out;
-	}
-
-	/** OIB: idprof1, sonst USt-ID ohne Länderkennung */
-	protected function oib($soc)
-	{
-		if (!empty($soc->idprof1)) {
-			return preg_replace('/^OIB:?\s*/i', '', $soc->idprof1);
-		}
-		if (!empty($soc->tva_intra)) {
-			return preg_replace('/^HR/i', '', $soc->tva_intra);
-		}
-		return '';
 	}
 
 	/** Hausverwalter (Lieferant aus den Moduleinstellungen) */

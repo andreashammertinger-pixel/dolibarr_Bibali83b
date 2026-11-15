@@ -85,6 +85,44 @@ if ($missing) {
 	print info_admin($langs->trans('HvKpdMissing').': '.implode(', ', $missing), 0, 0, 'warning');
 }
 
+// Prüfung OIB (Pflichtangabe): Gemeinschaft, Verwalter, Eigentümer je Apartment
+require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
+require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
+$oibIssues = array();
+$chk = function ($label, $oib) use (&$oibIssues, $langs) {
+	if ($oib === '') {
+		$oibIssues[] = $label.': '.$langs->trans('HvOibMissing');
+	} elseif (!hvOibValid($oib)) {
+		$oibIssues[] = $label.': '.$langs->trans('HvOibInvalid', $oib);
+	}
+};
+$chk($mysoc->name, hvOib($mysoc));
+if (getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID') > 0) {
+	$mg = new Societe($db);
+	if ($mg->fetch(getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID')) > 0) {
+		$chk($mg->name, hvOib($mg));
+	}
+}
+foreach ($calc->units as $uid => $u) {
+	if (empty($u->fk_soc)) {
+		continue;
+	}
+	$owners = $inv->ownerContacts((int) $u->fk_soc);
+	$soc = new Societe($db);
+	$soc->fetch((int) $u->fk_soc);
+	if (!$owners) {
+		$chk($langs->trans('HvUnit').' '.$u->ref.' ('.$langs->trans('HvNoOwnerContact').')', hvOib($soc));
+	}
+	foreach ($owners as $cid) {
+		$c = new Contact($db);
+		$c->fetch($cid);
+		$chk($langs->trans('HvUnit').' '.$u->ref.' – '.$c->getFullName($langs), hvOib($c) ?: (count($owners) == 1 ? hvOib($soc) : ''));
+	}
+}
+if ($oibIssues) {
+	print info_admin($langs->trans('HvOibCheck').':<br>'.implode('<br>', array_map('dol_escape_htmltag', $oibIssues)), 0, 0, 'warning');
+}
+
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'">';
 print '<div class="inline-block marginrightonly">'.$langs->trans('HvPeriod').': <input type="month" name="period" value="'.dol_escape_htmltag($period).'"></div>';
 print '<button class="button" name="action" value="preview">'.$langs->trans('HvPreview').'</button> ';
