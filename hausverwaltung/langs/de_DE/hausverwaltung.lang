@@ -79,3 +79,4 @@ HvDueDay = Fällig am Tag des Monats
 HvPaymentMode = Zahlungsart
 HvOpenInvoices = Offene Vorschreibungen
 HvLastMoves = Letzte Rücklagen-Bewegungen
+HvReserveProductHelp = Leer lassen = wird automatisch angelegt (HV-RL-…). Vorhandene Leistung wählen, z. B. L_Rue_H1

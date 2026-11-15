@@ -53,6 +53,7 @@ if ($canwrite && $action === 'save') {
 		'ref' => GETPOST('ref', 'alphanohtml'),
 		'label' => GETPOST('label', 'alphanohtml'),
 		'fk_bank_reserve' => GETPOSTINT('fk_bank_reserve') > 0 ? GETPOSTINT('fk_bank_reserve') : null,
+		'fk_product_reserve' => GETPOSTINT('fk_product_reserve') > 0 ? GETPOSTINT('fk_product_reserve') : null,
 		'position' => GETPOSTINT('position'),
 		'active' => GETPOSTINT('active') ? 1 : 0,
 		'note' => GETPOST('note', 'restricthtml'),
@@ -91,7 +92,7 @@ if ($action === 'delete') {
 }
 
 if ($canwrite && in_array($action, array('create', 'edit'))) {
-	$b = ($id && isset($buildings[$id])) ? $buildings[$id] : (object) array('ref' => '', 'label' => '', 'fk_bank_reserve' => 0, 'position' => 0, 'active' => 1, 'note' => '');
+	$b = ($id && isset($buildings[$id])) ? $buildings[$id] : (object) array('ref' => '', 'label' => '', 'fk_bank_reserve' => 0, 'fk_product_reserve' => 0, 'position' => 0, 'active' => 1, 'note' => '');
 	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="save"><input type="hidden" name="id" value="'.$id.'">';
 	print '<table class="border centpercent tableforfieldedit">';
 	print '<tr><td class="titlefield fieldrequired">'.$langs->trans('Ref').'</td><td><input name="ref" value="'.dol_escape_htmltag($b->ref).'" maxlength="32"></td></tr>';
@@ -99,6 +100,9 @@ if ($canwrite && in_array($action, array('create', 'edit'))) {
 	print '<tr><td>'.$langs->trans('HvReserveAccount').'</td><td>';
 	$form->select_comptes($b->fk_bank_reserve, 'fk_bank_reserve', 0, '', 1);
 	print '</td></tr>';
+	print '<tr><td>'.$langs->trans('HvReserveProduct').'</td><td>';
+	$form->select_produits((int) ($b->fk_product_reserve ?? 0), 'fk_product_reserve', 1, 0, 0, -1, 2, '', 0, array(), 0, 1, 0, 'minwidth300');
+	print ' <span class="opacitymedium">'.$langs->trans('HvReserveProductHelp').'</span></td></tr>';
 	print '<tr><td>'.$langs->trans('Position').'</td><td><input name="position" class="width50" value="'.((int) $b->position).'"></td></tr>';
 	print '<tr><td>'.$langs->trans('Active').'</td><td><input type="checkbox" name="active" value="1"'.($b->active ? ' checked' : '').'></td></tr>';
 	print '<tr><td>'.$langs->trans('Note').'</td><td><textarea name="note" class="quatrevingtpercent" rows="3">'.dol_escape_htmltag($b->note).'</textarea></td></tr>';
