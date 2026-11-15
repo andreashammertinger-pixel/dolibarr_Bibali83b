@@ -49,7 +49,7 @@ class HvRepository
 
 	/**
 	 * Extrafelder des Geschäftspartners, aus denen die m² gelesen werden (erstes befülltes gewinnt).
-	 * Standard: bk_schluessel (BK-Schlüssel), dann wohnflaeche_m2.
+	 * Standard: wohnflaeche_m2 (reine Wohnfläche, Beschluss: Abrechnung über Wohnfläche), dann bk_schluessel.
 	 *
 	 * @return string[] vorhandene Spalten
 	 */
@@ -60,7 +60,7 @@ class HvRepository
 			return $cache;
 		}
 		$cache = array();
-		$wanted = array_filter(array_map('trim', explode(',', getDolGlobalString('HAUSVERWALTUNG_AREA_FIELDS', 'bk_schluessel,wohnflaeche_m2'))));
+		$wanted = array_filter(array_map('trim', explode(',', getDolGlobalString('HAUSVERWALTUNG_AREA_FIELDS', 'wohnflaeche_m2,bk_schluessel'))));
 		$res = $this->db->query("SHOW COLUMNS FROM ".$this->db->prefix()."societe_extrafields");
 		$cols = array();
 		while ($res && ($o = $this->db->fetch_object($res))) {

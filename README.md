@@ -43,11 +43,12 @@ Layout nach Excel-Blatt *Rechnung*: Titel „Vorschreibung“, Datum/Fälligkeit
 * Die konkreten Codes bitte über die KPD-2025-Suche der Porezna uprava / DZS bestimmen und vom Steuerberater bestätigen lassen.
 
 ### Verteilschlüssel
-Verteilung nach **m² Etagenfläche laut Elaborat etažiranja 2023-127** (inkl. gewichteter Loggia/Terrasse; Summe 615,09 m²). Vergleich: Verteilung nach Miteigentumsanteil (‰) weicht höchstens ±0,16 €/Monat ab.
-Im Geschäftspartner-Feld `bk_schluessel` muss daher die **Elaborat-Fläche** stehen (nicht die Wohnfläche ohne Loggia/Terrasse).
+Verteilung nach **reiner Wohnfläche** (ohne Loggia, Terrasse, Balkon) – Feld `wohnflaeche_m2` am Geschäftspartner (Summe 599,02 m²).
+Grund: einige Apartments haben nachträglich Balkone erhalten, die im Elaborat etažiranja 2023-127 nicht enthalten sind.
+Hinweis: Der Miteigentumsvertrag (§3, §5.3) nennt die Elaborat-Anteile als Grundlage, *sofern die Eigentümergemeinschaft nichts anderes beschließt* – die Abrechnung über die Wohnfläche sollte daher per Beschluss festgehalten werden.
 
 ### m² aus dem Geschäftspartner
-Die Fläche je Apartment wird aus den Extrafeldern des Geschäftspartners gelesen: zuerst `bk_schluessel` (BK-Schlüssel), sonst `wohnflaeche_m2` (Einstellung `HAUSVERWALTUNG_AREA_FIELDS`). Der Wert im Modul gilt nur, wenn dort nichts eingetragen ist.
+Die Fläche je Apartment wird aus den Extrafeldern des Geschäftspartners gelesen: zuerst `wohnflaeche_m2` (Wohnfläche), sonst `bk_schluessel` (Einstellung `HAUSVERWALTUNG_AREA_FIELDS`). Der Wert im Modul gilt nur, wenn dort nichts eingetragen ist.
 Auf der Vorschreibung: Einzelpreis = **€/m²**, Menge = **m² des Apartments**; Apartment-Nr. und m² stehen im Betreff-Block.
 
 ### Berechnungslogik (wie Excel)
