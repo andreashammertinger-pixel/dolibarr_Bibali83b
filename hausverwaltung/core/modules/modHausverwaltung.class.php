@@ -1,0 +1,150 @@
+<?php
+/* Copyright (C) 2026 Green Villa and Apartment Resorts d.o.o.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ */
+
+/**
+ * \file    hausverwaltung/core/modules/modHausverwaltung.class.php
+ * \brief   Modul-Deskriptor Hausverwaltung (Betriebskosten, Rücklagen, Vorschreibung)
+ */
+include_once DOL_DOCUMENT_ROOT.'/core/modules/DolibarrModules.class.php';
+
+class modHausverwaltung extends DolibarrModules
+{
+	public function __construct($db)
+	{
+		global $conf;
+		$this->db = $db;
+
+		$this->numero = 591830;
+		$this->rights_class = 'hausverwaltung';
+		$this->family = 'financial';
+		$this->module_position = '90';
+		$this->name = preg_replace('/^mod/i', '', get_class($this));
+		$this->description = 'Hausverwaltung: Betriebskosten, Verteilschlüssel, Vorschreibungen, Rücklagen je Gebäude';
+		$this->descriptionlong = 'Kostenplan je Gebäude/alle Gebäude, Verteilung nach m², monatliche Vorschreibung als Kundenrechnung, automatische Rücklagen-Umbuchung bei Zahlungseingang, Jahresabrechnung und mobile Belegerfassung.';
+		$this->editor_name = 'Green Villa and Apartment Resorts d.o.o.';
+		$this->editor_url = 'https://www.greenresorts.hr';
+		$this->version = '1.0.0';
+		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
+		$this->picto = 'building';
+
+		$this->module_parts = array(
+			'triggers' => 1,
+			'css' => array(),
+			'js' => array(),
+			'hooks' => array(),
+			'moduleforexternal' => 0,
+		);
+
+		$this->dirs = array('/hausverwaltung/temp');
+		$this->config_page_url = array('setup.php@hausverwaltung');
+
+		$this->hidden = false;
+		$this->depends = array('modSociete', 'modFacture', 'modFournisseur', 'modBanque', 'modService');
+		$this->requiredby = array();
+		$this->conflictwith = array();
+		$this->langfiles = array('hausverwaltung@hausverwaltung');
+		$this->phpmin = array(7, 4);
+		$this->need_dolibarr_version = array(19, 0);
+
+		$this->const = array(
+			1 => array('HAUSVERWALTUNG_VAT_RATE', 'chaine', '0', 'MwSt-Satz auf Vorschreibungspositionen', 0, 'current', 0),
+			2 => array('HAUSVERWALTUNG_DUE_DAY', 'chaine', '5', 'Fälligkeit: Tag des Monats', 0, 'current', 0),
+		);
+
+		if (!isModEnabled('hausverwaltung')) {
+			$conf->hausverwaltung = new stdClass();
+			$conf->hausverwaltung->enabled = 0;
+		}
+
+		$this->tabs = array();
+		$this->dictionaries = array();
+		$this->boxes = array();
+		$this->cronjobs = array();
+
+		// Rechte
+		$this->rights = array();
+		$r = 0;
+		$this->rights[$r] = array($this->numero.'01', 'Hausverwaltung ansehen', 'r', 0, 'read', '');
+		$r++;
+		$this->rights[$r] = array($this->numero.'02', 'Stammdaten und Kostenplan bearbeiten', 'w', 0, 'write', '');
+		$r++;
+		$this->rights[$r] = array($this->numero.'03', 'Vorschreibungen erstellen', 'w', 0, 'invoice', '');
+		$r++;
+		$this->rights[$r] = array($this->numero.'04', 'Belege mobil erfassen', 'w', 0, 'capture', '');
+		$r++;
+
+		// Menüs
+		$this->menu = array();
+		$r = 0;
+		$this->menu[$r++] = array(
+			'fk_menu' => '', 'type' => 'top', 'titre' => 'Hausverwaltung', 'prefix' => img_picto('', 'building', 'class="pictofixedwidth valignmiddle"'),
+			'mainmenu' => 'hausverwaltung', 'leftmenu' => '', 'url' => '/hausverwaltung/index.php',
+			'langs' => 'hausverwaltung@hausverwaltung', 'position' => 1000, 'enabled' => 'isModEnabled("hausverwaltung")',
+			'perms' => '$user->hasRight("hausverwaltung", "read")', 'target' => '', 'user' => 0,
+		);
+		$left = array(
+			array('HvOverview', '/hausverwaltung/index.php', 'read', 'hv_overview'),
+			array('HvBuildings', '/hausverwaltung/buildings.php', 'read', 'hv_buildings'),
+			array('HvUnits', '/hausverwaltung/units.php', 'read', 'hv_units'),
+			array('HvCostPlan', '/hausverwaltung/costs.php', 'read', 'hv_costs'),
+			array('HvGenerate', '/hausverwaltung/generate.php', 'invoice', 'hv_generate'),
+			array('HvReserves', '/hausverwaltung/reserves.php', 'read', 'hv_reserves'),
+			array('HvSettlement', '/hausverwaltung/settlement.php', 'read', 'hv_settlement'),
+			array('HvMobile', '/hausverwaltung/mobile.php', 'capture', 'hv_mobile'),
+		);
+		$pos = 1001;
+		foreach ($left as $l) {
+			$this->menu[$r++] = array(
+				'fk_menu' => 'fk_mainmenu=hausverwaltung', 'type' => 'left', 'titre' => $l[0],
+				'mainmenu' => 'hausverwaltung', 'leftmenu' => $l[3], 'url' => $l[1],
+				'langs' => 'hausverwaltung@hausverwaltung', 'position' => $pos++, 'enabled' => 'isModEnabled("hausverwaltung")',
+				'perms' => '$user->hasRight("hausverwaltung", "'.$l[2].'")', 'target' => '', 'user' => 0,
+			);
+		}
+	}
+
+	/**
+	 * Aktivierung: Tabellen, Extrafelder, Dienstleistungen anlegen
+	 */
+	public function init($options = '')
+	{
+		global $conf, $langs, $user;
+
+		$result = $this->_load_tables('/hausverwaltung/sql/');
+		if ($result < 0) {
+			return -1;
+		}
+
+		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+		$ef = new ExtraFields($this->db);
+		$en = 'isModEnabled("hausverwaltung")';
+		$lf = 'hausverwaltung@hausverwaltung';
+
+		// Kundenrechnung (Vorschreibung)
+		$ef->addExtraField('hv_period', 'HvPeriod', 'varchar', 100, 7, 'facture', 0, 0, '', '', 1, '', '1', 'HvPeriodHelp', '', '0', $lf, $en);
+		$ef->addExtraField('hv_unit', 'HvUnit', 'sellist', 101, '', 'facture', 0, 0, '', array('options' => array('hv_unit:ref:rowid::entity=$ENTITY$' => null)), 1, '', '1', '', '', '0', $lf, $en);
+		// Lieferantenrechnung (Eingangsrechnung)
+		$ef->addExtraField('hv_costitem', 'HvCostItem', 'sellist', 100, '', 'facture_fourn', 0, 0, '', array('options' => array('hv_costitem:label:rowid::entity=$ENTITY$ AND active=1' => null)), 1, '', '1', 'HvCostItemHelp', '', '0', $lf, $en);
+		$ef->addExtraField('hv_reserve', 'HvPaidFromReserve', 'boolean', 101, '', 'facture_fourn', 0, 0, '', '', 1, '', '1', 'HvPaidFromReserveHelp', '', '0', $lf, $en);
+
+		dol_include_once('/hausverwaltung/class/hvinvoicer.class.php');
+		$inv = new HvInvoicer($this->db);
+		$inv->ensureBaseProducts($user);
+
+		$this->remove($options);
+		$sql = array();
+		return $this->_init($sql, $options);
+	}
+
+	public function remove($options = '')
+	{
+		$sql = array();
+		return $this->_remove($sql, $options);
+	}
+}
