@@ -6,6 +6,7 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php';
+require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 
 /**
  * Erzeugt die monatlichen Vorschreibungen (Kundenrechnungen) je Einheit
@@ -200,21 +201,35 @@ class HvInvoicer
 	}
 
 	/**
-	 * Kontakte des Apartments mit Funktion Eigentümer / Vlasnik / Owner / Lastnik (in dieser Reihenfolge der Anlage).
-	 * Ohne solche Kontakte: keine (dann wird die Adresse des Geschäftspartners verwendet).
+	 * Aktive Kontakte der Einheit mit Kennzeichen "Eigentümer" (Zusatzfeld hv_owner), in Reihenfolge der Anlage.
+	 * Andere Kontakte (Mieter, Notfallkontakt …) erhalten keine Dokumente.
+	 * Ohne markierten Eigentümer: keine (dann wird die Adresse des Geschäftspartners verwendet).
 	 *
 	 * @return int[]
 	 */
 	public function ownerContacts($socid)
 	{
 		$ids = array();
-		$res = $this->db->query("SELECT rowid, poste FROM ".$this->db->prefix()."socpeople WHERE fk_soc = ".((int) $socid)." AND statut = 1 ORDER BY rowid");
+		$sql = "SELECT sp.rowid FROM ".$this->db->prefix()."socpeople sp INNER JOIN ".$this->db->prefix()."socpeople_extrafields e ON e.fk_object = sp.rowid";
+		$sql .= " WHERE sp.fk_soc = ".((int) $socid)." AND sp.statut = 1 AND e.hv_owner = 1 ORDER BY sp.rowid";
+		$res = $this->db->query($sql);
 		while ($res && ($o = $this->db->fetch_object($res))) {
-			if (preg_match('/^\s*(eigentümer|eigentuemer|vlasni|owner|lastnik|власник)/iu', (string) $o->poste)) {
-				$ids[] = (int) $o->rowid;
-			}
+			$ids[] = (int) $o->rowid;
 		}
 		return $ids;
+	}
+
+	/** Namen der markierten Eigentümer (für Übersichten) */
+	public function ownerNames($socid)
+	{
+		$names = array();
+		foreach ($this->ownerContacts($socid) as $cid) {
+			$c = new Contact($this->db);
+			if ($c->fetch($cid) > 0) {
+				$names[] = $c->getFullName($GLOBALS['langs']);
+			}
+		}
+		return $names;
 	}
 
 	/** Existiert für Einheit + Periode bereits eine (nicht stornierte) Vorschreibung? */

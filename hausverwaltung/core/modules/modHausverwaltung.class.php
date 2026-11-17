@@ -29,7 +29,7 @@ class modHausverwaltung extends DolibarrModules
 		$this->descriptionlong = 'Kostenplan je Gebäude/alle Gebäude, Verteilung nach m², monatliche Vorschreibung als Kundenrechnung, automatische Rücklagen-Umbuchung bei Zahlungseingang, Jahresabrechnung und mobile Belegerfassung.';
 		$this->editor_name = 'Green Villa and Apartment Resorts d.o.o.';
 		$this->editor_url = 'https://www.greenresorts.hr';
-		$this->version = '1.4.0';
+		$this->version = '1.5.0';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->picto = 'building';
 
@@ -143,6 +143,18 @@ class modHausverwaltung extends DolibarrModules
 		$resk = $this->db->query("SELECT type FROM ".$this->db->prefix()."extrafields WHERE name = 'kpd' AND elementtype = 'product'");
 		if ($resk && ($ok = $this->db->fetch_object($resk)) && $ok->type !== 'sellist') {
 			$ef->update('kpd', 'HvKpd', 'sellist', '', 'product', 0, 0, 50, $kpdparam, 1, '', '1', 'HvKpdHelp', '', '', '0', $lf, '1');
+		}
+		// Kennzeichen "Eigentümer" am Kontakt: nur diese Kontakte erhalten Vorschreibungen/Abrechnungen
+		$ownerFieldExisted = false;
+		$resx = $this->db->query("SELECT rowid FROM ".$this->db->prefix()."extrafields WHERE name = 'hv_owner' AND elementtype = 'contact'");
+		if ($resx && $this->db->num_rows($resx)) {
+			$ownerFieldExisted = true;
+		}
+		$ef->addExtraField('hv_owner', 'HvIsOwner', 'boolean', 5, '', 'contact', 0, 0, '', '', 1, '', '1', 'HvIsOwnerHelp', '', '0', $lf, '1');
+		if (!$ownerFieldExisted) {
+			// Einmalige Übernahme: Kontakte mit Funktion "Eigentümer/Vlasnik/Owner" als Eigentümer markieren
+			$this->db->query("INSERT INTO ".$this->db->prefix()."socpeople_extrafields (fk_object, hv_owner) SELECT sp.rowid, 1 FROM ".$this->db->prefix()."socpeople sp WHERE (sp.poste LIKE 'Eigent%' OR sp.poste LIKE 'Vlasni%' OR sp.poste LIKE 'Owner%' OR sp.poste LIKE 'Lastnik%') AND NOT EXISTS (SELECT 1 FROM ".$this->db->prefix()."socpeople_extrafields e WHERE e.fk_object = sp.rowid)");
+			$this->db->query("UPDATE ".$this->db->prefix()."socpeople_extrafields e INNER JOIN ".$this->db->prefix()."socpeople sp ON sp.rowid = e.fk_object SET e.hv_owner = 1 WHERE (e.hv_owner IS NULL OR e.hv_owner = 0) AND (sp.poste LIKE 'Eigent%' OR sp.poste LIKE 'Vlasni%' OR sp.poste LIKE 'Owner%' OR sp.poste LIKE 'Lastnik%')");
 		}
 		// OIB je Eigentümer (Kontakt) – Pflichtangabe auf kroatischen Rechnungen
 		$ef->addExtraField('hv_oib', 'HvOib', 'varchar', 10, 20, 'contact', 0, 0, '', '', 1, '', '1', 'HvOibHelp', '', '0', $lf, '1');

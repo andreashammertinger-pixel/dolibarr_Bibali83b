@@ -139,7 +139,6 @@ HvOibHelp = Osobni identifikacijski broj (11 znamenki) vlasnika. Ispisuje se na 
 HvOibMissing = nedostaje OIB
 HvOibInvalid = OIB %s neispravan (kontrolna znamenka)
 HvOibCheck = Provjera OIB-a (obvezan podatak na hrvatskim računima)
-HvNoOwnerContact = nema kontakta s funkcijom vlasnik
 HvSend = Slanje zaduženja
 HvMailSubject = %s – Zaduženje zajedničkih troškova apartman %s – %s
 HvMailSubjectSettlement = %s – Obračun zajedničkih troškova apartman %s – %s
@@ -200,3 +199,8 @@ HvImportTemplate = Preuzmi prazan predložak
 HvImportExample = Preuzmi primjer Bibali 83b
 HvImportBadFile = Odaberite ispravnu datoteku početnih podataka (JSON).
 HvKeyFallback = Ključ raspodjele bez vrijednosti: %s – troškovi se zamjenski raspodjeljuju po m². Molimo upišite udjele kod jedinica / partnera.
+HvIsOwner = Vlasnik
+HvIsOwnerHelp = Da = ovaj kontakt je (su)vlasnik jedinice i prima zaduženja i obračune (ime, OIB, e-pošta na dokumentu). Najmoprimce, kontakte za hitne slučajeve itd. ostaviti na Ne.
+HvOwnersMarked = Vlasnici (kontakti)
+HvNoOwnerMarked = nijedan kontakt nije označen kao vlasnik
+HvNoOwnerContact = nijedan kontakt nije označen kao vlasnik

@@ -140,7 +140,6 @@ HvOibHelp = Kroatische Identifikationsnummer (11 Ziffern) des Eigentümers. Wird
 HvOibMissing = OIB fehlt
 HvOibInvalid = OIB %s ungültig (Prüfziffer)
 HvOibCheck = OIB-Prüfung (Pflichtangabe auf kroatischen Rechnungen)
-HvNoOwnerContact = kein Kontakt mit Funktion Eigentümer
 HvSend = Vorschreibungen versenden
 HvMailSubject = %s – Betriebskostenvorschreibung Apartment %s – %s
 HvMailSubjectSettlement = %s – Betriebskostenabrechnung Apartment %s – %s
@@ -201,3 +200,8 @@ HvImportTemplate = Leere Vorlage herunterladen
 HvImportExample = Beispiel Bibali 83b herunterladen
 HvImportBadFile = Bitte eine gültige Startdaten-Datei (JSON) auswählen.
 HvKeyFallback = Verteilschlüssel ohne Werte: %s – betroffene Kosten werden ersatzweise nach m² verteilt. Bitte Anteile bei den Einheiten bzw. Geschäftspartnern eintragen.
+HvIsOwner = Eigentümer
+HvIsOwnerHelp = Ja = dieser Kontakt ist (Mit-)Eigentümer der Einheit und erhält Vorschreibungen und Abrechnungen (Name, OIB, E-Mail auf dem Dokument). Mieter, Notfallkontakte usw. auf Nein lassen.
+HvOwnersMarked = Eigentümer (Kontakte)
+HvNoOwnerMarked = kein Kontakt als Eigentümer markiert
+HvNoOwnerContact = kein Kontakt als Eigentümer markiert

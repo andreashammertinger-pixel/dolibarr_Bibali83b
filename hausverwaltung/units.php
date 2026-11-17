@@ -35,6 +35,7 @@ if (!$res) {
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 dol_include_once('/hausverwaltung/lib/hausverwaltung.lib.php');
+dol_include_once('/hausverwaltung/class/hvinvoicer.class.php');
 
 $langs->loadLangs(array('hausverwaltung@hausverwaltung', 'companies'));
 if (!$user->hasRight('hausverwaltung', 'read')) {
@@ -106,10 +107,12 @@ if ($canwrite && in_array($action, array('create', 'edit'))) {
 }
 
 print '<div class="div-table-responsive"><table class="noborder centpercent">';
-print '<tr class="liste_titre"><th>'.$langs->trans('Ref').'</th><th>'.$langs->trans('HvBuilding').'</th><th>'.$langs->trans('HvOwner').'</th><th class="right">'.$langs->trans('HvArea').'</th><th class="right">'.$langs->trans('HvShare').'</th><th class="right">'.$langs->trans('HvReserveRate').'</th><th class="right">'.$langs->trans('HvAdminRate').'</th><th>'.$langs->trans('HvHhIns').'</th><th class="center">'.$langs->trans('Active').'</th><th></th></tr>';
+print '<tr class="liste_titre"><th>'.$langs->trans('Ref').'</th><th>'.$langs->trans('HvBuilding').'</th><th>'.$langs->trans('HvOwner').'</th><th>'.$langs->trans('HvOwnersMarked').'</th><th class="right">'.$langs->trans('HvArea').'</th><th class="right">'.$langs->trans('HvShare').'</th><th class="right">'.$langs->trans('HvReserveRate').'</th><th class="right">'.$langs->trans('HvAdminRate').'</th><th>'.$langs->trans('HvHhIns').'</th><th class="center">'.$langs->trans('Active').'</th><th></th></tr>';
 foreach ($units as $u) {
 	print '<tr class="oddeven"><td>'.dol_escape_htmltag($u->ref).'</td><td>'.dol_escape_htmltag(hvBuildingLabel($u->fk_building, $buildings)).'</td>';
 	print '<td>'.($u->fk_soc ? '<a href="'.DOL_URL_ROOT.'/societe/card.php?socid='.$u->fk_soc.'">'.dol_escape_htmltag($u->socname).'</a>' : '<span class="warning">'.$langs->trans('HvNoThirdparty').'</span>').'</td>';
+	$on = $u->fk_soc ? (new HvInvoicer($db))->ownerNames((int) $u->fk_soc) : array();
+	print '<td>'.($on ? dol_escape_htmltag(implode(', ', $on)) : '<span class="warning">'.$langs->trans('HvNoOwnerMarked').'</span>').($u->fk_soc ? ' <a href="'.DOL_URL_ROOT.'/societe/contact.php?socid='.$u->fk_soc.'">'.img_picto($langs->trans('Contacts'), 'contact').'</a>' : '').'</td>';
 	print '<td class="right">'.price($u->area, 0, $langs, 1, 2, 2).(!empty($u->area_from_soc) ? ' '.img_picto($langs->trans('HvAreaFromThirdparty'), 'company') : '').'</td><td class="right">'.price($u->share, 0, $langs, 1, 0, 4).'</td><td class="right">'.price($u->reserve_rate, 0, $langs, 1, 2, 4).'</td><td class="right">'.price($u->admin_rate, 0, $langs, 1, 2, 4).'</td>';
 	$hs = HvRepository::hhStatus($u, $db);
 	$badge = array('ok' => 'badge-status4', 'expiring' => 'badge-status1', 'expired' => 'badge-status8', 'missing' => 'badge-status8')[$hs];

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.0
+- Neues Kontaktfeld **„Eigentümer“** (Ja/Nein): nur markierte Kontakte stehen auf Vorschreibung/Abrechnung und erhalten die E-Mail; Mieter, Notfallkontakte usw. bleiben außen vor. Mehrere Eigentümer je Einheit werden alle angeführt.
+- Einmalige Übernahme beim Aktivieren: Kontakte mit Funktion „Eigentümer“ werden automatisch markiert
+- *Apartments* zeigt die markierten Eigentümer bzw. eine Warnung, wenn keiner markiert ist
+
 ## 1.4.0
 - Vorschreibung für einen **Zeitraum** (von–bis, z. B. Jahr oder Restjahr): ein Dokument je Einheit, Zeilen = Monatsbetrag × Monate, **Zahlungsplan** mit gleichen Monatsraten, Hinweis Dauerauftrag; Schutz vor Überschneidungen mit bestehenden Vorschreibungen
 - Honorar-Eingangsrechnung und E-Mail-Text für Zeiträume

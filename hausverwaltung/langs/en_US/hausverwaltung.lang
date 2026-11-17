@@ -139,7 +139,6 @@ HvOibHelp = Croatian personal identification number (11 digits) of the owner. Pr
 HvOibMissing = OIB missing
 HvOibInvalid = OIB %s invalid (check digit)
 HvOibCheck = OIB check (mandatory on Croatian invoices)
-HvNoOwnerContact = no contact with role owner
 HvSend = Send service charges
 HvMailSubject = %s – Service charge apartment %s – %s
 HvMailSubjectSettlement = %s – Operating cost statement apartment %s – %s
@@ -200,3 +199,8 @@ HvImportTemplate = Download empty template
 HvImportExample = Download example Bibali 83b
 HvImportBadFile = Please select a valid initial data file (JSON).
 HvKeyFallback = Allocation key without values: %s – affected costs are allocated by m² instead. Please enter the shares for the units / third parties.
+HvIsOwner = Owner
+HvIsOwnerHelp = Yes = this contact is (co-)owner of the unit and receives service charges and statements (name, OIB, e-mail on the document). Leave tenants, emergency contacts etc. on No.
+HvOwnersMarked = Owners (contacts)
+HvNoOwnerMarked = no contact marked as owner
+HvNoOwnerContact = no contact marked as owner

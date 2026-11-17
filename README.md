@@ -6,7 +6,7 @@ Erste Anwendung: Bibali 83b (3 Gebäude, 11 Apartments); die Bibali-Daten sind n
 
 ## Neues Objekt anlegen (allgemein)
 1. In Multicompany eine neue Firma für die Liegenschaft anlegen (Name, Adresse, OIB, Bankkonten: Betriebskonto + je Gebäude ein Rücklagenkonto).
-2. Einheiten als Geschäftspartner (Kunde) anlegen, Name endet auf die Einheitennummer (z. B. „Musterstraße 5 - Top 3“); Eigentümer als Kontakte mit Funktion *Eigentümer*, E-Mail und OIB.
+2. Einheiten als Geschäftspartner (Kunde) anlegen, Name endet auf die Einheitennummer (z. B. „Musterstraße 5 - Top 3“); Eigentümer als Kontakte mit Häkchen **Eigentümer = Ja**, E-Mail und OIB (Mieter/Notfallkontakte auf Nein).
    m² im Feld `wohnflaeche_m2`, optional Anteil in `eigentumsanteil` (oder direkt an der Einheit im Modul).
 3. Modul in dieser Firma aktivieren, Einstellungen setzen.
 4. *Startdaten importieren*: leere Vorlage herunterladen, ausfüllen (Gebäude – bei nur einem Haus ein Eintrag –, Einheiten, Kostenplan mit Verteilschlüssel), hochladen.
