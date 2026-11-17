@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.0
+- Neue Seite *Vorschreibungen versenden*: E-Mail an alle Eigentümer-Kontakte, Anhänge kroatisches Original + Übersetzungskopie, Betreff/Text in Eigentümersprache (de/hr/sl/uk/en) mit Betrag, Fälligkeit, IBAN, Zahlungsreferenz
+- Testversand an eigene Adresse, Versandprotokoll, Agenda-Eintrag an der Rechnung, optional BCC-Archivkopie und eigene Absenderadresse
+
 ## 1.2.0
 - OIB auf Vorschreibung/Rechnung: Gemeinschaft (Firma 5) und Verwalter (Green Villa) im Absenderblock; Eigentümer (neues Kontaktfeld „OIB“) mit E-Mail unterhalb der Postanschrift (Adressfeld bleibt postkonform)
 - OIB-Prüfung mit Prüfziffer (ISO 7064) und Warnliste auf *Vorschreibung erstellen*

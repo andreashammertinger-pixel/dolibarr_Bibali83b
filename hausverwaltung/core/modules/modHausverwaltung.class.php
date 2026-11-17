@@ -29,7 +29,7 @@ class modHausverwaltung extends DolibarrModules
 		$this->descriptionlong = 'Kostenplan je Gebäude/alle Gebäude, Verteilung nach m², monatliche Vorschreibung als Kundenrechnung, automatische Rücklagen-Umbuchung bei Zahlungseingang, Jahresabrechnung und mobile Belegerfassung.';
 		$this->editor_name = 'Green Villa and Apartment Resorts d.o.o.';
 		$this->editor_url = 'https://www.greenresorts.hr';
-		$this->version = '1.2.0';
+		$this->version = '1.3.0';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->picto = 'building';
 
@@ -95,6 +95,7 @@ class modHausverwaltung extends DolibarrModules
 			array('HvUnits', '/hausverwaltung/units.php', 'read', 'hv_units'),
 			array('HvCostPlan', '/hausverwaltung/costs.php', 'read', 'hv_costs'),
 			array('HvGenerate', '/hausverwaltung/generate.php', 'invoice', 'hv_generate'),
+			array('HvSend', '/hausverwaltung/send.php', 'invoice', 'hv_send'),
 			array('HvReserves', '/hausverwaltung/reserves.php', 'read', 'hv_reserves'),
 			array('HvSettlement', '/hausverwaltung/settlement.php', 'read', 'hv_settlement'),
 			array('HvMobile', '/hausverwaltung/mobile.php', 'capture', 'hv_mobile'),

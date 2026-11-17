@@ -16,6 +16,7 @@ Bildet die Logik der Excel-Vorlage `Bibali83B_Betriebskosten_Template.xlsx` in D
 | **Eingangsrechnungen** | Extrafelder *Kostenart (Hausverwaltung)* und *Aus Rücklage bezahlt* auf Lieferantenrechnungen |
 | **Jahresabrechnung** | Plan vs. Ist je Kostenart, Ist-Anteil je Apartment vs. vorgeschriebene Akonto-BK → Saldo. *Abrechnung buchen*: **Nachzahlung** → eigene Rechnung „Abrechnung“ (Leistung `HV-BKA`); **Guthaben** → wird automatisch als Zeile „Guthaben aus Abrechnung“ (`HV-GUT`) mit den folgenden Vorschreibungen verrechnet, bis es aufgebraucht ist. Der durch ein Guthaben gedeckte Rücklagenanteil wird bei der Freigabe sofort auf das Rücklagenkonto umgebucht. |
 | **Haushaltsversicherung** | Nachweisfelder am Geschäftspartner (Versicherer, Polizzen-Nr., gültig bis) gemäß Miteigentumsvertrag §10.2; Status in *Apartments*, Warnung in der Übersicht |
+| **Versand** | *Vorschreibungen versenden*: je Vorschreibung eine E-Mail an alle Eigentümer-Kontakte (Rechnungskontakt) mit kroatischem Original + Übersetzungskopie; Betreff/Text in der Sprache des Apartments. Testversand an eigene Adresse, Versandprotokoll, Agenda-Eintrag. Voraussetzung: E-Mail-Versand in Dolibarr eingerichtet (*Einstellungen → E-Mails*). |
 | **Mobil** | `/custom/hausverwaltung/mobile.php`: Beleg fotografieren, Kostenart wählen (Lieferant und MwSt werden vorbelegt), Betrag → Lieferantenrechnung im Entwurf inkl. Foto. Außerdem offene Vorschreibungen und Rücklagenstände |
 
 ### Festgelegte Struktur (Entscheidungen)
