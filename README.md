@@ -12,6 +12,8 @@ Erste Anwendung: Bibali 83b (3 Gebäude, 11 Apartments); die Bibali-Daten sind n
 4. *Startdaten importieren*: leere Vorlage herunterladen, ausfüllen (Gebäude – bei nur einem Haus ein Eintrag –, Einheiten, Kostenplan mit Verteilschlüssel), hochladen.
 5. Gebäude: Rücklagenkonto zuordnen. Kostenplan prüfen. Vorschreibung für den gewünschten Zeitraum erstellen.
 
+**Firma als Eigentümer:** Kontakt mit Firmenname im Feld *Nachname*, Vorname leer, Firmenadresse, Firmen-E-Mail, **Firmen-OIB**, Eigentümer = Ja. Ansprechpersonen der Firma als weitere Kontakte mit Eigentümer = Nein.
+
 Texte wie „Apartment“ lassen sich je Firma über *Einstellungen → Übersetzung* überschreiben (z. B. Schlüssel `HvUnit` → „Wohnung“).
 
 ## Vorschreibung: Monat oder Zeitraum

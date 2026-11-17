@@ -204,3 +204,4 @@ HvIsOwnerHelp = Yes = this contact is (co-)owner of the unit and receives servic
 HvOwnersMarked = Owners (contacts)
 HvNoOwnerMarked = no contact marked as owner
 HvNoOwnerContact = no contact marked as owner
+HvMailHelloCompany = Dear Sir or Madam,

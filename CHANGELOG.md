@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.5.1
+- Firma als Eigentümer: Kontakt mit Firmenname als Nachname, leerem Vornamen, Firmen-OIB und Eigentümer = Ja; E-Mail-Anrede dann „Sehr geehrte Damen und Herren“ (hr: „Poštovani,“)
+
 ## 1.5.0
 - Neues Kontaktfeld **„Eigentümer“** (Ja/Nein): nur markierte Kontakte stehen auf Vorschreibung/Abrechnung und erhalten die E-Mail; Mieter, Notfallkontakte usw. bleiben außen vor. Mehrere Eigentümer je Einheit werden alle angeführt.
 - Einmalige Übernahme beim Aktivieren: Kontakte mit Funktion „Eigentümer“ werden automatisch markiert

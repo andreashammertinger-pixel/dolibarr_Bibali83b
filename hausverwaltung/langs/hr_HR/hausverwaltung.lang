@@ -204,3 +204,4 @@ HvIsOwnerHelp = Da = ovaj kontakt je (su)vlasnik jedinice i prima zaduženja i o
 HvOwnersMarked = Vlasnici (kontakti)
 HvNoOwnerMarked = nijedan kontakt nije označen kao vlasnik
 HvNoOwnerContact = nijedan kontakt nije označen kao vlasnik
+HvMailHelloCompany = Poštovani,

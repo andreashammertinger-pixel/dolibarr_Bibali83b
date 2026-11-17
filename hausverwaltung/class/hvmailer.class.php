@@ -30,13 +30,13 @@ class HvMailer
 		foreach ($f->getIdContact('external', 'BILLING') as $cid) {
 			$c = new Contact($this->db);
 			if ($c->fetch($cid) > 0 && isValidEmail($c->email)) {
-				$out[] = array('id' => (int) $c->id, 'name' => $c->getFullName($GLOBALS['langs']), 'email' => $c->email);
+				$out[] = array('id' => (int) $c->id, 'name' => $c->getFullName($GLOBALS['langs']), 'email' => $c->email, 'company' => (trim((string) $c->firstname) === ''));
 			}
 		}
 		if (!$out) {
 			$f->fetch_thirdparty();
 			if (isValidEmail($f->thirdparty->email)) {
-				$out[] = array('id' => 0, 'name' => $f->thirdparty->name, 'email' => $f->thirdparty->email);
+				$out[] = array('id' => 0, 'name' => $f->thirdparty->name, 'email' => $f->thirdparty->email, 'company' => true);
 			}
 		}
 		return $out;
@@ -117,7 +117,14 @@ class HvMailer
 		$due = dol_print_date($f->date_lim_reglement, 'day', false, $ol);
 
 		$subject = $ol->transnoentities($isSettlement ? 'HvMailSubjectSettlement' : 'HvMailSubject', $mysoc->name, $unitRef, $plabel);
-		$body = $ol->transnoentities('HvMailHello', $names)."\n\n";
+		// Anrede: Personen namentlich, Firmen (Kontakt ohne Vorname) mit "Sehr geehrte Damen und Herren"
+		$persons = array();
+		foreach ($rcpt as $rr) {
+			if (empty($rr['company'])) {
+				$persons[] = $rr['name'];
+			}
+		}
+		$body = ($persons ? $ol->transnoentities('HvMailHello', implode(', ', $persons)) : $ol->transnoentities('HvMailHelloCompany'))."\n\n";
 		$body .= $ol->transnoentities($isSettlement ? 'HvMailIntroSettlement' : 'HvMailIntro', $unitRef, $plabel)."\n\n";
 		if ((float) $f->total_ttc > 0) {
 			if ($nMonths > 1) {
