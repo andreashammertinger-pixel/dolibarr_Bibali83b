@@ -56,6 +56,7 @@ if ($canwrite && $action === 'save') {
 		'period_months' => in_array(GETPOSTINT('period_months'), array(1, 3, 6, 12)) ? GETPOSTINT('period_months') : 12,
 		'amount_net' => (float) price2num(GETPOST('amount_net', 'alphanohtml')),
 		'vat_rate' => (float) price2num(GETPOST('vat_rate', 'alphanohtml')),
+		'alloc_key' => in_array(GETPOST('alloc_key', 'aZ09'), HvCalculator::keys(), true) ? GETPOST('alloc_key', 'aZ09') : 'area',
 		'fk_soc_supplier' => GETPOSTINT('fk_soc_supplier') > 0 ? GETPOSTINT('fk_soc_supplier') : null,
 		'reference' => GETPOST('reference', 'alphanohtml'),
 		'position' => GETPOSTINT('position'),
@@ -80,22 +81,34 @@ if ($canwrite && $action === 'confirm_delete' && GETPOST('confirm') === 'yes') {
 }
 
 $items = $repo->getCostItems(false);
+$chk = new HvCalculator($db);
+$chk->compute();
 
 llxHeader('', $langs->trans('HvCostPlan'), '', '', 0, 0, '', '', '', 'mod-hausverwaltung');
 $newbtn = $canwrite ? dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', $_SERVER['PHP_SELF'].'?action=create') : '';
 print load_fiche_titre($langs->trans('HvCostPlan'), $newbtn, 'bill');
+if (!empty($chk->warnings)) {
+	print info_admin($langs->trans('HvKeyFallback', implode(', ', array_map(function ($k) use ($langs) {
+		return $langs->trans('HvKey_'.$k);
+	}, array_keys($chk->warnings)))), 0, 0, 'warning');
+}
 
 if ($action === 'delete') {
 	print $form->formconfirm($_SERVER['PHP_SELF'].'?id='.$id, $langs->trans('Delete'), $langs->trans('ConfirmDelete'), 'confirm_delete', '', 0, 1);
 }
 
 if ($canwrite && in_array($action, array('create', 'edit'))) {
-	$c = ($id && isset($items[$id])) ? $items[$id] : (object) array('label' => '', 'fk_building' => 0, 'period_months' => 12, 'amount_net' => '', 'vat_rate' => 25, 'fk_soc_supplier' => 0, 'reference' => '', 'position' => 0, 'active' => 1, 'note' => '');
+	$c = ($id && isset($items[$id])) ? $items[$id] : (object) array('label' => '', 'fk_building' => 0, 'period_months' => 12, 'amount_net' => '', 'vat_rate' => 25, 'alloc_key' => 'area', 'fk_soc_supplier' => 0, 'reference' => '', 'position' => 0, 'active' => 1, 'note' => '');
 	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="save"><input type="hidden" name="id" value="'.$id.'">';
 	print '<table class="border centpercent tableforfieldedit">';
 	print '<tr><td class="titlefield fieldrequired">'.$langs->trans('Label').'</td><td><input name="label" class="minwidth300" value="'.dol_escape_htmltag($c->label).'"></td></tr>';
 	print '<tr><td>'.$langs->trans('HvBuilding').'</td><td>'.hvSelectBuilding('fk_building', (string) (int) $c->fk_building, $buildings, true).'</td></tr>';
 	print '<tr><td>'.$langs->trans('HvRhythm').'</td><td>'.hvSelectPeriod('period_months', $c->period_months).'</td></tr>';
+	print '<tr><td>'.$langs->trans('HvAllocKey').'</td><td><select name="alloc_key" class="flat">';
+	foreach (HvCalculator::keys() as $k) {
+		print '<option value="'.$k.'"'.(($c->alloc_key ?? 'area') === $k ? ' selected' : '').'>'.$langs->trans('HvKey_'.$k).'</option>';
+	}
+	print '</select></td></tr>';
 	print '<tr><td>'.$langs->trans('HvAmountNet').'</td><td><input name="amount_net" class="width100" value="'.dol_escape_htmltag(price2num($c->amount_net)).'"> €</td></tr>';
 	print '<tr><td>'.$langs->trans('VAT').'</td><td><input name="vat_rate" class="width50" value="'.dol_escape_htmltag(price2num($c->vat_rate)).'"> %</td></tr>';
 	print '<tr><td>'.$langs->trans('HvSupplier').'</td><td>'.$form->select_company($c->fk_soc_supplier, 'fk_soc_supplier', '(s.fournisseur:=:1)', 1, 0, 0, array(), 0, 'minwidth300').'</td></tr>';
@@ -108,7 +121,7 @@ if ($canwrite && in_array($action, array('create', 'edit'))) {
 
 $tot = array('m' => 0, 'y' => 0);
 print '<div class="div-table-responsive"><table class="noborder centpercent">';
-print '<tr class="liste_titre"><th>'.$langs->trans('Label').'</th><th>'.$langs->trans('HvBuilding').'</th><th>'.$langs->trans('HvRhythm').'</th><th class="right">'.$langs->trans('AmountHT').'</th><th class="right">'.$langs->trans('VAT').'</th><th class="right">'.$langs->trans('HvAmountGross').'</th><th class="right">'.$langs->trans('HvMonthly').'</th><th class="right">'.$langs->trans('HvYearly').'</th><th>'.$langs->trans('HvSupplier').'</th><th>'.$langs->trans('HvReference').'</th><th class="center">'.$langs->trans('Active').'</th><th></th></tr>';
+print '<tr class="liste_titre"><th>'.$langs->trans('Label').'</th><th>'.$langs->trans('HvBuilding').'</th><th>'.$langs->trans('HvRhythm').'</th><th>'.$langs->trans('HvAllocKey').'</th><th class="right">'.$langs->trans('AmountHT').'</th><th class="right">'.$langs->trans('VAT').'</th><th class="right">'.$langs->trans('HvAmountGross').'</th><th class="right">'.$langs->trans('HvMonthly').'</th><th class="right">'.$langs->trans('HvYearly').'</th><th>'.$langs->trans('HvSupplier').'</th><th>'.$langs->trans('HvReference').'</th><th class="center">'.$langs->trans('Active').'</th><th></th></tr>';
 foreach ($items as $c) {
 	$m = HvCalculator::monthly($c);
 	if ($c->active) {
@@ -116,7 +129,7 @@ foreach ($items as $c) {
 		$tot['y'] += $m * 12;
 	}
 	print '<tr class="oddeven'.($c->active ? '' : ' opacitymedium').'"><td>'.dol_escape_htmltag($c->label).'</td><td>'.dol_escape_htmltag(hvBuildingLabel($c->fk_building, $buildings)).'</td>';
-	print '<td>'.$langs->trans('HvPeriod'.((int) $c->period_months)).'</td>';
+	print '<td>'.$langs->trans('HvPeriod'.((int) $c->period_months)).'</td><td>'.$langs->trans('HvKey_'.($c->alloc_key ?: 'area')).'</td>';
 	print '<td class="right">'.hvMoney($c->amount_net).'</td><td class="right">'.vatrate($c->vat_rate, true).'</td><td class="right">'.hvMoney(HvCalculator::gross($c)).'</td>';
 	print '<td class="right">'.hvMoney($m).'</td><td class="right">'.hvMoney($m * 12).'</td>';
 	print '<td>'.dol_escape_htmltag($c->suppliername).'</td><td>'.dol_escape_htmltag($c->reference).'</td><td class="center">'.yn($c->active).'</td><td class="right nowraponall">';
@@ -126,7 +139,7 @@ foreach ($items as $c) {
 	}
 	print '</td></tr>';
 }
-print '<tr class="liste_total"><td colspan="6">'.$langs->trans('Total').'</td><td class="right">'.hvMoney($tot['m']).'</td><td class="right">'.hvMoney($tot['y']).'</td><td colspan="4"></td></tr>';
+print '<tr class="liste_total"><td colspan="7">'.$langs->trans('Total').'</td><td class="right">'.hvMoney($tot['m']).'</td><td class="right">'.hvMoney($tot['y']).'</td><td colspan="4"></td></tr>';
 print '</table></div>';
 
 llxFooter();

@@ -62,7 +62,16 @@ if ($action === 'save') {
 
 if ($action === 'importseed') {
 	$repo = new HvRepository($db);
-	$data = json_decode(file_get_contents(dol_buildpath('/hausverwaltung/data/bibali83b_seed.json', 0)), true);
+	// Startdaten aus hochgeladener JSON-Datei (Aufbau siehe data/vorlage_startdaten.json)
+	$data = null;
+	if (!empty($_FILES['seedfile']['tmp_name']) && is_uploaded_file($_FILES['seedfile']['tmp_name'])) {
+		$data = json_decode(file_get_contents($_FILES['seedfile']['tmp_name']), true);
+	}
+	if (!is_array($data) || !isset($data['buildings'], $data['units'], $data['costitems'])) {
+		setEventMessages($langs->trans('HvImportBadFile'), null, 'errors');
+		header('Location: '.$_SERVER['PHP_SELF']);
+		exit;
+	}
 	$bmap = array();
 	foreach ($repo->getBuildings(false) as $b) {
 		$bmap[$b->ref] = (int) $b->rowid;
@@ -80,28 +89,43 @@ if ($action === 'importseed') {
 	}
 	foreach ($data['units'] as $i => $u) {
 		if (!isset($existingUnits[$u['ref']])) {
-			$repo->save('hv_unit', array('ref' => $u['ref'], 'fk_building' => (int) $bmap[$u['building']], 'area' => (float) $u['area'], 'reserve_rate' => (float) $u['reserve_rate'], 'admin_rate' => (float) $u['admin_rate'], 'position' => $i + 1, 'active' => 1));
+			$repo->save('hv_unit', array('ref' => $u['ref'], 'fk_building' => (int) $bmap[$u['building']], 'area' => (float) ($u['area'] ?? 0), 'share' => (float) ($u['share'] ?? 0), 'reserve_rate' => (float) ($u['reserve_rate'] ?? 0), 'admin_rate' => (float) ($u['admin_rate'] ?? 0), 'position' => $i + 1, 'active' => 1));
 			$n[1]++;
 		}
 	}
 	// Geschäftspartner automatisch zuordnen: Name endet auf "Apt 1.1" / "Apartment 1.1"
-	$socByUnit = array();
-	$res = $db->query("SELECT rowid, nom FROM ".$db->prefix()."societe WHERE entity = ".((int) $conf->entity)." AND client IN (1,3)");
+	// Geschäftspartner automatisch zuordnen: Name endet auf die Einheitennummer, z. B. "… Apt 1.1", "… Top 3", "Wohnung 12"
+	// (oder in der Datei je Einheit "thirdparty": exakter Name des Geschäftspartners)
+	$socs = array();
+	$res = $db->query("SELECT rowid, nom FROM ".$db->prefix()."societe WHERE entity IN (".getEntity('societe').") AND client IN (1,3)");
 	while ($res && ($o = $db->fetch_object($res))) {
-		if (preg_match('/\b(?:apt|apartment|apartman)\.?\s*(\d+\.\d+)\s*$/i', $o->nom, $mm)) {
-			$socByUnit[$mm[1]] = (int) $o->rowid;
+		$socs[(int) $o->rowid] = $o->nom;
+	}
+	$byRefName = array();
+	foreach ($data['units'] as $du) {
+		if (!empty($du['thirdparty'])) {
+			$byRefName[$du['ref']] = $du['thirdparty'];
 		}
 	}
 	$linked = 0;
 	foreach ($repo->getUnits(false) as $u) {
-		if (empty($u->fk_soc) && isset($socByUnit[$u->ref])) {
-			$db->query("UPDATE ".$db->prefix()."hv_unit SET fk_soc = ".$socByUnit[$u->ref]." WHERE rowid = ".((int) $u->rowid));
+		if (!empty($u->fk_soc)) {
+			continue;
+		}
+		$hits = array();
+		foreach ($socs as $sid => $nom) {
+			if (isset($byRefName[$u->ref]) ? (strcasecmp(trim($nom), trim($byRefName[$u->ref])) === 0) : preg_match('/(^|[^0-9a-z])'.preg_quote($u->ref, '/').'\s*$/i', $nom)) {
+				$hits[] = $sid;
+			}
+		}
+		if (count($hits) === 1) {
+			$db->query("UPDATE ".$db->prefix()."hv_unit SET fk_soc = ".((int) $hits[0])." WHERE rowid = ".((int) $u->rowid));
 			$linked++;
 		}
 	}
 	if (count($repo->getCostItems(false)) == 0) {
 		foreach ($data['costitems'] as $i => $c) {
-			$repo->save('hv_costitem', array('label' => $c['label'], 'fk_building' => $c['building'] ? (int) $bmap[$c['building']] : 0, 'period_months' => (int) $c['period'], 'amount_net' => (float) $c['net'], 'vat_rate' => (float) $c['vat'], 'reference' => $c['reference'] ?? '', 'note' => $c['note'] ?? '', 'position' => $i + 1, 'active' => 1));
+			$repo->save('hv_costitem', array('label' => $c['label'], 'fk_building' => !empty($c['building']) ? (int) $bmap[$c['building']] : 0, 'alloc_key' => in_array($c['key'] ?? 'area', array('area', 'share', 'units'), true) ? ($c['key'] ?? 'area') : 'area', 'period_months' => (int) $c['period'], 'amount_net' => (float) $c['net'], 'vat_rate' => (float) $c['vat'], 'reference' => $c['reference'] ?? '', 'note' => $c['note'] ?? '', 'position' => $i + 1, 'active' => 1));
 			$n[2]++;
 		}
 	}
@@ -148,7 +172,8 @@ print '</table><div class="center"><input type="submit" class="button button-sav
 
 print load_fiche_titre($langs->trans('HvImportSeed'), '', '');
 print '<p>'.$langs->trans('HvImportSeedHelp').'</p>';
-print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="importseed"><input type="submit" class="button" value="'.$langs->trans('HvImportSeed').'"></form>';
+print '<p><a href="'.dol_buildpath('/hausverwaltung/data/vorlage_startdaten.json', 1).'" download>'.$langs->trans('HvImportTemplate').'</a> · <a href="'.dol_buildpath('/hausverwaltung/data/bibali83b_seed.json', 1).'" download>'.$langs->trans('HvImportExample').'</a></p>';
+print '<form method="POST" enctype="multipart/form-data" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="importseed"><input type="file" name="seedfile" accept=".json,application/json"> <input type="submit" class="button" value="'.$langs->trans('HvImportSeed').'"></form>';
 
 print dol_get_fiche_end();
 llxFooter();

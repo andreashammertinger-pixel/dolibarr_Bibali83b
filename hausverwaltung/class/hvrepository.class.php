@@ -55,12 +55,24 @@ class HvRepository
 	 */
 	public function areaFields()
 	{
-		static $cache = null;
-		if ($cache !== null) {
-			return $cache;
+		return $this->socFields(getDolGlobalString('HAUSVERWALTUNG_AREA_FIELDS', 'wohnflaeche_m2,bk_schluessel'));
+	}
+
+	/** Extrafelder für den Miteigentumsanteil (Standard: eigentumsanteil) */
+	public function shareFields()
+	{
+		return $this->socFields(getDolGlobalString('HAUSVERWALTUNG_SHARE_FIELDS', 'eigentumsanteil'));
+	}
+
+	/** @return string[] vorhandene Spalten aus einer kommagetrennten Liste */
+	protected function socFields($list)
+	{
+		static $cacheAll = array();
+		if (isset($cacheAll[$list])) {
+			return $cacheAll[$list];
 		}
 		$cache = array();
-		$wanted = array_filter(array_map('trim', explode(',', getDolGlobalString('HAUSVERWALTUNG_AREA_FIELDS', 'wohnflaeche_m2,bk_schluessel'))));
+		$wanted = array_filter(array_map('trim', explode(',', $list)));
 		$res = $this->db->query("SHOW COLUMNS FROM ".$this->db->prefix()."societe_extrafields");
 		$cols = array();
 		while ($res && ($o = $this->db->fetch_object($res))) {
@@ -71,6 +83,7 @@ class HvRepository
 				$cache[] = $w;
 			}
 		}
+		$cacheAll[$list] = $cache;
 		return $cache;
 	}
 
@@ -114,11 +127,23 @@ class HvRepository
 			}
 			$areaExpr = "COALESCE(".implode(', ', $parts).", u.area)";
 		}
+		$sf = $this->shareFields();
+		$shareExpr = 'u.share';
+		if ($sf) {
+			$sp = array();
+			foreach ($sf as $f) {
+				$sp[] = "NULLIF(ses.".$f.", 0)";
+			}
+			$shareExpr = "COALESCE(".implode(', ', $sp).", u.share)";
+		}
 		$hh = $this->hasSocField('hv_hh_valid_until') ? "seh.hv_hh_valid_until as hh_valid_until, seh.hv_hh_insurer as hh_insurer," : "NULL as hh_valid_until, NULL as hh_insurer,";
-		$sql = "SELECT u.*, u.area as area_module, ".$areaExpr." as area, ".$hh." ".($fields ? "CASE WHEN COALESCE(".implode(', ', $parts).") IS NULL THEN 0 ELSE 1 END" : "0")." as area_from_soc, s.nom as socname, b.ref as building_ref FROM ".$this->db->prefix()."hv_unit u";
+		$sql = "SELECT u.*, u.area as area_module, ".$areaExpr." as area, u.share as share_module, ".$shareExpr." as share, ".$hh." ".($fields ? "CASE WHEN COALESCE(".implode(', ', $parts).") IS NULL THEN 0 ELSE 1 END" : "0")." as area_from_soc, s.nom as socname, b.ref as building_ref FROM ".$this->db->prefix()."hv_unit u";
 		$sql .= " LEFT JOIN ".$this->db->prefix()."societe s ON s.rowid = u.fk_soc";
 		if ($fields) {
 			$sql .= " LEFT JOIN ".$this->db->prefix()."societe_extrafields se ON se.fk_object = u.fk_soc";
+		}
+		if ($sf) {
+			$sql .= " LEFT JOIN ".$this->db->prefix()."societe_extrafields ses ON ses.fk_object = u.fk_soc";
 		}
 		if ($this->hasSocField('hv_hh_valid_until')) {
 			$sql .= " LEFT JOIN ".$this->db->prefix()."societe_extrafields seh ON seh.fk_object = u.fk_soc";

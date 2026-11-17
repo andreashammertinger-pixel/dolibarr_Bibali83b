@@ -124,7 +124,7 @@ body.hvm{margin:0;background:#f4f5f7;font-family:-apple-system,Segoe UI,Roboto,s
 .hvm .muted{color:#777;font-size:13px}
 </style>
 <?php
-print '<body class="hvm"><header><a href="'.$_SERVER['PHP_SELF'].'">🏠 Bibali 83b</a><a href="'.dol_buildpath('/hausverwaltung/index.php', 1).'" class="muted" style="color:#cfe">Desktop</a></header><main>';
+print '<body class="hvm"><header><a href="'.$_SERVER['PHP_SELF'].'">🏠 '.dol_escape_htmltag($mysoc->name).'</a><a href="'.dol_buildpath('/hausverwaltung/index.php', 1).'" class="muted" style="color:#cfe">Desktop</a></header><main>';
 if ($msg) {
 	print '<div class="ok">'.$msg.'</div>';
 }

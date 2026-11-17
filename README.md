@@ -1,7 +1,25 @@
-# Dolibarr-Modul „Hausverwaltung“ – Bibali 83b
+# Dolibarr-Modul „Hausverwaltung“
 
 Externes Modul für **Dolibarr 20.0.x** (getestet mit 20.0.4, Multicompany-fähig über `entity`).
-Bildet die Logik der Excel-Vorlage `Bibali83B_Betriebskosten_Template.xlsx` in Dolibarr ab.
+Allgemein für Wohnungseigentumsgemeinschaften verwendbar – **je Liegenschaft eine Firma (Entität)** in Multicompany.
+Erste Anwendung: Bibali 83b (3 Gebäude, 11 Apartments); die Bibali-Daten sind nur Beispiel-Startdaten.
+
+## Neues Objekt anlegen (allgemein)
+1. In Multicompany eine neue Firma für die Liegenschaft anlegen (Name, Adresse, OIB, Bankkonten: Betriebskonto + je Gebäude ein Rücklagenkonto).
+2. Einheiten als Geschäftspartner (Kunde) anlegen, Name endet auf die Einheitennummer (z. B. „Musterstraße 5 - Top 3“); Eigentümer als Kontakte mit Funktion *Eigentümer*, E-Mail und OIB.
+   m² im Feld `wohnflaeche_m2`, optional Anteil in `eigentumsanteil` (oder direkt an der Einheit im Modul).
+3. Modul in dieser Firma aktivieren, Einstellungen setzen.
+4. *Startdaten importieren*: leere Vorlage herunterladen, ausfüllen (Gebäude – bei nur einem Haus ein Eintrag –, Einheiten, Kostenplan mit Verteilschlüssel), hochladen.
+5. Gebäude: Rücklagenkonto zuordnen. Kostenplan prüfen. Vorschreibung für den gewünschten Zeitraum erstellen.
+
+Texte wie „Apartment“ lassen sich je Firma über *Einstellungen → Übersetzung* überschreiben (z. B. Schlüssel `HvUnit` → „Wohnung“).
+
+## Vorschreibung: Monat oder Zeitraum
+- **Einzelmonat**: wie bisher (€/m² × m²).
+- **Zeitraum** (z. B. Jänner–Dezember): ein Dokument je Einheit mit Zahlungsplan; gleiche Monatsraten, fällig jeweils am eingestellten Tag; Empfehlung Dauerauftrag.
+  Sonderfall Jahresbeginn mitten im Jahr (z. B. Bibali 2026): einfach **Restjahr** (z. B. 11–12/2026) erzeugen, ab dem Folgejahr **ganzes Jahr**.
+- Überschneidungen mit bestehenden Vorschreibungen werden erkannt und übersprungen.
+- *Zahlungsstand* zeigt je Vorschreibung fällig bis heute / bezahlt / Rückstand.
 
 ## Funktionen
 

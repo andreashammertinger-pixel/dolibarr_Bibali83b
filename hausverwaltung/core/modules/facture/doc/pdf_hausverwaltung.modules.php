@@ -12,6 +12,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 dol_include_once('/hausverwaltung/lib/hausverwaltung.lib.php');
+dol_include_once('/hausverwaltung/class/hvinvoicer.class.php');
 
 class pdf_hausverwaltung extends ModelePDFFactures
 {
@@ -42,7 +43,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$langs->loadLangs(array('main', 'bills'));
 		$this->db = $db;
 		$this->name = 'hausverwaltung';
-		$this->description = 'Vorschreibung Hausverwaltung (Layout Bibali 83b)';
+		$this->description = 'Vorschreibung Hausverwaltung (Original + Übersetzungskopie)';
 		$this->update_main_doc_field = 1;
 		$this->type = 'pdf';
 		$formatarray = pdf_getFormat();
@@ -261,7 +262,9 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		// --- Betreff
 		$y = max(110, $yAfterFrom + 6, $yAfterTo + 6);
 		$period = $object->array_options['options_hv_period'] ?? '';
-		$plabel = $period ? substr($period, 5, 2).'/'.substr($period, 0, 4) : dol_print_date($object->date, '%m/%Y');
+		$periodTo = (string) ($object->array_options['options_hv_period_to'] ?? '');
+		$nMonths = (!$isSettlement && $period) ? max(1, HvInvoicer::months($period, $periodTo ?: $period)) : 1;
+		$plabel = $period && !$isSettlement ? HvInvoicer::periodLabel($period, $periodTo) : dol_print_date($object->date, '%m/%Y');
 		$unitInfo = $this->unitInfo($object);
 		$pdf->SetFont('', 'B', $fs + 1);
 		$pdf->SetXY($L, $y);
@@ -273,7 +276,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		}
 		$pdf->SetFont('', '', $fs - 1);
 		$pdf->SetX($L);
-		$pdf->Cell($W, 5, $isSettlement ? $outputlangs->transnoentities('HvPdfSublineSettlement', $sm[1], dol_print_date($object->date_lim_reglement, 'day', false, $outputlangs, true)) : $outputlangs->transnoentities('HvPdfSubline', $plabel, $dueDay), 0, 1, 'L');
+		$pdf->Cell($W, 5, $isSettlement ? $outputlangs->transnoentities('HvPdfSublineSettlement', $sm[1], dol_print_date($object->date_lim_reglement, 'day', false, $outputlangs, true)) : ($nMonths > 1 ? $outputlangs->transnoentities('HvPdfSublineRange', $plabel, $nMonths, $dueDay) : $outputlangs->transnoentities('HvPdfSubline', $plabel, $dueDay)), 0, 1, 'L');
 		$y = $pdf->GetY() + 4;
 
 		// --- Positionstabelle
@@ -285,7 +288,9 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		}
 		$cols = $showVat
 			? array(array('Description', 0.45, 'L'), array('VAT', 0.10, 'R'), array('PriceUHT', 0.15, 'R'), array('Qty', 0.13, 'R'), array('TotalHT', 0.17, 'R'))
-			: array(array('Description', 0.53, 'L'), array('HvPdfRatePerM2', 0.16, 'R'), array('HvPdfM2', 0.14, 'R'), array('Total', 0.17, 'R'));
+			: ($nMonths > 1
+				? array(array('Description', 0.45, 'L'), array('HvPdfRatePerM2Month', 0.15, 'R'), array('HvPdfM2', 0.12, 'R'), array('HvPdfMonths', 0.11, 'R'), array('Total', 0.17, 'R'))
+				: array(array('Description', 0.53, 'L'), array('HvPdfRatePerM2', 0.16, 'R'), array('HvPdfM2', 0.14, 'R'), array('Total', 0.17, 'R')));
 		$pdf->SetFillColor($dark[0], $dark[1], $dark[2]);
 		$pdf->SetTextColor(255, 255, 255);
 		$pdf->SetFont('', 'B', $fs - 1);
@@ -307,7 +312,18 @@ class pdf_hausverwaltung extends ModelePDFFactures
 			$vals = $showVat
 				? array($desc, vatrate($l->tva_tx, true), price($l->subprice, 0, $outputlangs, 1, 2, 2), (float) $l->qty, price($l->total_ht, 0, $outputlangs, 1, 2, 2))
 				: array($desc, price($l->subprice * (1 + $l->tva_tx / 100), 0, $outputlangs, 1, 2, getDolGlobalInt('HAUSVERWALTUNG_RATE_DECIMALS', 2)), price($l->qty, 0, $outputlangs, 1, 2, 2), price($l->total_ttc, 0, $outputlangs, 1, 2, 2));
-			if (!$showVat && (float) $l->qty == 1.0 && $unitInfo && (float) $unitInfo['area'] != 1.0) {
+			$flat = (!$showVat && (float) $l->qty == 1.0 && $unitInfo && (float) $unitInfo['area'] != 1.0);
+			if (!$showVat && $nMonths > 1) {
+				// Zeitraum: Satz je m² und Monat = Einzelpreis / Monate
+				// Zeitraum: Zeile = Monatsbetrag × Monate; Satz €/m²·Monat = Monatsbetrag / m²
+				$flat = ((float) $l->qty != (float) $nMonths);
+				$ar = $unitInfo ? (float) $unitInfo['area'] : 0;
+				$vals = array($desc, $ar > 0 ? price(round($l->subprice * (1 + $l->tva_tx / 100) / $ar, getDolGlobalInt('HAUSVERWALTUNG_RATE_DECIMALS', 2)), 0, $outputlangs, 1, 2, getDolGlobalInt('HAUSVERWALTUNG_RATE_DECIMALS', 2)) : '', price($ar, 0, $outputlangs, 1, 2, 2), $nMonths, price($l->total_ttc, 0, $outputlangs, 1, 2, 2));
+				if ($flat) {
+					$vals[3] = '';
+				}
+			}
+			if ($flat) {
 				// Pauschalzeile (Guthaben / Nachzahlung): kein €/m² und keine m²
 				$vals[1] = '';
 				$vals[2] = '';
@@ -354,8 +370,33 @@ class pdf_hausverwaltung extends ModelePDFFactures
 			$y = $pdf->GetY();
 		}
 
+		// --- Zahlungsplan (Zeitraum): monatliche Raten
+		if ($nMonths > 1 && (float) $object->total_ttc > 0) {
+			$plan = HvInvoicer::installments($object->total_ttc, $period, $periodTo);
+			$y += 4;
+			$pdf->SetFont('', 'B', $fs - 1);
+			$pdf->SetXY($L, $y);
+			$pdf->Cell($W, 5, $outputlangs->transnoentities('HvPdfPlan'), 0, 1, 'L');
+			$pdf->SetFont('', '', $fs - 2);
+			$colw = $W / 3;
+			$perCol = (int) ceil(count($plan) / 3);
+			$y0 = $pdf->GetY();
+			foreach ($plan as $k => $p) {
+				$cx = $L + intdiv($k, $perCol) * $colw;
+				$cy = $y0 + ($k % $perCol) * 4.4;
+				$pdf->SetXY($cx, $cy);
+				$pdf->Cell($colw * 0.55, 4.4, $outputlangs->transnoentities('HvPdfDueOn', dol_print_date($p['due'], 'day', false, $outputlangs, true)), 0, 0, 'L');
+				$pdf->Cell($colw * 0.35, 4.4, price($p['amount'], 0, $outputlangs, 1, 2, 2, $conf->currency), 0, 0, 'R');
+			}
+			$y = $y0 + $perCol * 4.4 + 1;
+			$pdf->SetFont('', 'I', $fs - 3);
+			$pdf->SetXY($L, $y);
+			$pdf->MultiCell($W, 4, $outputlangs->transnoentities('HvPdfStandingOrder'), 0, 'L');
+			$y = $pdf->GetY();
+		}
+
 		// --- Zahlungsbedingungen / Bankverbindung
-		$y = max($y + 8, 200);
+		$y = max($y + 8, $nMonths > 1 ? $y + 6 : 200);
 		$pdf->SetFont('', 'B', $fs - 1);
 		$pdf->SetXY($L, $y);
 		$pdf->Cell($W, 5, $outputlangs->transnoentities('HvPdfPaymentTerms'), 0, 1, 'L');
@@ -450,7 +491,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		if (!$period || !$unitId) {
 			return $out;
 		}
-		$mlabel = substr($period, 5, 2).'/'.substr($period, 0, 4);
+		$mlabel = HvInvoicer::periodLabel($period, (string) ($object->array_options['options_hv_period_to'] ?? ''));
 		$sql = "SELECT u.ref as uref, b.ref as bref, b.fk_product_reserve FROM ".$this->db->prefix()."hv_unit u LEFT JOIN ".$this->db->prefix()."hv_building b ON b.rowid = u.fk_building WHERE u.rowid = ".$unitId;
 		$res = $this->db->query($sql);
 		$o = $res ? $this->db->fetch_object($res) : null;
@@ -475,7 +516,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 			}
 		}
 		if (!empty($o->fk_product_reserve)) {
-			$out[(int) $o->fk_product_reserve] = $outputlangs->transnoentities('HvLineReserve', $outputlangs->transnoentities('HvBuildingNo', preg_replace('/\D/', '', $o->bref) ?: $o->bref), $mlabel);
+			$out[(int) $o->fk_product_reserve] = $outputlangs->transnoentities('HvLineReserve', (preg_match('/\d/', $o->bref) ? $outputlangs->transnoentities('HvBuildingNo', preg_replace('/\D/', '', $o->bref)) : $o->bref), $mlabel);
 		}
 		return $out;
 	}

@@ -53,6 +53,12 @@ if (empty($calc->units)) {
 	print info_admin($langs->trans('HvImportSeedHelp').' → <a href="'.dol_buildpath('/hausverwaltung/admin/setup.php', 1).'">'.$langs->trans('HvSetupPage').'</a>');
 }
 
+if (!empty($calc->warnings)) {
+	print info_admin($langs->trans('HvKeyFallback', implode(', ', array_map(function ($k) use ($langs) {
+		return $langs->trans('HvKey_'.$k);
+	}, array_keys($calc->warnings)))), 0, 0, 'warning');
+}
+
 // Warnung Haushaltsversicherung (Miteigentumsvertrag §10.2)
 $hhMissing = array();
 foreach ($calc->units as $u) {

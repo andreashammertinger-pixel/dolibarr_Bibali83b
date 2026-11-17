@@ -26,6 +26,55 @@ class HvInvoicer
 		$this->db = $db;
 	}
 
+	/** Anzahl Monate von 'YYYY-MM' bis 'YYYY-MM' (inklusive), 0 bei ungültig */
+	public static function months($from, $to)
+	{
+		if (!preg_match('/^(\d{4})-(\d{2})$/', (string) $from, $a) || !preg_match('/^(\d{4})-(\d{2})$/', (string) $to, $b)) {
+			return 0;
+		}
+		$n = ((int) $b[1] - (int) $a[1]) * 12 + ((int) $b[2] - (int) $a[2]) + 1;
+		return $n > 0 ? $n : 0;
+	}
+
+	/** Anzeige des Zeitraums: 09/2027 bzw. 01–12/2027 bzw. 11/2026–02/2027 */
+	public static function periodLabel($from, $to = '')
+	{
+		$to = $to ?: $from;
+		if (!preg_match('/^(\d{4})-(\d{2})$/', (string) $from, $a) || !preg_match('/^(\d{4})-(\d{2})$/', (string) $to, $b)) {
+			return (string) $from;
+		}
+		if ($from === $to) {
+			return $a[2].'/'.$a[1];
+		}
+		return $a[1] === $b[1] ? $a[2].'–'.$b[2].'/'.$a[1] : $a[2].'/'.$a[1].'–'.$b[2].'/'.$b[1];
+	}
+
+	/**
+	 * Zahlungsplan: monatliche Raten (letzte Rate gleicht Rundung aus).
+	 *
+	 * @return array<int,array{due:int,amount:float,label:string}>
+	 */
+	public static function installments($total, $from, $to)
+	{
+		$n = self::months($from, $to);
+		if ($n <= 0) {
+			return array();
+		}
+		$dueDay = max(1, min(28, getDolGlobalInt('HAUSVERWALTUNG_DUE_DAY', 5)));
+		preg_match('/^(\d{4})-(\d{2})$/', $from, $a);
+		$rate = round((float) $total / $n, 2);
+		$out = array();
+		$sum = 0;
+		for ($i = 0; $i < $n; $i++) {
+			$y = (int) $a[1] + intdiv((int) $a[2] - 1 + $i, 12);
+			$mo = ((int) $a[2] - 1 + $i) % 12 + 1;
+			$amt = ($i === $n - 1) ? round((float) $total - $sum, 2) : $rate;
+			$sum += $amt;
+			$out[] = array('due' => dol_mktime(12, 0, 0, $mo, $dueDay, $y), 'amount' => $amt, 'label' => sprintf('%02d/%04d', $mo, $y));
+		}
+		return $out;
+	}
+
 	public static function vatRate()
 	{
 		return (float) getDolGlobalString('HAUSVERWALTUNG_VAT_RATE', '0');
@@ -96,16 +145,18 @@ class HvInvoicer
 	 *
 	 * @return array{status:string,message:string,invoice_id:int,total:float}
 	 */
-	public function generateManagerFee(User $user, $period)
+	public function generateManagerFee(User $user, $period, $periodTo = '')
 	{
 		global $conf, $langs;
 		$res = array('status' => 'skip', 'message' => '', 'invoice_id' => 0, 'total' => 0);
 		$socid = getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID');
-		if ($socid <= 0 || !preg_match('/^(\d{4})-(\d{2})$/', $period, $m)) {
+		$periodTo = $periodTo ?: $period;
+		$nMonths = self::months($period, $periodTo);
+		if ($socid <= 0 || !preg_match('/^(\d{4})-(\d{2})$/', $period, $m) || $nMonths <= 0) {
 			$res['message'] = $langs->trans('HvNoManager');
 			return $res;
 		}
-		$refsupplier = 'HON-'.$period;
+		$refsupplier = 'HON-'.$period.($periodTo !== $period ? '..'.$periodTo : '');
 		$sql = "SELECT rowid FROM ".$this->db->prefix()."facture_fourn WHERE entity = ".((int) $conf->entity)." AND fk_soc = ".$socid." AND ref_supplier = '".$this->db->escape($refsupplier)."'";
 		$q = $this->db->query($sql);
 		if ($q && ($o = $this->db->fetch_object($q))) {
@@ -119,7 +170,8 @@ class HvInvoicer
 			$net += $r['admin_net'];
 		}
 		$vat = HvCalculator::adminVatRate();
-		$mlabel = sprintf('%02d/%04d', (int) $m[2], (int) $m[1]);
+		$net = $net * $nMonths;
+		$mlabel = self::periodLabel($period, $periodTo);
 		$this->db->begin();
 		$ff = new FactureFournisseur($this->db);
 		$ff->socid = $socid;
@@ -166,14 +218,17 @@ class HvInvoicer
 	}
 
 	/** Existiert für Einheit + Periode bereits eine (nicht stornierte) Vorschreibung? */
-	public function findExisting($unitId, $period)
+	public function findExisting($unitId, $period, $periodTo = '')
 	{
 		global $conf;
+		$periodTo = $periodTo ?: $period;
 		$sql = "SELECT f.rowid FROM ".$this->db->prefix()."facture f";
 		$sql .= " INNER JOIN ".$this->db->prefix()."facture_extrafields fe ON fe.fk_object = f.rowid";
 		$sql .= " WHERE f.entity = ".((int) $conf->entity)." AND f.type = ".Facture::TYPE_STANDARD;
 		$sql .= " AND f.fk_statut <> ".Facture::STATUS_ABANDONED;
-		$sql .= " AND fe.hv_unit = ".((int) $unitId)." AND fe.hv_period = '".$this->db->escape($period)."'";
+		// Überschneidung mit bestehender Vorschreibung (einzelner Monat oder Zeitraum); Abrechnungen (JJJJ-A) ausgenommen
+		$sql .= " AND fe.hv_unit = ".((int) $unitId)." AND fe.hv_period NOT LIKE '%-A'";
+		$sql .= " AND fe.hv_period <= '".$this->db->escape($periodTo)."' AND COALESCE(NULLIF(fe.hv_period_to, ''), fe.hv_period) >= '".$this->db->escape($period)."'";
 		$res = $this->db->query($sql);
 		if ($res && ($obj = $this->db->fetch_object($res))) {
 			return (int) $obj->rowid;
@@ -191,18 +246,22 @@ class HvInvoicer
 	 * @param bool   $dryrun   nur berechnen
 	 * @return array<int,array{unit:string,status:string,message:string,invoice_id:int,total:float}>
 	 */
-	public function generate(User $user, $period, $validate = false, $onlyUnits = array(), $dryrun = false)
+	public function generate(User $user, $period, $validate = false, $onlyUnits = array(), $dryrun = false, $periodTo = '')
 	{
 		global $conf, $langs;
 
 		$log = array();
-		if (!preg_match('/^(\d{4})-(\d{2})$/', $period, $m)) {
+		$periodTo = $periodTo ?: $period;
+		$nMonths = self::months($period, $periodTo);
+		if (!preg_match('/^(\d{4})-(\d{2})$/', $period, $m) || $nMonths <= 0 || $nMonths > 24) {
 			$this->error = 'Bad period';
 			return $log;
 		}
 		$year = (int) $m[1];
 		$month = (int) $m[2];
+		preg_match('/^(\d{4})-(\d{2})$/', $periodTo, $mt);
 		$date = dol_mktime(12, 0, 0, $month, 1, $year);
+		$dateEnd = dol_get_last_day((int) $mt[1], (int) $mt[2]);
 		$dueDay = max(1, min(28, (int) getDolGlobalString('HAUSVERWALTUNG_DUE_DAY', '5')));
 		$due = dol_mktime(12, 0, 0, $month, $dueDay, $year);
 		$vat = self::vatRate();
@@ -224,14 +283,14 @@ class HvInvoicer
 			if (!empty($onlyUnits) && !in_array($unitId, $onlyUnits)) {
 				continue;
 			}
-			$entry = array('unit' => $u->ref, 'status' => '', 'message' => '', 'invoice_id' => 0, 'total' => $r['total']);
+			$entry = array('unit' => $u->ref, 'status' => '', 'message' => '', 'invoice_id' => 0, 'total' => round($r['total'] * $nMonths, 2));
 			if (empty($u->fk_soc)) {
 				$entry['status'] = 'skip';
 				$entry['message'] = $langs->trans('HvNoThirdparty');
 				$log[] = $entry;
 				continue;
 			}
-			$existing = $this->findExisting($unitId, $period);
+			$existing = $this->findExisting($unitId, $period, $periodTo);
 			if ($existing) {
 				$entry['status'] = 'skip';
 				$entry['message'] = $langs->trans('HvAlreadyExists');
@@ -254,7 +313,7 @@ class HvInvoicer
 			// Rechnungstexte immer in der Originalsprache (Kroatien: hr_HR); Kopie in Eigentümersprache erzeugt die PDF-Vorlage
 			$outlangs->setDefaultLang(getDolGlobalString('HAUSVERWALTUNG_ORIGINAL_LANG', 'hr_HR'));
 			$outlangs->loadLangs(array('main', 'bills', 'hausverwaltung@hausverwaltung'));
-			$mlabel = sprintf('%02d/%04d', $month, $year);
+			$mlabel = self::periodLabel($period, $periodTo);
 
 			$this->db->begin();
 			$f = new Facture($this->db);
@@ -262,7 +321,7 @@ class HvInvoicer
 			$f->type = Facture::TYPE_STANDARD;
 			$f->date = $date;
 			$f->ref_client = $outlangs->transnoentities('HvInvoiceRefClient', $u->ref, $mlabel);
-			$f->note_public = $outlangs->transnoentities('HvInvoiceNote', $mlabel, dol_print_date($due, 'day', false, $outlangs));
+			$f->note_public = $nMonths > 1 ? $outlangs->transnoentities('HvInvoiceNoteRange', $mlabel, $nMonths, $dueDay) : $outlangs->transnoentities('HvInvoiceNote', $mlabel, dol_print_date($due, 'day', false, $outlangs));
 			if (getDolGlobalInt('HAUSVERWALTUNG_BANK_ACCOUNT') > 0) {
 				$f->fk_account = getDolGlobalInt('HAUSVERWALTUNG_BANK_ACCOUNT');
 			}
@@ -270,7 +329,7 @@ class HvInvoicer
 				$f->mode_reglement_id = getDolGlobalInt('HAUSVERWALTUNG_PAYMENT_MODE');
 			}
 			$f->cond_reglement_id = $soc->cond_reglement_id ?: 1;
-			$f->array_options = array('options_hv_period' => $period, 'options_hv_unit' => (int) $unitId);
+			$f->array_options = array('options_hv_period' => $period, 'options_hv_period_to' => ($periodTo !== $period ? $periodTo : ''), 'options_hv_unit' => (int) $unitId);
 			$f->model_pdf = getDolGlobalString('HAUSVERWALTUNG_PDF_MODEL', 'hausverwaltung');
 			$id = $f->create($user);
 			$err = $id <= 0;
@@ -282,7 +341,7 @@ class HvInvoicer
 
 			$lines = array(
 				array($pBk->id, $outlangs->transnoentities('HvLineBk', $mlabel, $u->ref), $r['bk_rate']),
-				array($fkReserveProduct, $outlangs->transnoentities('HvLineReserve', $building ? $outlangs->transnoentities('HvBuildingNo', preg_replace('/\D/', '', $building->ref) ?: $building->ref) : '', $mlabel), $r['reserve_rate']),
+				array($fkReserveProduct, $outlangs->transnoentities('HvLineReserve', $building ? (preg_match('/\d/', $building->ref) ? $outlangs->transnoentities('HvBuildingNo', preg_replace('/\D/', '', $building->ref)) : $building->label) : '', $mlabel), $r['reserve_rate']),
 				array($pAdmin->id, $outlangs->transnoentities('HvLineAdmin', $mlabel), $r['admin_rate']),
 			);
 			foreach ($lines as $l) {
@@ -292,7 +351,13 @@ class HvInvoicer
 				if ((float) $l[2] == 0) {
 					continue;
 				}
-				$res = $f->addline($l[1], $l[2], (float) $r['area'], $vat, 0, 0, (int) $l[0], 0, $date, dol_get_last_day($year, $month), 0, 0, 0, 'HT', 0, 1);
+				if ($nMonths > 1) {
+					// Zeitraum: Einzelpreis = Monatsbetrag (Satz €/m² × m², gerundet), Menge = Anzahl Monate → jede Monatsrate = Monatsbetrag
+					$res = $f->addline($l[1], round($l[2] * (float) $r['area'], 2), $nMonths, $vat, 0, 0, (int) $l[0], 0, $date, $dateEnd, 0, 0, 0, 'HT', 0, 1);
+				} else {
+					// Einzelmonat: Einzelpreis = Satz €/m², Menge = m²
+					$res = $f->addline($l[1], $l[2], (float) $r['area'], $vat, 0, 0, (int) $l[0], 0, $date, $dateEnd, 0, 0, 0, 'HT', 0, 1);
+				}
 				if ($res <= 0) {
 					$err = true;
 				}

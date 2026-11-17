@@ -1,0 +1,58 @@
+{
+  "_hinweis": "Startdaten-Vorlage Hausverwaltung. buildings: Gebäude/Stiegen (bei nur einem Gebäude einen Eintrag). units: Einheiten mit ref (z. B. Top 1), building (= ref des Gebäudes), area (m², Fallback falls nicht am Geschäftspartner), share (Anteil, optional), reserve_rate und admin_rate (€/m²/Monat), optional thirdparty (exakter Name des Geschäftspartners). costitems: label, building (ref oder leer = alle Gebäude), key (area | share | units), period (12/6/3/1 Monate), net (netto je Periode), vat (%), reference, note.",
+  "buildings": [
+    {
+      "ref": "A",
+      "label": "Haus A",
+      "position": 1
+    }
+  ],
+  "units": [
+    {
+      "ref": "Top 1",
+      "building": "A",
+      "area": 60.0,
+      "share": 0,
+      "reserve_rate": 0.5,
+      "admin_rate": 0.3
+    },
+    {
+      "ref": "Top 2",
+      "building": "A",
+      "area": 75.0,
+      "share": 0,
+      "reserve_rate": 0.5,
+      "admin_rate": 0.3
+    }
+  ],
+  "costitems": [
+    {
+      "label": "Gebäudeversicherung",
+      "building": "A",
+      "key": "area",
+      "period": 12,
+      "net": 500.0,
+      "vat": 0,
+      "reference": "",
+      "note": ""
+    },
+    {
+      "label": "Stiegenhausreinigung",
+      "building": "A",
+      "key": "area",
+      "period": 1,
+      "net": 60.0,
+      "vat": 25,
+      "note": ""
+    },
+    {
+      "label": "Müllgebühr",
+      "building": "",
+      "key": "units",
+      "period": 3,
+      "net": 90.0,
+      "vat": 13,
+      "note": ""
+    }
+  ]
+}

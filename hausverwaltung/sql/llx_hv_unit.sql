@@ -8,6 +8,7 @@ CREATE TABLE llx_hv_unit (
   area           double(24,4) DEFAULT 0 NOT NULL,  -- Wohnfläche m²
   reserve_rate   double(24,4) DEFAULT 0 NOT NULL,  -- Rücklage €/m²/Monat
   admin_rate     double(24,4) DEFAULT 0 NOT NULL,  -- Verwaltung €/m²/Monat
+  share          double(24,4) DEFAULT 0 NOT NULL,  -- Miteigentumsanteil (z. B. ‰), Fallback wenn nicht am Geschäftspartner
   position       integer DEFAULT 0,
   active         smallint DEFAULT 1 NOT NULL,
   note           text,

@@ -48,6 +48,11 @@ $period = GETPOST('period', 'alphanohtml');
 if (!preg_match('/^\d{4}-\d{2}$/', (string) $period)) {
 	$period = dol_print_date(dol_now(), '%Y-%m');
 }
+$periodTo = GETPOST('period_to', 'alphanohtml');
+if (!preg_match('/^\d{4}-\d{2}$/', (string) $periodTo) || HvInvoicer::months($period, $periodTo) <= 0) {
+	$periodTo = $period;
+}
+$nMonths = HvInvoicer::months($period, $periodTo);
 $validate = GETPOSTINT('validate') ? true : false;
 $withfee = ($action === '' || $action === 'preview') ? (getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID') > 0) : (GETPOSTINT('withfee') ? true : false);
 
@@ -56,14 +61,14 @@ $calc = new HvCalculator($db);
 $rows = $calc->compute();
 $log = array();
 if ($action === 'generate') {
-	$log = $inv->generate($user, $period, $validate);
+	$log = $inv->generate($user, $period, $validate, array(), false, $periodTo);
 	if ($withfee) {
-		$fee = $inv->generateManagerFee($user, $period);
+		$fee = $inv->generateManagerFee($user, $period, $periodTo);
 		$fee['unit'] = $langs->transnoentities('HvManagerFee');
 		$log[] = $fee;
 	}
 }
-$preview = $inv->generate($user, $period, false, array(), true);
+$preview = $inv->generate($user, $period, false, array(), true, $periodTo);
 $status = array();
 foreach ($preview as $p) {
 	$status[$p['unit']] = $p;
@@ -124,7 +129,18 @@ if ($oibIssues) {
 }
 
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'">';
-print '<div class="inline-block marginrightonly">'.$langs->trans('HvPeriod').': <input type="month" name="period" value="'.dol_escape_htmltag($period).'"></div>';
+$y = (int) substr($period, 0, 4);
+$now = dol_print_date(dol_now(), '%Y-%m');
+$presets = array(
+	$langs->trans('HvPresetMonth') => array($now, $now),
+	$langs->trans('HvPresetRestOfYear') => array($now, substr($now, 0, 4).'-12'),
+	$langs->trans('HvPresetYear', $y + 1) => array(($y + 1).'-01', ($y + 1).'-12'),
+);
+print '<div class="inline-block marginrightonly">'.$langs->trans('HvPeriodFrom').': <input type="month" name="period" value="'.dol_escape_htmltag($period).'"> '.$langs->trans('HvPeriodTo').': <input type="month" name="period_to" value="'.dol_escape_htmltag($periodTo).'"></div>';
+foreach ($presets as $lbl => $p) {
+	print '<a class="butAction small" href="'.$_SERVER['PHP_SELF'].'?period='.$p[0].'&period_to='.$p[1].'">'.dol_escape_htmltag($lbl).'</a> ';
+}
+print '<br><br>';
 print '<button class="button" name="action" value="preview">'.$langs->trans('HvPreview').'</button> ';
 print '<label class="marginleftonly"><input type="checkbox" name="validate" value="1"'.($validate ? ' checked' : '').'> '.$langs->trans('HvValidateDirectly').'</label> ';
 print '<label class="marginleftonly"><input type="checkbox" name="withfee" value="1"'.($withfee ? ' checked' : '').(getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID') > 0 ? '' : ' disabled').'> '.$langs->trans('HvCreateManagerFee').'</label> ';
@@ -150,17 +166,17 @@ if ($log) {
 	print '</table><br>';
 }
 
-print load_fiche_titre($langs->trans('HvPreview').' '.$period, '', '');
-print '<div class="div-table-responsive"><table class="noborder centpercent"><tr class="liste_titre"><th>'.$langs->trans('HvUnit').'</th><th>'.$langs->trans('HvOwner').'</th><th class="right">'.$langs->trans('HvBk').'</th><th class="right">'.$langs->trans('HvReserve').'</th><th class="right">'.$langs->trans('HvAdmin').'</th><th class="right">'.$langs->trans('Total').'</th><th>'.$langs->trans('Status').'</th></tr>';
+print load_fiche_titre($langs->trans('HvPreview').' '.HvInvoicer::periodLabel($period, $periodTo).($nMonths > 1 ? ' ('.$nMonths.' '.$langs->trans('HvMonths').')' : ''), '', '');
+print '<div class="div-table-responsive"><table class="noborder centpercent"><tr class="liste_titre"><th>'.$langs->trans('HvUnit').'</th><th>'.$langs->trans('HvOwner').'</th><th class="right">'.$langs->trans('HvBk').'</th><th class="right">'.$langs->trans('HvReserve').'</th><th class="right">'.$langs->trans('HvAdmin').'</th><th class="right">'.$langs->trans('HvTotalMonth').'</th>'.($nMonths > 1 ? '<th class="right">'.$langs->trans('Total').' '.HvInvoicer::periodLabel($period, $periodTo).'</th>' : '').'<th>'.$langs->trans('Status').'</th></tr>';
 $sum = 0;
 foreach ($rows as $r) {
 	$u = $r['unit'];
 	$st = $status[$u->ref] ?? null;
 	$sum += $r['total'];
-	print '<tr class="oddeven"><td>'.dol_escape_htmltag($u->ref).'</td><td>'.dol_escape_htmltag($u->socname).'</td><td class="right">'.hvMoney($r['bk']).'</td><td class="right">'.hvMoney($r['reserve']).'</td><td class="right">'.hvMoney($r['admin']).'</td><td class="right"><strong>'.hvMoney($r['total']).'</strong></td>';
+	print '<tr class="oddeven"><td>'.dol_escape_htmltag($u->ref).'</td><td>'.dol_escape_htmltag($u->socname).'</td><td class="right">'.hvMoney($r['bk']).'</td><td class="right">'.hvMoney($r['reserve']).'</td><td class="right">'.hvMoney($r['admin']).'</td><td class="right"><strong>'.hvMoney($r['total']).'</strong></td>'.($nMonths > 1 ? '<td class="right"><strong>'.hvMoney($r['total'] * $nMonths).'</strong></td>' : '');
 	print '<td>'.($st && $st['status'] !== 'dryrun' ? '<span class="opacitymedium">'.dol_escape_htmltag($st['message']).'</span>' : '').'</td></tr>';
 }
-print '<tr class="liste_total"><td colspan="5">'.$langs->trans('Total').'</td><td class="right">'.hvMoney($sum).'</td><td></td></tr></table></div>';
+print '<tr class="liste_total"><td colspan="5">'.$langs->trans('Total').'</td><td class="right">'.hvMoney($sum).'</td>'.($nMonths > 1 ? '<td class="right">'.hvMoney($sum * $nMonths).'</td>' : '').'<td></td></tr></table></div>';
 
 llxFooter();
 $db->close();

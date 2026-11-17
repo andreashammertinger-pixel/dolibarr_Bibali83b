@@ -6,6 +6,7 @@ require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
+dol_include_once('/hausverwaltung/class/hvinvoicer.class.php');
 
 /**
  * E-Mail-Versand von Vorschreibungen / Abrechnungen:
@@ -95,7 +96,9 @@ class HvMailer
 
 		$period = (string) ($f->array_options['options_hv_period'] ?? '');
 		$isSettlement = (bool) preg_match('/^(\d{4})-A$/', $period, $m);
-		$plabel = $isSettlement ? $m[1] : (preg_match('/^(\d{4})-(\d{2})$/', $period, $pm) ? $pm[2].'/'.$pm[1] : dol_print_date($f->date, '%m/%Y'));
+		$periodTo = (string) ($f->array_options['options_hv_period_to'] ?? '');
+		$nMonths = $isSettlement ? 1 : max(1, HvInvoicer::months($period, $periodTo ?: $period));
+		$plabel = $isSettlement ? $m[1] : (preg_match('/^\d{4}-\d{2}$/', $period) ? HvInvoicer::periodLabel($period, $periodTo) : dol_print_date($f->date, '%m/%Y'));
 		$unitRef = '';
 		if (!empty($f->array_options['options_hv_unit'])) {
 			$r = $this->db->query("SELECT ref FROM ".$this->db->prefix()."hv_unit WHERE rowid = ".((int) $f->array_options['options_hv_unit']));
@@ -117,7 +120,12 @@ class HvMailer
 		$body = $ol->transnoentities('HvMailHello', $names)."\n\n";
 		$body .= $ol->transnoentities($isSettlement ? 'HvMailIntroSettlement' : 'HvMailIntro', $unitRef, $plabel)."\n\n";
 		if ((float) $f->total_ttc > 0) {
-			$body .= $ol->transnoentities('HvMailAmount', $amount, $due)."\n";
+			if ($nMonths > 1) {
+				$plan = HvInvoicer::installments($f->total_ttc, $period, $periodTo);
+				$body .= $ol->transnoentities('HvMailAmountRange', $amount, $nMonths, price($plan[0]['amount'], 0, $ol, 1, 2, 2, $conf->currency), getDolGlobalInt('HAUSVERWALTUNG_DUE_DAY', 5), dol_print_date($plan[0]['due'], 'day', false, $ol))."\n";
+			} else {
+				$body .= $ol->transnoentities('HvMailAmount', $amount, $due)."\n";
+			}
 			$body .= $ol->transnoentities('HvMailBank', $holder, $iban, $f->ref)."\n\n";
 		} else {
 			$body .= $ol->transnoentities('HvMailNothingToPay')."\n\n";

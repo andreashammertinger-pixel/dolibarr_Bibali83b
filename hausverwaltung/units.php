@@ -56,6 +56,7 @@ if ($canwrite && $action === 'save') {
 		'area' => (float) price2num(GETPOST('area', 'alphanohtml')),
 		'reserve_rate' => (float) price2num(GETPOST('reserve_rate', 'alphanohtml')),
 		'admin_rate' => (float) price2num(GETPOST('admin_rate', 'alphanohtml')),
+		'share' => (float) price2num(GETPOST('share', 'alphanohtml')),
 		'position' => GETPOSTINT('position'),
 		'active' => GETPOSTINT('active') ? 1 : 0,
 		'note' => GETPOST('note', 'restricthtml'),
@@ -88,13 +89,14 @@ if ($action === 'delete') {
 }
 
 if ($canwrite && in_array($action, array('create', 'edit'))) {
-	$u = ($id && isset($units[$id])) ? $units[$id] : (object) array('ref' => '', 'fk_building' => 0, 'fk_soc' => 0, 'area' => '', 'reserve_rate' => '', 'admin_rate' => getDolGlobalString('HAUSVERWALTUNG_DEFAULT_ADMIN_RATE', '0.3'), 'position' => 0, 'active' => 1, 'note' => '');
+	$u = ($id && isset($units[$id])) ? $units[$id] : (object) array('ref' => '', 'fk_building' => 0, 'fk_soc' => 0, 'area' => '', 'reserve_rate' => '', 'admin_rate' => getDolGlobalString('HAUSVERWALTUNG_DEFAULT_ADMIN_RATE', '0.3'), 'share' => 0, 'position' => 0, 'active' => 1, 'note' => '');
 	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="save"><input type="hidden" name="id" value="'.$id.'">';
 	print '<table class="border centpercent tableforfieldedit">';
 	print '<tr><td class="titlefield fieldrequired">'.$langs->trans('Ref').'</td><td><input name="ref" value="'.dol_escape_htmltag($u->ref).'" maxlength="32"></td></tr>';
 	print '<tr><td class="fieldrequired">'.$langs->trans('HvBuilding').'</td><td>'.hvSelectBuilding('fk_building', $u->fk_building, $buildings).'</td></tr>';
 	print '<tr><td>'.$langs->trans('HvOwner').'</td><td>'.$form->select_company($u->fk_soc, 'fk_soc', '', 1, 0, 0, array(), 0, 'minwidth300').'</td></tr>';
 	print '<tr><td class="fieldrequired">'.$langs->trans('HvArea').'</td><td><input name="area" class="width75" value="'.dol_escape_htmltag(price2num($u->area_module ?? $u->area)).'">'.(!empty($u->area_from_soc) ? ' <span class="opacitymedium">'.$langs->trans('HvAreaFromThirdpartyHelp', price($u->area)).'</span>' : '').'</td></tr>';
+	print '<tr><td>'.$langs->trans('HvShare').'</td><td><input name="share" class="width75" value="'.dol_escape_htmltag(price2num($u->share_module ?? $u->share)).'"> <span class="opacitymedium">'.$langs->trans('HvShareHelp').'</span></td></tr>';
 	print '<tr><td>'.$langs->trans('HvReserveRate').'</td><td><input name="reserve_rate" class="width75" value="'.dol_escape_htmltag(price2num($u->reserve_rate)).'"> € / m² / Monat</td></tr>';
 	print '<tr><td>'.$langs->trans('HvAdminRate').'</td><td><input name="admin_rate" class="width75" value="'.dol_escape_htmltag(price2num($u->admin_rate)).'"> € / m² / Monat</td></tr>';
 	print '<tr><td>'.$langs->trans('Position').'</td><td><input name="position" class="width50" value="'.((int) $u->position).'"></td></tr>';
@@ -104,11 +106,11 @@ if ($canwrite && in_array($action, array('create', 'edit'))) {
 }
 
 print '<div class="div-table-responsive"><table class="noborder centpercent">';
-print '<tr class="liste_titre"><th>'.$langs->trans('Ref').'</th><th>'.$langs->trans('HvBuilding').'</th><th>'.$langs->trans('HvOwner').'</th><th class="right">'.$langs->trans('HvArea').'</th><th class="right">'.$langs->trans('HvReserveRate').'</th><th class="right">'.$langs->trans('HvAdminRate').'</th><th>'.$langs->trans('HvHhIns').'</th><th class="center">'.$langs->trans('Active').'</th><th></th></tr>';
+print '<tr class="liste_titre"><th>'.$langs->trans('Ref').'</th><th>'.$langs->trans('HvBuilding').'</th><th>'.$langs->trans('HvOwner').'</th><th class="right">'.$langs->trans('HvArea').'</th><th class="right">'.$langs->trans('HvShare').'</th><th class="right">'.$langs->trans('HvReserveRate').'</th><th class="right">'.$langs->trans('HvAdminRate').'</th><th>'.$langs->trans('HvHhIns').'</th><th class="center">'.$langs->trans('Active').'</th><th></th></tr>';
 foreach ($units as $u) {
 	print '<tr class="oddeven"><td>'.dol_escape_htmltag($u->ref).'</td><td>'.dol_escape_htmltag(hvBuildingLabel($u->fk_building, $buildings)).'</td>';
 	print '<td>'.($u->fk_soc ? '<a href="'.DOL_URL_ROOT.'/societe/card.php?socid='.$u->fk_soc.'">'.dol_escape_htmltag($u->socname).'</a>' : '<span class="warning">'.$langs->trans('HvNoThirdparty').'</span>').'</td>';
-	print '<td class="right">'.price($u->area, 0, $langs, 1, 2, 2).(!empty($u->area_from_soc) ? ' '.img_picto($langs->trans('HvAreaFromThirdparty'), 'company') : '').'</td><td class="right">'.price($u->reserve_rate, 0, $langs, 1, 2, 4).'</td><td class="right">'.price($u->admin_rate, 0, $langs, 1, 2, 4).'</td>';
+	print '<td class="right">'.price($u->area, 0, $langs, 1, 2, 2).(!empty($u->area_from_soc) ? ' '.img_picto($langs->trans('HvAreaFromThirdparty'), 'company') : '').'</td><td class="right">'.price($u->share, 0, $langs, 1, 0, 4).'</td><td class="right">'.price($u->reserve_rate, 0, $langs, 1, 2, 4).'</td><td class="right">'.price($u->admin_rate, 0, $langs, 1, 2, 4).'</td>';
 	$hs = HvRepository::hhStatus($u, $db);
 	$badge = array('ok' => 'badge-status4', 'expiring' => 'badge-status1', 'expired' => 'badge-status8', 'missing' => 'badge-status8')[$hs];
 	print '<td><span class="badge '.$badge.'">'.$langs->trans('HvHh'.ucfirst($hs)).'</span>'.(!empty($u->hh_valid_until) ? ' <span class="opacitymedium">'.dol_print_date($db->jdate($u->hh_valid_until), 'day').'</span>' : '').($u->fk_soc ? ' <a href="'.DOL_URL_ROOT.'/societe/card.php?socid='.$u->fk_soc.'&action=edit">'.img_edit().'</a>' : '').'</td>';

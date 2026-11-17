@@ -7,6 +7,7 @@ CREATE TABLE llx_hv_costitem (
   period_months  integer DEFAULT 12 NOT NULL,      -- 12 = jährlich, 6 = halbjährlich, 3 = vierteljährlich, 1 = monatlich
   amount_net     double(24,8) DEFAULT 0 NOT NULL,  -- Planbetrag netto je Periode
   vat_rate       double(6,3) DEFAULT 0 NOT NULL,   -- MwSt-Satz in % (25, 13, 0 ...)
+  alloc_key      varchar(16) DEFAULT 'area' NOT NULL, -- Verteilschlüssel: area (m²) | share (Anteil) | units (gleich je Einheit)
   fk_soc_supplier integer DEFAULT NULL,            -- üblicher Lieferant
   reference      varchar(128) DEFAULT NULL,        -- Polizzennummer, Vertragsnummer ...
   position       integer DEFAULT 0,

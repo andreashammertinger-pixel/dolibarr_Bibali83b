@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0
+- Vorschreibung für einen **Zeitraum** (von–bis, z. B. Jahr oder Restjahr): ein Dokument je Einheit, Zeilen = Monatsbetrag × Monate, **Zahlungsplan** mit gleichen Monatsraten, Hinweis Dauerauftrag; Schutz vor Überschneidungen mit bestehenden Vorschreibungen
+- Honorar-Eingangsrechnung und E-Mail-Text für Zeiträume
+- Neue Seite **Zahlungsstand**: fällig bis heute, bezahlt, Rückstand, nächste Rate
+- **Verteilschlüssel je Kostenart**: m², Miteigentumsanteil, gleich je Einheit (Anteil aus Geschäftspartner-Feld `eigentumsanteil` oder an der Einheit); ohne Werte automatisch nach m² mit Warnung
+- **Allgemeiner Import**: Startdaten als JSON-Datei hochladen (leere Vorlage + Beispiel Bibali), Zuordnung der Geschäftspartner über die Einheitennummer am Namensende oder exakten Namen
+- Keine Bibali-spezifischen Texte mehr im Code (Kopfzeile Mobil, Gebäudebezeichnung)
+
 ## 1.3.0
 - Neue Seite *Vorschreibungen versenden*: E-Mail an alle Eigentümer-Kontakte, Anhänge kroatisches Original + Übersetzungskopie, Betreff/Text in Eigentümersprache (de/hr/sl/uk/en) mit Betrag, Fälligkeit, IBAN, Zahlungsreferenz
 - Testversand an eigene Adresse, Versandprotokoll, Agenda-Eintrag an der Rechnung, optional BCC-Archivkopie und eigene Absenderadresse

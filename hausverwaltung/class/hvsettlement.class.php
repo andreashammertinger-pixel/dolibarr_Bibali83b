@@ -46,7 +46,8 @@ class HvSettlement
 		$unitActual = array();
 		foreach ($actual as $cid => $amount) {
 			$fk_b = isset($costitems[$cid]) ? (int) $costitems[$cid]->fk_building : 0;
-			foreach ($calc->allocate($amount, $fk_b) as $uid => $v) {
+			$key = isset($costitems[$cid]) && !empty($costitems[$cid]->alloc_key) ? $costitems[$cid]->alloc_key : 'area';
+			foreach ($calc->allocate($amount, $fk_b, $key) as $uid => $v) {
 				$unitActual[$uid] = ($unitActual[$uid] ?? 0) + $v;
 			}
 		}

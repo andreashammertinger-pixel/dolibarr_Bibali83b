@@ -29,7 +29,7 @@ class modHausverwaltung extends DolibarrModules
 		$this->descriptionlong = 'Kostenplan je Gebäude/alle Gebäude, Verteilung nach m², monatliche Vorschreibung als Kundenrechnung, automatische Rücklagen-Umbuchung bei Zahlungseingang, Jahresabrechnung und mobile Belegerfassung.';
 		$this->editor_name = 'Green Villa and Apartment Resorts d.o.o.';
 		$this->editor_url = 'https://www.greenresorts.hr';
-		$this->version = '1.3.0';
+		$this->version = '1.4.0';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->picto = 'building';
 
@@ -96,6 +96,7 @@ class modHausverwaltung extends DolibarrModules
 			array('HvCostPlan', '/hausverwaltung/costs.php', 'read', 'hv_costs'),
 			array('HvGenerate', '/hausverwaltung/generate.php', 'invoice', 'hv_generate'),
 			array('HvSend', '/hausverwaltung/send.php', 'invoice', 'hv_send'),
+			array('HvPaymentStatus', '/hausverwaltung/status.php', 'read', 'hv_status'),
 			array('HvReserves', '/hausverwaltung/reserves.php', 'read', 'hv_reserves'),
 			array('HvSettlement', '/hausverwaltung/settlement.php', 'read', 'hv_settlement'),
 			array('HvMobile', '/hausverwaltung/mobile.php', 'capture', 'hv_mobile'),
@@ -130,6 +131,7 @@ class modHausverwaltung extends DolibarrModules
 
 		// Kundenrechnung (Vorschreibung)
 		$ef->addExtraField('hv_period', 'HvPeriod', 'varchar', 100, 7, 'facture', 0, 0, '', '', 1, '', '1', 'HvPeriodHelp', '', '0', $lf, $en);
+		$ef->addExtraField('hv_period_to', 'HvPeriodTo', 'varchar', 100, 7, 'facture', 0, 0, '', '', 1, '', '1', 'HvPeriodToHelp', '', '0', $lf, $en);
 		$ef->addExtraField('hv_unit', 'HvUnit', 'sellist', 101, '', 'facture', 0, 0, '', array('options' => array('hv_unit:ref:rowid::entity=$ENTITY$' => null)), 1, '', '1', '', '', '0', $lf, $en);
 		// Lieferantenrechnung (Eingangsrechnung)
 		$ef->addExtraField('hv_costitem', 'HvCostItem', 'sellist', 100, '', 'facture_fourn', 0, 0, '', array('options' => array('hv_costitem:label:rowid::entity=$ENTITY$ AND active=1' => null)), 1, '', '1', 'HvCostItemHelp', '', '0', $lf, $en);
