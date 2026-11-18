@@ -302,3 +302,4 @@ HvMailLblHolder = Beneficiary
 HvMailLblRef = Payment reference
 HvMailStandingOrder = A standing order is easiest.
 HvMailWithinDays = within %s days
+HvExternalRightsWarning = Warning: external users (owner access) have property management rights: %s. Please remove these rights from the user or group – property management contains data of all apartments. Owners see their own invoices and statements via "Invoices" and the documents of their apartment.

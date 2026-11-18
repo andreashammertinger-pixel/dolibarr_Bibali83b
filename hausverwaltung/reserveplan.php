@@ -38,7 +38,8 @@ dol_include_once('/hausverwaltung/lib/hausverwaltung.lib.php');
 dol_include_once('/hausverwaltung/class/hvreserveplan.class.php');
 
 $langs->loadLangs(array('hausverwaltung@hausverwaltung', 'banks'));
-if (!$user->hasRight('hausverwaltung', 'read')) {
+if (!$user->hasRight('hausverwaltung', 'read') || !empty($user->socid)) {
+	// Externe Benutzer (Eigentümer-Zugang) sehen die Hausverwaltung nie – sie enthält Daten aller Einheiten
 	accessforbidden();
 }
 $canwrite = $user->hasRight('hausverwaltung', 'write');

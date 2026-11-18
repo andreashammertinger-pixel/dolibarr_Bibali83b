@@ -303,3 +303,4 @@ HvMailLblHolder = Empfänger
 HvMailLblRef = Zahlungsreferenz
 HvMailStandingOrder = Am einfachsten per Dauerauftrag.
 HvMailWithinDays = binnen %s Tagen
+HvExternalRightsWarning = Achtung: Externe Benutzer (Eigentümer-Zugang) haben Rechte für die Hausverwaltung: %s. Bitte diese Rechte bei Benutzer bzw. Gruppe entfernen – die Hausverwaltung enthält Daten aller Apartments. Ihre eigenen Rechnungen und Abrechnungen sehen Eigentümer über „Rechnungen“ und die Dokumente ihres Apartments.

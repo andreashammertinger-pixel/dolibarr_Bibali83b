@@ -24,7 +24,7 @@ class Hausverwaltung extends DolibarrApi
 
 	private function check()
 	{
-		if (!DolibarrApiAccess::$user->hasRight('hausverwaltung', 'read')) {
+		if (!DolibarrApiAccess::$user->hasRight('hausverwaltung', 'read') || !empty(DolibarrApiAccess::$user->socid)) {
 			throw new RestException(403, 'Missing right hausverwaltung read');
 		}
 	}

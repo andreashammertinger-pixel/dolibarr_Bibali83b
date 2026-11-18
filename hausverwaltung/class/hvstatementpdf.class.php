@@ -87,7 +87,28 @@ class HvStatementPdf
 				$files[] = $f2;
 			}
 		}
+		// Kopie in die Dokumente des Apartments (Geschäftspartner): sichtbar für den Eigentümer-Zugang (externe Benutzer)
+		if ($files && getDolGlobalString('HAUSVERWALTUNG_STMT_TO_THIRDPARTY', '1') === '1') {
+			$sd = self::thirdpartyDir((int) $soc->id);
+			dol_mkdir($sd);
+			foreach (glob($sd.'/ABR-'.((int) $year).'-'.dol_sanitizeFileName($d['unit']->ref).'*.pdf') ?: array() as $old) {
+				dol_delete_file($old, 0, 0, 0, null, false, 0);
+			}
+			foreach ($files as $fl) {
+				dol_copy($fl, $sd.'/'.basename($fl), '0', 1);
+			}
+		}
 		return $files;
+	}
+
+	/** Dokumentordner des Geschäftspartners */
+	public static function thirdpartyDir($socid)
+	{
+		global $conf;
+		$base = !empty($conf->societe->multidir_output[$conf->entity]) ? $conf->societe->multidir_output[$conf->entity] : $conf->societe->dir_output;
+		// Standard: direkt im Dokumentordner (der Reiter „Dokumente“ zeigt keine Unterordner)
+		$sub = getDolGlobalString('HAUSVERWALTUNG_STMT_SUBDIR', '');
+		return $base.'/'.((int) $socid).($sub !== '' ? '/'.dol_sanitizeFileName($sub) : '');
 	}
 
 	protected function write($d, Societe $soc, $year, $lang, $isCopy, $file)

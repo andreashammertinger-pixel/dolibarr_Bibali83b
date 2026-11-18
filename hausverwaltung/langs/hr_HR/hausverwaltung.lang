@@ -302,3 +302,4 @@ HvMailLblHolder = Primatelj
 HvMailLblRef = Poziv na broj
 HvMailStandingOrder = Najjednostavnije putem trajnog naloga.
 HvMailWithinDays = u roku od %s dana
+HvExternalRightsWarning = Pažnja: vanjski korisnici (pristup vlasnika) imaju prava za upravljanje zgradom: %s. Molimo uklonite ta prava kod korisnika odnosno grupe – upravljanje sadrži podatke svih apartmana. Vlasnici svoje račune i obračune vide preko „Računi“ i dokumenata svog apartmana.

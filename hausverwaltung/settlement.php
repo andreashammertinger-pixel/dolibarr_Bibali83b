@@ -41,7 +41,8 @@ dol_include_once('/hausverwaltung/class/hvstatementpdf.class.php');
 dol_include_once('/hausverwaltung/class/hvmailer.class.php');
 
 $langs->loadLangs(array('hausverwaltung@hausverwaltung', 'bills'));
-if (!$user->hasRight('hausverwaltung', 'read')) {
+if (!$user->hasRight('hausverwaltung', 'read') || !empty($user->socid)) {
+	// Externe Benutzer (Eigentümer-Zugang) sehen die Hausverwaltung nie – sie enthält Daten aller Einheiten
 	accessforbidden();
 }
 $year = GETPOSTINT('year') ?: ((int) dol_print_date(dol_now(), '%Y') - 1);
@@ -168,7 +169,7 @@ foreach ($data['units'] as $uid => $r) {
 	$links = array();
 	foreach (HvStatementPdf::files($year, $u->ref) as $f) {
 		$rel = 'statements/'.$year.'/'.basename($f);
-		$links[] = '<a href="'.DOL_URL_ROOT.'/document.php?modulepart=hausverwaltung&file='.urlencode($rel).'" target="_blank">'.img_picto('', 'pdf').' '.dol_escape_htmltag(basename($f)).'</a>';
+		$links[] = '<a href="'.dol_buildpath('/hausverwaltung/file.php', 1).'?file='.urlencode($rel).'" target="_blank">'.img_picto('', 'pdf').' '.dol_escape_htmltag(basename($f)).'</a>';
 	}
 	$lrow = $u->fk_soc ? $db->getRow("SELECT default_lang FROM ".$db->prefix()."societe WHERE rowid = ".((int) $u->fk_soc)) : null;
 	$last = $mailer->lastSentStatement($year, $u->ref);

@@ -37,7 +37,8 @@ dol_include_once('/hausverwaltung/class/hvinvoicer.class.php');
 dol_include_once('/hausverwaltung/core/modules/facture/doc/pdf_hausverwaltung.modules.php');
 
 $langs->loadLangs(array('hausverwaltung@hausverwaltung', 'bills'));
-if (!$user->hasRight('hausverwaltung', 'invoice')) {
+if (!$user->hasRight('hausverwaltung', 'invoice') || !empty($user->socid)) {
+	// Externe Benutzer (Eigentümer-Zugang) sehen die Hausverwaltung nie – sie enthält Daten aller Einheiten
 	accessforbidden();
 }
 $unitId = GETPOSTINT('unit');

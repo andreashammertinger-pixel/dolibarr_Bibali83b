@@ -39,7 +39,8 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 dol_include_once('/hausverwaltung/lib/hausverwaltung.lib.php');
 
 $langs->loadLangs(array('hausverwaltung@hausverwaltung', 'bills', 'companies'));
-if (!$user->hasRight('hausverwaltung', 'capture')) {
+if (!$user->hasRight('hausverwaltung', 'capture') || !empty($user->socid)) {
+	// Externe Benutzer (Eigentümer-Zugang) sehen die Hausverwaltung nie – sie enthält Daten aller Einheiten
 	accessforbidden();
 }
 $action = GETPOST('action', 'aZ09');

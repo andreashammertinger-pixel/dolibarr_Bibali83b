@@ -204,3 +204,20 @@ function hvAdminPrepareHead()
 	$h++;
 	return $head;
 }
+
+/** Externe Benutzer (Eigentümer-Zugang) mit Hausverwaltungs-Rechten – darf es nicht geben (Daten aller Einheiten) */
+function hvExternalWithRights()
+{
+	global $db, $conf;
+	$e = (int) $conf->entity;
+	$p = $db->prefix();
+	$sql = "SELECT DISTINCT u.login FROM ".$p."user u WHERE u.fk_soc > 0 AND u.statut = 1 AND (";
+	$sql .= " EXISTS (SELECT 1 FROM ".$p."user_rights ur INNER JOIN ".$p."rights_def rd ON rd.id = ur.fk_id WHERE ur.fk_user = u.rowid AND rd.module = 'hausverwaltung' AND ur.entity = ".$e.")";
+	$sql .= " OR EXISTS (SELECT 1 FROM ".$p."usergroup_user ugu INNER JOIN ".$p."usergroup_rights ugr ON ugr.fk_usergroup = ugu.fk_usergroup INNER JOIN ".$p."rights_def rd ON rd.id = ugr.fk_id WHERE ugu.fk_user = u.rowid AND rd.module = 'hausverwaltung' AND ugr.entity = ".$e."))";
+	$out = array();
+	$res = $db->query($sql);
+	while ($res && ($o = $db->fetch_object($res))) {
+		$out[] = $o->login;
+	}
+	return $out;
+}

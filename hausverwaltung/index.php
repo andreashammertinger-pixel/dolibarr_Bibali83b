@@ -37,7 +37,8 @@ dol_include_once('/hausverwaltung/lib/hausverwaltung.lib.php');
 dol_include_once('/hausverwaltung/class/hvcalculator.class.php');
 
 $langs->loadLangs(array('hausverwaltung@hausverwaltung', 'bills'));
-if (!$user->hasRight('hausverwaltung', 'read')) {
+if (!$user->hasRight('hausverwaltung', 'read') || !empty($user->socid)) {
+	// Externe Benutzer (Eigentümer-Zugang) sehen die Hausverwaltung nie – sie enthält Daten aller Einheiten
 	accessforbidden();
 }
 
@@ -53,6 +54,10 @@ if (empty($calc->units)) {
 	print info_admin($langs->trans('HvImportSeedHelp').' → <a href="'.dol_buildpath('/hausverwaltung/admin/setup.php', 1).'">'.$langs->trans('HvSetupPage').'</a>');
 }
 
+$ext = hvExternalWithRights();
+if ($ext) {
+	print info_admin($langs->trans('HvExternalRightsWarning', implode(', ', array_map('dol_escape_htmltag', $ext))), 0, 0, 'error');
+}
 if (!empty($calc->warnings)) {
 	print info_admin($langs->trans('HvKeyFallback', implode(', ', array_map(function ($k) use ($langs) {
 		return $langs->trans('HvKey_'.$k);

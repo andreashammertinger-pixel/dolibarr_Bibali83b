@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.4
+- Eigentümer-Zugang (externe Benutzer): Hausverwaltungs-Seiten, Menü und API für externe Benutzer immer gesperrt (auch bei versehentlich vergebenen Rechten); Warnung in der Übersicht, falls externe Benutzer Hausverwaltungs-Rechte haben
+- Abrechnungsblätter zusätzlich in den Dokumenten des Apartments (Geschäftspartner) – dort sieht sie der Eigentümer mit seinem Zugang
+- Download der Abrechnungsblätter in der Jahresabrechnung über eigene, geschützte Seite
+
 ## 1.8.3
 - Verspätete Ausstellung: Ist eine Rate bei der Freigabe schon fällig (z. B. Freigabe am 18.11., Fälligkeit 5.11.), gilt eine Frist von 7 Tagen ab Freigabe (Einstellung `HAUSVERWALTUNG_LATE_DAYS`). Wirkt auf PDF (Fälligkeit, Zahlungsplan), E-Mail („binnen 7 Tagen“), Zahlungsstatus und das Fälligkeitsdatum der Rechnung; folgende Raten bleiben am Fälligkeitstag.
 

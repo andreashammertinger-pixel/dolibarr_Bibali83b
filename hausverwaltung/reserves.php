@@ -38,7 +38,8 @@ dol_include_once('/hausverwaltung/lib/hausverwaltung.lib.php');
 dol_include_once('/hausverwaltung/class/hvcalculator.class.php');
 
 $langs->loadLangs(array('hausverwaltung@hausverwaltung', 'banks', 'bills'));
-if (!$user->hasRight('hausverwaltung', 'read')) {
+if (!$user->hasRight('hausverwaltung', 'read') || !empty($user->socid)) {
+	// Externe Benutzer (Eigentümer-Zugang) sehen die Hausverwaltung nie – sie enthält Daten aller Einheiten
 	accessforbidden();
 }
 $year = GETPOSTINT('year') ?: (int) dol_print_date(dol_now(), '%Y');

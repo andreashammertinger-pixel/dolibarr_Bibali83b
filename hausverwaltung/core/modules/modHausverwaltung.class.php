@@ -29,7 +29,7 @@ class modHausverwaltung extends DolibarrModules
 		$this->descriptionlong = 'Kostenplan je Gebäude/alle Gebäude, Verteilung nach m², monatliche Vorschreibung als Kundenrechnung, automatische Rücklagen-Umbuchung bei Zahlungseingang, Jahresabrechnung und mobile Belegerfassung.';
 		$this->editor_name = 'Green Villa and Apartment Resorts d.o.o.';
 		$this->editor_url = 'https://www.greenresorts.hr';
-		$this->version = '1.8.3';
+		$this->version = '1.8.4';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->picto = 'building';
 
@@ -87,7 +87,7 @@ class modHausverwaltung extends DolibarrModules
 			'fk_menu' => '', 'type' => 'top', 'titre' => 'Hausverwaltung', 'prefix' => img_picto('', 'building', 'class="pictofixedwidth valignmiddle"'),
 			'mainmenu' => 'hausverwaltung', 'leftmenu' => '', 'url' => '/hausverwaltung/index.php',
 			'langs' => 'hausverwaltung@hausverwaltung', 'position' => 1000, 'enabled' => 'isModEnabled("hausverwaltung")',
-			'perms' => '$user->hasRight("hausverwaltung", "read")', 'target' => '', 'user' => 0,
+			'perms' => '$user->hasRight("hausverwaltung", "read") && empty($user->socid)', 'target' => '', 'user' => 0,
 		);
 		$left = array(
 			array('HvOverview', '/hausverwaltung/index.php', 'read', 'hv_overview'),
@@ -109,7 +109,7 @@ class modHausverwaltung extends DolibarrModules
 				'fk_menu' => 'fk_mainmenu=hausverwaltung', 'type' => 'left', 'titre' => $l[0],
 				'mainmenu' => 'hausverwaltung', 'leftmenu' => $l[3], 'url' => $l[1],
 				'langs' => 'hausverwaltung@hausverwaltung', 'position' => $pos++, 'enabled' => 'isModEnabled("hausverwaltung")',
-				'perms' => '$user->hasRight("hausverwaltung", "'.$l[2].'")', 'target' => '', 'user' => 0,
+				'perms' => '$user->hasRight("hausverwaltung", "'.$l[2].'") && empty($user->socid)', 'target' => '', 'user' => 0,
 			);
 		}
 	}
