@@ -1,0 +1,104 @@
+site_name: Bibali 83b – Pomoć za vlasnike
+site_description: Pomoć za vlasnike – pristup računima i dokumentima u Dolibarru
+copyright: Green Villa and Apartment Resorts d.o.o.
+docs_dir: docs
+theme:
+  name: material
+  language: hr
+  logo: assets/images/logo.svg
+  favicon: assets/images/logo.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle: {icon: material/weather-night, name: Dark}
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle: {icon: material/weather-sunny, name: Light}
+  features:
+    - navigation.instant
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+extra_css:
+  - assets/stylesheets/extra.css
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - attr_list
+  - md_in_html
+  - tables
+  - toc: {permalink: true}
+plugins:
+  - search
+  - i18n:
+      docs_structure: folder
+      fallback_to_default: true
+      reconfigure_material: true
+      reconfigure_search: true
+      languages:
+        - locale: hr
+          default: true
+          name: Hrvatski
+          build: true
+        - locale: de
+          name: Deutsch
+          build: true
+          site_name: Bibali 83b – Hilfe für Eigentümer
+          nav_translations:
+            Početak: Start
+            Prijava: Anmelden
+            Moji računi i dokumenti: Meine Rechnungen und Dokumente
+            Razumjeti zaduženje: Vorschreibung verstehen
+            Godišnji obračun i pričuva: Jahresabrechnung und Rücklage
+            Pitanja i kontakt: Fragen und Kontakt
+            Novosti i propisi: News und Recht
+        - locale: en
+          name: English
+          build: true
+          site_name: Bibali 83b – Help for owners
+          nav_translations:
+            Početak: Start
+            Prijava: Sign in
+            Moji računi i dokumenti: My invoices and documents
+            Razumjeti zaduženje: Understanding the service charge
+            Godišnji obračun i pričuva: Annual statement and reserve
+            Pitanja i kontakt: Questions and contact
+            Novosti i propisi: News and law
+        - locale: sl
+          name: Slovenščina
+          build: true
+          site_name: Bibali 83b – Pomoč za lastnike
+          nav_translations:
+            Početak: Začetek
+            Prijava: Prijava
+            Moji računi i dokumenti: Moji računi in dokumenti
+            Razumjeti zaduženje: Razumeti obremenitev
+            Godišnji obračun i pričuva: Letni obračun in rezervni sklad
+            Pitanja i kontakt: Vprašanja in kontakt
+            Novosti i propisi: Novice in predpisi
+        - locale: uk
+          name: Українська
+          build: true
+          site_name: Bibali 83b – Допомога для власників
+          nav_translations:
+            Početak: Початок
+            Prijava: Вхід
+            Moji računi i dokumenti: Мої рахунки та документи
+            Razumjeti zaduženje: Як читати нарахування
+            Godišnji obračun i pričuva: Річний розрахунок і резервний фонд
+            Pitanja i kontakt: Питання та контакт
+            Novosti i propisi: Новини та законодавство
+nav:
+  - Početak: index.md
+  - Prijava: prijava.md
+  - Moji računi i dokumenti: racuni.md
+  - Razumjeti zaduženje: zaduzenje.md
+  - Godišnji obračun i pričuva: obracun.md
+  - Pitanja i kontakt: pitanja.md
+  - Novosti i propisi: news/index.md

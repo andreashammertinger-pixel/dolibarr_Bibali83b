@@ -1,0 +1,81 @@
+site_name: Hausverwaltung – Handbuch
+site_description: Handbuch für die Mitarbeiter der Hausverwaltung (Dolibarr-Modul Hausverwaltung)
+copyright: Green Villa and Apartment Resorts d.o.o.
+docs_dir: docs
+theme:
+  name: material
+  language: de
+  logo: assets/images/logo.svg
+  favicon: assets/images/logo.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle: {icon: material/weather-night, name: Dunkel}
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle: {icon: material/weather-sunny, name: Hell}
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+  icon:
+    admonition:
+      note: material/information-outline
+extra_css:
+  - assets/stylesheets/extra.css
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed: {alternate_style: true}
+  - pymdownx.tasklist: {custom_checkbox: true}
+  - attr_list
+  - md_in_html
+  - tables
+  - toc: {permalink: true}
+plugins:
+  - search
+  - i18n:
+      docs_structure: folder
+      fallback_to_default: true
+      reconfigure_material: true
+      reconfigure_search: true
+      languages:
+        - locale: de
+          default: true
+          name: Deutsch
+          build: true
+        - locale: hr
+          name: Hrvatski
+          build: true
+          site_name: Upravljanje zgradom – priručnik
+          nav_translations:
+            Start: Početak
+            Vorschreibung: Zaduženje
+            Zahlungen: Uplate
+            Kosten und Eingangsrechnungen: Troškovi i ulazni računi
+            Jahresabrechnung: Godišnji obračun
+            Rücklage: Pričuva
+            Sprachen und Texte: Jezici i tekstovi
+            Eigentümer-Zugang: Pristup za vlasnike
+            Einstellungen und neues Objekt: Postavke i novi objekt
+            News und Recht: Novosti i propisi
+nav:
+  - Start: index.md
+  - Vorschreibung: vorschreibung.md
+  - Zahlungen: zahlungen.md
+  - Kosten und Eingangsrechnungen: kosten.md
+  - Jahresabrechnung: jahresabrechnung.md
+  - Rücklage: ruecklage.md
+  - Sprachen und Texte: sprachen.md
+  - Eigentümer-Zugang: eigentuemer-zugang.md
+  - Einstellungen und neues Objekt: einstellungen.md
+  - News und Recht: news/index.md

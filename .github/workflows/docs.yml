@@ -1,0 +1,46 @@
+# Baut die Hilfe-Website (docs/) und lädt sie auf den Webspace (world4you) hoch.
+# Benötigte Repository-Secrets (Settings → Secrets and variables → Actions):
+#   DOCS_FTP_HOST      z. B. ftp.greenresorts.hr (bzw. Server laut world4you)
+#   DOCS_FTP_USER      FTP-/SFTP-Benutzer
+#   DOCS_FTP_PASSWORD  Passwort
+#   DOCS_FTP_DIR       Zielordner auf dem Webspace, z. B. /hilfe
+#   DOCS_FTP_PROTOCOL  optional: ftps (Standard) oder sftp
+# Ohne Secrets wird nur gebaut und die Website als Artefakt bereitgestellt.
+name: Hilfe-Website
+on:
+  push:
+    branches: [main]
+    paths: ['docs/**', '.github/workflows/docs.yml']
+  workflow_dispatch:
+concurrency: { group: docs-deploy, cancel-in-progress: true }
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Werkzeuge installieren
+        run: pip install "mkdocs-material>=9.5,<10" "mkdocs-static-i18n>=1.2,<2"
+      - name: Website bauen
+        env: { NO_MKDOCS_2_WARNING: '1' }
+        run: ./docs/build-docs.sh
+      - uses: actions/upload-artifact@v4
+        with: { name: hilfe-website, path: docs/site, retention-days: 14 }
+      - name: Auf Webspace hochladen
+        env:
+          HOST: ${{ secrets.DOCS_FTP_HOST }}
+          USER: ${{ secrets.DOCS_FTP_USER }}
+          PASS: ${{ secrets.DOCS_FTP_PASSWORD }}
+          DIR: ${{ secrets.DOCS_FTP_DIR }}
+          PROTO: ${{ secrets.DOCS_FTP_PROTOCOL }}
+        run: |
+          if [ -z "$HOST" ] || [ -z "$USER" ] || [ -z "$PASS" ] || [ -z "$DIR" ]; then
+            echo "::notice::Keine Zugangsdaten hinterlegt – Website nur gebaut (Artefakt hilfe-website)."
+            exit 0
+          fi
+          sudo apt-get install -y -qq lftp >/dev/null
+          PROTO="${PROTO:-ftps}"
+          if [ "$PROTO" = "sftp" ]; then URL="sftp://$HOST"; SET="set sftp:auto-confirm yes;"; else URL="ftp://$HOST"; SET="set ftp:ssl-force true; set ftp:ssl-protect-data true;"; fi
+          # .htaccess/.htpasswd (z. B. Verzeichnisschutz für /verwaltung aus dem world4you-Kundenbereich) werden nie überschrieben oder gelöscht
+          lftp -u "$USER","$PASS" "$URL" -e "$SET set net:max-retries 3; mirror -R --delete --verbose=1 --exclude-glob .ht* --exclude-glob '*/.ht*' docs/site/ $DIR; quit"

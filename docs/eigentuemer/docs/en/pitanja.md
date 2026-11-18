@@ -1,0 +1,21 @@
+# Questions and contact
+
+??? question "Why is my rate different from my neighbour's in another house?"
+    Costs relating to one house only (insurance, garden, stairwell) are borne by that house. The reserve also depends on the needs of each building. See [Understanding the service charge](zaduzenje.md).
+
+??? question "Which document is valid – the Croatian one or the one in my language?"
+    The **Croatian original** is legally binding. The copy in your language is for information.
+
+??? question "I did not receive the e-mail."
+    All service charges are also available online: [My invoices and documents](racuni.md). Please check your spam folder and tell us if your e-mail address has changed.
+
+??? question "I transferred too much / too little."
+    No problem – the difference is balanced with the next instalment or in the annual statement. Write to us if you have questions.
+
+??? question "My details (address, e-mail, OIB) have changed."
+    Please let us know – we will update them so that documents are issued correctly.
+
+## Contact property manager
+
+**Green Villa and Apartment Resorts d.o.o.**  
+E-mail: [office@greenresorts.hr](mailto:office@greenresorts.hr)
