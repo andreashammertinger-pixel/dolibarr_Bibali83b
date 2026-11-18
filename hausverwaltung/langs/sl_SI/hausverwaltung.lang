@@ -51,3 +51,4 @@ HvPdfStandingOrder = Prosimo, za mesečne obroke uredite trajni nalog z navedeni
 HvMailAmountRange = Skupaj: %s v %s mesečnih obrokih po %s, zapadlost vsakega %s. v mesecu (prvi obrok %s). Najlažje s trajnim nalogom.
 HvMailHelloCompany = Spoštovani,
 HvPdfRegNo = Reg. št.
+HvPdfDigitalNote = Digitalni dokument – papirna različica se ne pošilja.

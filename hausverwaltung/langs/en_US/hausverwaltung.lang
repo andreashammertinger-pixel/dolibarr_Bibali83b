@@ -210,3 +210,5 @@ HvPreviewRefresh = Refresh preview
 HvPdfPreview = PDF preview
 HvPdfOriginal = Original
 HvPdfCopyShort = Copy
+HvPdfDigitalNote = Digital document – no paper copy will be sent.
+HvDigitalNoteSetting = Note "digital document" on the service charge

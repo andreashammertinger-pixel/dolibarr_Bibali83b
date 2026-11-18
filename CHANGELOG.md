@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.5.4
+- Hinweis „Digitales Dokument – es erfolgt kein Versand in Papierform“ in der Dokumentsprache über der Fußzeile; in den Einstellungen abschaltbar (für Objekte mit Postversand)
+
 ## 1.5.3
 - *Vorschreibung erstellen*: Spalte **PDF-Vorschau** je Einheit (Original und Übersetzungskopie) mit Wasserzeichen „Entwurf“ – es wird keine Rechnung angelegt
 - Knopf „Vorschau“ heißt jetzt „Vorschau aktualisieren“ (berechnet die Tabelle für geänderte Zeiträume neu)

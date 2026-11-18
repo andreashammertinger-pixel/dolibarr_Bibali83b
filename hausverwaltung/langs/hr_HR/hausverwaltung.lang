@@ -210,3 +210,5 @@ HvPreviewRefresh = Osvježi pregled
 HvPdfPreview = PDF pregled
 HvPdfOriginal = Izvornik
 HvPdfCopyShort = Kopija
+HvPdfDigitalNote = Digitalni dokument – papirnata verzija se ne dostavlja.
+HvDigitalNoteSetting = Napomena „digitalni dokument“ na zaduženju

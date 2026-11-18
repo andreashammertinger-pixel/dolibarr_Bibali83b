@@ -436,6 +436,15 @@ class pdf_hausverwaltung extends ModelePDFFactures
 			$pdf->Cell($W - 46, 5, $outputlangs->convToOutputCharset($b[1]), 0, 1, 'L');
 		}
 
+		// --- Hinweis "Digitales Dokument" direkt über der Fußzeilenlinie (abschaltbar)
+		if (getDolGlobalString('HAUSVERWALTUNG_PDF_DIGITAL_NOTE', '1') === '1') {
+			$pdf->SetFont('', 'I', $fs - 2);
+			$pdf->SetTextColor(90, 90, 90);
+			$pdf->SetXY($L, $this->page_hauteur - $this->marge_basse - 12.5);
+			$pdf->Cell($W, 4.5, $outputlangs->transnoentities('HvPdfDigitalNote'), 0, 0, 'C');
+			$pdf->SetTextColor(0, 0, 0);
+		}
+
 		// --- Fußzeile
 		$parts = array($mysoc->name);
 		foreach (array($mysoc->url, $mysoc->email) as $p) {

@@ -50,6 +50,7 @@ if ($action === 'save') {
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_BANK_ACCOUNT', GETPOSTINT('HAUSVERWALTUNG_BANK_ACCOUNT'), 'chaine', 0, '', $conf->entity);
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_PAYMENT_MODE', GETPOSTINT('HAUSVERWALTUNG_PAYMENT_MODE'), 'chaine', 0, '', $conf->entity);
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_DUE_DAY', max(1, min(28, GETPOSTINT('HAUSVERWALTUNG_DUE_DAY'))), 'chaine', 0, '', $conf->entity);
+	dolibarr_set_const($db, 'HAUSVERWALTUNG_PDF_DIGITAL_NOTE', GETPOSTINT('HAUSVERWALTUNG_PDF_DIGITAL_NOTE') ? '1' : '0', 'chaine', 0, '', $conf->entity);
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_MAIL_FROM', GETPOST('HAUSVERWALTUNG_MAIL_FROM', 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_MAIL_BCC', GETPOST('HAUSVERWALTUNG_MAIL_BCC', 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_MANAGER_SOCID', GETPOSTINT('HAUSVERWALTUNG_MANAGER_SOCID'), 'chaine', 0, '', $conf->entity);
@@ -165,6 +166,7 @@ print '</td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvDueDay').'</td><td><input name="HAUSVERWALTUNG_DUE_DAY" class="width50" value="'.getDolGlobalInt('HAUSVERWALTUNG_DUE_DAY', 5).'"></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvManager').'</td><td>'.$form->select_company(getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID'), 'HAUSVERWALTUNG_MANAGER_SOCID', '(s.fournisseur:=:1)', 1, 0, 0, array(), 0, 'minwidth300').'</td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvAdminVatRate').'</td><td><input name="HAUSVERWALTUNG_ADMIN_VAT_RATE" class="width50" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_ADMIN_VAT_RATE', '25')).'"> %</td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans('HvDigitalNoteSetting').'</td><td><input type="checkbox" name="HAUSVERWALTUNG_PDF_DIGITAL_NOTE" value="1"'.(getDolGlobalString('HAUSVERWALTUNG_PDF_DIGITAL_NOTE', '1') === '1' ? ' checked' : '').'> <span class="opacitymedium">'.$langs->trans('HvPdfDigitalNote').'</span></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvMailFromSetting').'</td><td><input name="HAUSVERWALTUNG_MAIL_FROM" class="minwidth250" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_MAIL_FROM')).'" placeholder="'.dol_escape_htmltag($mysoc->email).'"></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvMailBccSetting').'</td><td><input name="HAUSVERWALTUNG_MAIL_BCC" class="minwidth250" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_MAIL_BCC')).'"></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('VAT').' (Vorschreibung)</td><td><input name="HAUSVERWALTUNG_VAT_RATE" class="width50" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_VAT_RATE', '0')).'"> %</td></tr>';

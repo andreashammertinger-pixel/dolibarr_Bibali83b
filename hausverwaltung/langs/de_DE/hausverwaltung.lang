@@ -211,3 +211,5 @@ HvPreviewRefresh = Vorschau aktualisieren
 HvPdfPreview = PDF-Vorschau
 HvPdfOriginal = Original
 HvPdfCopyShort = Kopie
+HvPdfDigitalNote = Digitales Dokument – es erfolgt kein Versand in Papierform.
+HvDigitalNoteSetting = Hinweis „Digitales Dokument“ auf der Vorschreibung
