@@ -26,3 +26,20 @@ Eigene Texte werden in der Datenbank gespeichert und bleiben bei Modul-Updates e
 2. Texte direkt übersetzen **oder** *Export für Übersetzer* → Datei übersetzen lassen → *Übersetzungsdatei importieren*.
 
 Solange Texte fehlen, wird Englisch verwendet.
+
+## Begriffe in Dolibarr
+
+Dolibarr spricht allgemein von *Geschäftspartnern*, *Kunden* und *Kundenrechnungen*. Auf der Sprachen-Seite übernimmt **Hausverwaltungs-Begriffe übernehmen** passende Begriffe – nur für diese Firma, in allen Sprachen, auch für die Eigentümer:
+
+| Dolibarr | Hausverwaltung |
+|---|---|
+| Geschäftspartner | Apartments & Kontakte |
+| Kunden | Apartments |
+| Kontakte/Adressen | Eigentümer & Kontakte |
+| Rechnung \| Zahlung | Vorschreibung \| Zahlung |
+| Kundenrechnungen | Vorschreibungen |
+| Kundenzahlungen | Zahlungen der Eigentümer |
+| Kundennr. | Apartment-Nr. |
+| Vertriebsmitarbeiter | Zuständig |
+
+*Interessenten* werden ausgeblendet. Die Begriffe bleiben bei Dolibarr-Updates erhalten; **Zurücksetzen** stellt die Dolibarr-Begriffe wieder her. Einzelne Begriffe lassen sich unter *Einstellungen → Übersetzung* anpassen.

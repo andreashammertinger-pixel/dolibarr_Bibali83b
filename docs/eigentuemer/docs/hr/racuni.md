@@ -4,7 +4,7 @@ U Dolibarru vidite **samo svoj apartman** – drugi vlasnici ne vide Vaše podat
 
 ## Zaduženja
 
-Izbornik **Računi | Plaćanja → Izlazni računi**
+Izbornik **Zaduženja | Plaćanja → Zaduženja**
 
 - popis Vaših zaduženja s iznosom i statusom (*otvoreno*, *plaćeno*),
 - kliknite račun → dolje **dokumenti**:
@@ -19,7 +19,7 @@ Pod *Plaćanja* vidite koje su uplate već proknjižene.
 
 ## Obračuni i ostali dokumenti
 
-Izbornik **Treće osobe** → Vaš apartman (npr. *Bibali 83 B - Apt 1.8*) → kartica **Povezane datoteke**
+Izbornik **Apartmani i kontakti** → Vaš apartman (npr. *Bibali 83 B - Apt 1.8*) → kartica **Povezane datoteke**
 
 Ondje je **sve što smo Vam poslali** – zaduženja, objašnjenja, godišnji obračuni – s datumom slanja na početku naziva (npr. `2026-11-18_IN2611-0001.pdf`), te ostali dokumenti Vašeg apartmana.
 

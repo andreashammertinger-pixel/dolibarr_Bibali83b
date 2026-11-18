@@ -26,3 +26,20 @@ Vlastiti tekstovi spremaju se u bazu i ostaju sačuvani pri ažuriranju modula. 
 2. Tekstove prevesti izravno **ili** *Izvoz za prevoditelja* → prevesti datoteku → *Uvoz datoteke prijevoda*.
 
 Dok tekstovi nedostaju, koristi se engleski.
+
+## Pojmovi u Dolibarru
+
+Dolibarr općenito govori o *trećim osobama*, *kupcima* i *izlaznim računima*. Na stranici Jezici gumb **Preuzmi pojmove upravljanja zgradom** postavlja odgovarajuće pojmove – samo za ovu tvrtku, na svim jezicima, i za vlasnike:
+
+| Dolibarr | Upravljanje zgradom |
+|---|---|
+| Treće osobe | Apartmani i kontakti |
+| Kupci | Apartmani |
+| Kontakti/adrese | Vlasnici i kontakti |
+| Računi \| Plaćanja | Zaduženja \| Plaćanja |
+| Izlazni računi | Zaduženja |
+| Uplate kupaca | Uplate vlasnika |
+| Oznaka kupca | Br. apartmana |
+| Prodajni predstavnici | Zadužena osoba |
+
+*Mogući kupci* se skrivaju. Pojmovi ostaju sačuvani pri ažuriranju Dolibarra; **Vrati** vraća pojmove Dolibarra. Pojedine pojmove moguće je prilagoditi pod *Postavke → Prijevod*.

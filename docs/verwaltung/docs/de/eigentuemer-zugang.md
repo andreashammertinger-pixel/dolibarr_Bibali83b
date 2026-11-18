@@ -4,7 +4,7 @@ Eigentümer können sich in Dolibarr anmelden und sehen dort **nur ihr eigenes A
 
 ## Eigentümer als Kontakt
 
-Am Apartment (Geschäftspartner) → *Kontakte*:
+Am Apartment (*Apartments & Kontakte*) → *Kontakte*:
 
 - **Eigentümer = Ja** → erhält Vorschreibungen und Abrechnungen, steht mit Name und OIB auf den Dokumenten.
 - Mieter, Notfallkontakte usw. auf *Nein* lassen.
@@ -30,6 +30,6 @@ Rechte der Gruppe in der Firma *Bibali 83B*:
 
 ## Was der Eigentümer sieht
 
-- *Rechnung | Zahlung → Kundenrechnungen*: seine Vorschreibungen mit PDF (Original, Kopie, Erläuterung)
+- *Vorschreibung | Zahlung → Vorschreibungen*: seine Vorschreibungen mit PDF (Original, Kopie, Erläuterung)
 - Apartment → *Verknüpfte Dokumente*: alles, was an ihn versendet wurde (Vorschreibungen, Erläuterungen, Abrechnungen) mit Versanddatum
 - Anleitung für Eigentümer: [Hilfe für Eigentümer](../../eigentuemer/de/)

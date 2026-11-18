@@ -4,7 +4,7 @@ Vlasnici se mogu prijaviti u Dolibarr i ondje vide **samo svoj apartman**: zadu�
 
 ## Vlasnik kao kontakt
 
-Na apartmanu (poslovni partner) → *Kontakti*:
+Na apartmanu (*Apartmani i kontakti*) → *Kontakti*:
 
 - **Vlasnik = Da** → prima zaduženja i obračune, navodi se imenom i OIB-om na dokumentima.
 - Najmoprimce, kontakte za hitne slučajeve itd. ostaviti na *Ne*.
@@ -30,6 +30,6 @@ Prava grupe u tvrtki *Bibali 83B*:
 
 ## Što vlasnik vidi
 
-- *Računi | Plaćanja → Izlazni računi*: svoja zaduženja s PDF-om (izvornik, kopija, objašnjenje)
+- *Zaduženja | Plaćanja → Zaduženja*: svoja zaduženja s PDF-om (izvornik, kopija, objašnjenje)
 - apartman → *Povezane datoteke*: sve što mu je poslano (zaduženja, objašnjenja, obračuni) s datumom slanja
 - upute za vlasnike: [Pomoć za vlasnike](../../../eigentuemer/)

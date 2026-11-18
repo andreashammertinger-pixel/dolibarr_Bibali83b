@@ -23,7 +23,7 @@ Die Vorschreibung ist die Rechnung der Gemeinschaft an das Apartment. Sie enthä
 
 ## 3. Freigeben
 
-*Rechnung | Zahlung → Kundenrechnungen → Liste*
+*Vorschreibung | Zahlung → Vorschreibungen → Liste*
 
 1. Filter *Status* = **Entwurf**, alle anhaken.
 2. **Massenaktionen → Freigeben**.

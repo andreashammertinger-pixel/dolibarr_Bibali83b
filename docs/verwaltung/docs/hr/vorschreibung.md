@@ -23,7 +23,7 @@ Zaduženje je račun zajednice apartmanu. Sadrži tri stavke: **zajedničke tro�
 
 ## 3. Ovjera
 
-*Računi | Plaćanja → Izlazni računi → Popis*
+*Zaduženja | Plaćanja → Zaduženja → Popis*
 
 1. Filtar *Status* = **Skica**, označiti sve.
 2. **Grupne radnje → Ovjeri**.

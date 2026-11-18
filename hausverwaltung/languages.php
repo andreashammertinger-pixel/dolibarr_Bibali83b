@@ -79,6 +79,12 @@ function hvSetI18n($db, $table, $obj, $lang, $values)
 	$db->query("UPDATE ".$db->prefix().$table." SET i18n = ".($tr ? "'".$db->escape(json_encode($tr, JSON_UNESCAPED_UNICODE))."'" : 'NULL')." WHERE rowid = ".((int) $obj->rowid));
 }
 
+if (in_array($action, array('applyterms', 'resetterms'), true)) {
+	$n = hvApplyTerms($action === 'applyterms');
+	setEventMessages($langs->trans($action === 'applyterms' ? 'HvTermsApplied' : 'HvTermsReset', $n), null);
+	header('Location: '.$_SERVER['PHP_SELF']);
+	exit;
+}
 if ($action === 'addlang' && preg_match('/^[a-z]{2}_[A-Z]{2}$/', $lang)) {
 	$list = array_filter(array_map('trim', explode(',', getDolGlobalString('HAUSVERWALTUNG_DOC_LANGS', 'hr_HR,de_DE,en_US,sl_SI,uk_UA'))));
 	$list[] = $lang;
@@ -221,6 +227,23 @@ foreach (hvDocLangs() as $l) {
 	print '<td class="right nowraponall"><a class="butAction small" href="'.$_SERVER['PHP_SELF'].'?action=edit&lang='.$l.'">'.$langs->trans('HvLangTranslate').'</a> <a class="butAction small" href="'.$_SERVER['PHP_SELF'].'?action=export&lang='.$l.'">'.$langs->trans('HvLangExport').'</a></td></tr>';
 }
 print '</table><br>';
+
+// Begriffe der Hausverwaltung (Menüs von Dolibarr)
+$termsOn = getDolGlobalString('HAUSVERWALTUNG_TERMS_APPLIED') === '1';
+print load_fiche_titre($langs->trans('HvTermsTitle'), '', '');
+print '<div class="opacitymedium">'.$langs->trans('HvTermsHelp').'</div>';
+print '<table class="noborder centpercent"><tr class="liste_titre"><th>Dolibarr</th><th>de</th><th>hr</th><th>en</th><th>sl</th><th>uk</th></tr>';
+foreach (hvTerms() as $k => $v) {
+	print '<tr class="oddeven"><td class="opacitymedium">'.dol_escape_htmltag($k).'</td>';
+	foreach ($v as $x) {
+		print '<td>'.dol_escape_htmltag($x).'</td>';
+	}
+	print '</tr>';
+}
+print '</table>';
+print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'" class="center"><input type="hidden" name="token" value="'.newToken().'">';
+print ($termsOn ? '<span class="badge badge-status4">'.$langs->trans('HvTermsActive').'</span> <button class="button" name="action" value="resetterms">'.$langs->trans('HvTermsResetBtn').'</button>' : '<button class="button button-save" name="action" value="applyterms">'.$langs->trans('HvTermsApplyBtn').'</button>');
+print '</form><br>';
 
 // Neue Sprache + Import
 print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'" class="inline-block marginrightonly"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="addlang">'.$langs->trans('HvLangAdd').': '.$formadmin->select_language('', 'lang', 0, array(), 1, 0, 0, 'minwidth200', 1).' <input type="submit" class="button small" value="'.$langs->trans('Add').'"></form>';

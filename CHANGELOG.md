@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.12.0
+- **Hausverwaltungs-Begriffe in Dolibarr** (Seite Sprachen, ein Klick, nur für die aktuelle Firma, alle Sprachen, update-sicher): Geschäftspartner → *Apartments & Kontakte*, Kunden → *Apartments*, Kontakte/Adressen → *Eigentümer & Kontakte*, Rechnung | Zahlung → *Vorschreibung | Zahlung*, Kundenrechnungen → *Vorschreibungen*, Kundenzahlungen → *Zahlungen der Eigentümer*, Spalten Name/Art/Apartment-Nr./Zuständig; Interessenten ausgeblendet; Zurücksetzen möglich
+- Doku mit den neuen Menünamen (Handbuch de/hr, Eigentümerhilfe 5 Sprachen)
+
 ## 1.11.0
 - **Versendete Dokumente beim Apartment**: Jede an Eigentümer versendete Datei (Vorschreibung, Übersetzung, Erläuterung, Abrechnungsblatt, Nachzahlungsrechnung) liegt zusätzlich unter Geschäftspartner → *Verknüpfte Dokumente*, mit Versanddatum im Dateinamen; sichtbar auch im Eigentümer-Zugang. Testversand legt nichts ab.
 - Einmalig beim Aktivieren: bereits versendete Vorschreibungen werden nachträglich abgelegt

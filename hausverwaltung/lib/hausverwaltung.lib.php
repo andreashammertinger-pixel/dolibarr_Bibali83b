@@ -246,3 +246,72 @@ function hvHelpUrl($page = '', $section = 'verwaltung', $lang = '')
 	}
 	return $base.'/'.$section.'/'.$prefix.$page;
 }
+
+/**
+ * Dolibarr-Begriffe in Hausverwaltungs-Logik (überschreibt die Übersetzung nur für die aktuelle Firma).
+ * Reihenfolge der Werte: de, hr, en, sl, uk
+ */
+function hvTerms()
+{
+	return array(
+		'ThirdParties' => array('Apartments & Kontakte', 'Apartmani i kontakti', 'Apartments & contacts', 'Apartmaji in kontakti', 'Апартаменти та контакти'),
+		'ThirdParty' => array('Apartment / Partner', 'Apartman / partner', 'Apartment / partner', 'Apartma / partner', 'Апартамент / партнер'),
+		'MenuNewThirdParty' => array('Neues Apartment / Partner', 'Novi apartman / partner', 'New apartment / partner', 'Nov apartma / partner', 'Новий апартамент / партнер'),
+		'Customers' => array('Apartments', 'Apartmani', 'Apartments', 'Apartmaji', 'Апартаменти'),
+		'Customer' => array('Apartment', 'Apartman', 'Apartment', 'Apartma', 'Апартамент'),
+		'MenuNewCustomer' => array('Neues Apartment', 'Novi apartman', 'New apartment', 'Nov apartma', 'Новий апартамент'),
+		'CustomersCategoriesShort' => array('Apartment-Kategorien', 'Kategorije apartmana', 'Apartment tags', 'Oznake apartmajev', 'Категорії апартаментів'),
+		'CustomersProspectsCategoriesShort' => array('Apartment-Kategorien', 'Kategorije apartmana', 'Apartment tags', 'Oznake apartmajev', 'Категорії апартаментів'),
+		'ThirdPartyName' => array('Name', 'Naziv', 'Name', 'Naziv', 'Назва'),
+		'ThirdPartyType' => array('Art', 'Vrsta', 'Type', 'Vrsta', 'Тип'),
+		'CustomerCode' => array('Apartment-Nummer', 'Broj apartmana', 'Apartment number', 'Številka apartmaja', 'Номер апартаменту'),
+		'CustomerCodeShort' => array('Apartment-Nr.', 'Br. apartmana', 'Apartment no.', 'Št. apartmaja', '№ апартаменту'),
+		'SalesRepresentatives' => array('Zuständig', 'Zadužena osoba', 'Responsible', 'Odgovorna oseba', 'Відповідальний'),
+		'ThirdPartyContacts' => array('Kontakte', 'Kontakti', 'Contacts', 'Kontakti', 'Контакти'),
+		'ContactsForCompany' => array('Eigentümer und Kontakte dieses Apartments', 'Vlasnici i kontakti ovog apartmana', 'Owners and contacts of this apartment', 'Lastniki in kontakti tega apartmaja', 'Власники та контакти цього апартаменту'),
+		'ContactsAddresses' => array('Eigentümer & Kontakte', 'Vlasnici i kontakti', 'Owners & contacts', 'Lastniki in kontakti', 'Власники та контакти'),
+		'NewContactAddress' => array('Neuer Kontakt (Eigentümer, Mieter …)', 'Novi kontakt (vlasnik, najmoprimac …)', 'New contact (owner, tenant …)', 'Nov kontakt (lastnik, najemnik …)', 'Новий контакт (власник, орендар …)'),
+		'BillsCustomers' => array('Vorschreibungen', 'Zaduženja', 'Service charges', 'Obremenitve', 'Нарахування'),
+		'CustomersInvoices' => array('Vorschreibungen', 'Zaduženja', 'Service charges', 'Obremenitve', 'Нарахування'),
+		'SearchIntoCustomerInvoices' => array('Vorschreibungen', 'Zaduženja', 'Service charges', 'Obremenitve', 'Нарахування'),
+		'SearchIntoCustomerPayments' => array('Zahlungen der Eigentümer', 'Uplate vlasnika', 'Owner payments', 'Plačila lastnikov', 'Платежі власників'),
+		'BillsCustomersUnpaid' => array('Offene Vorschreibungen', 'Neplaćena zaduženja', 'Unpaid service charges', 'Neplačane obremenitve', 'Неоплачені нарахування'),
+		'ListOfCustomerPayments' => array('Zahlungen der Eigentümer', 'Uplate vlasnika', 'Owner payments', 'Plačila lastnikov', 'Платежі власників'),
+		'CustomersInvoicesAndPayments' => array('Vorschreibungen und Zahlungen', 'Zaduženja i uplate', 'Service charges and payments', 'Obremenitve in plačila', 'Нарахування та платежі'),
+		'MenuFinancial' => array('Vorschreibung | Zahlung', 'Zaduženja | Plaćanja', 'Charges | Payment', 'Obremenitve | Plačila', 'Нарахування | Оплата'),
+	);
+}
+
+/** Sprachcodes je Spalte von hvTerms() (inkl. üblicher Varianten) */
+function hvTermLangs()
+{
+	return array(array('de_DE', 'de_AT', 'de_CH'), array('hr_HR'), array('en_US', 'en_GB'), array('sl_SI'), array('uk_UA'));
+}
+
+/** Begriffe übernehmen (1) oder zurücksetzen (0) – nur aktuelle Firma */
+function hvApplyTerms($on)
+{
+	global $db, $conf;
+	$e = (int) $conf->entity;
+	$n = 0;
+	foreach (hvTerms() as $key => $vals) {
+		foreach (hvTermLangs() as $i => $langsOfCol) {
+			foreach ($langsOfCol as $l) {
+				$db->query("DELETE FROM ".$db->prefix()."overwrite_trans WHERE entity = ".$e." AND lang = '".$db->escape($l)."' AND transkey = '".$db->escape($key)."'");
+				if ($on) {
+					$db->query("INSERT INTO ".$db->prefix()."overwrite_trans (entity, lang, transkey, transvalue) VALUES (".$e.", '".$db->escape($l)."', '".$db->escape($key)."', '".$db->escape($vals[$i])."')");
+					$n++;
+				}
+			}
+		}
+	}
+	if ($on) {
+		dolibarr_set_const($db, 'MAIN_ENABLE_OVERWRITE_TRANSLATION', '1', 'chaine', 0, '', $e);
+		dolibarr_set_const($db, 'SOCIETE_DISABLE_PROSPECTS', '1', 'chaine', 0, '', $e);
+		dolibarr_set_const($db, 'HAUSVERWALTUNG_TERMS_APPLIED', '1', 'chaine', 0, '', $e);
+	} else {
+		dolibarr_del_const($db, 'SOCIETE_DISABLE_PROSPECTS', $e);
+		dolibarr_del_const($db, 'HAUSVERWALTUNG_TERMS_APPLIED', $e);
+	}
+	return $n;
+}
