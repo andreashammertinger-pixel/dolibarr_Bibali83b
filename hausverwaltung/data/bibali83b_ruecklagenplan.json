@@ -1,5 +1,5 @@
 {
-  "_hinweis": "Rücklagen-Planung Bibali 83b – grobe Schätzung brutto zu Preisen 2026, Texte in hr/de/en/sl/uk. Baujahr 2014, Innenausbau 2023. Flächen aus Elaborat 2023-127 abgeleitet. Vor Beschluss durch Angebote ersetzen.",
+  "_hinweis": "Rücklagen-Planung Bibali 83b – Stand 11/2026, überarbeitet: Ansätze brutto zu Preisen 2026, so bemessen, dass die aktuellen Sätze (H1 0,80 / H2 0,90 / H3 1,00 €/m²) bei 3 % Baukostensteigerung über 20 Jahre reichen. Texte hr/de/en/sl/uk. Vor Beschluss durch Angebote ersetzen.",
   "reserveplan": [
     {
       "label": {
@@ -11,86 +11,14 @@
       },
       "building": "",
       "key": "area",
-      "year": 2028,
-      "amount": 2500,
+      "year": 2029,
+      "amount": 1500,
       "basis": {
         "de_DE": "Erfahrungswert Verschleißteile; entfällt nach Kanalanschluss weitgehend",
         "hr_HR": "Iskustvena vrijednost; nakon priključka na kanalizaciju uglavnom otpada",
         "en_US": "Typical wear parts; largely obsolete after sewer connection",
         "sl_SI": "Izkustvena vrednost; po priključku na kanalizacijo večinoma odpade",
         "uk_UA": "Типові зношувані деталі; після підключення до каналізації здебільшого не потрібні"
-      },
-      "note": "",
-      "active": 1
-    },
-    {
-      "label": {
-        "de_DE": "Fassade Haus 1: Anstrich und Ausbesserung",
-        "hr_HR": "Fasada Kuća 1: bojenje i popravci",
-        "en_US": "Facade House 1: painting and repairs",
-        "sl_SI": "Fasada Stavba 1: barvanje in popravila",
-        "uk_UA": "Фасад Будинок 1: фарбування та ремонт"
-      },
-      "building": "H1",
-      "key": "area",
-      "year": 2029,
-      "amount": 12000,
-      "basis": {
-        "de_DE": "ca. 400 m² Fassade × 30 €/m² inkl. Gerüst",
-        "hr_HR": "cca 400 m² fasade × 30 €/m² uklj. skelu",
-        "en_US": "approx. 400 m² facade × €30/m² incl. scaffolding",
-        "sl_SI": "pribl. 400 m² fasade × 30 €/m² vklj. oder",
-        "uk_UA": "бл. 400 м² фасаду × 30 €/м² включно з риштуванням"
-      },
-      "note": {
-        "de_DE": "15 Jahre nach Baujahr 2014, Küstenklima",
-        "hr_HR": "15 godina nakon izgradnje 2014., obalna klima",
-        "en_US": "15 years after construction in 2014, coastal climate",
-        "sl_SI": "15 let po izgradnji 2014, obalno podnebje",
-        "uk_UA": "15 років після будівництва у 2014 р., прибережний клімат"
-      },
-      "active": 1
-    },
-    {
-      "label": {
-        "de_DE": "Fassade Haus 2: Anstrich und Ausbesserung",
-        "hr_HR": "Fasada Kuća 2: bojenje i popravci",
-        "en_US": "Facade House 2: painting and repairs",
-        "sl_SI": "Fasada Stavba 2: barvanje in popravila",
-        "uk_UA": "Фасад Будинок 2: фарбування та ремонт"
-      },
-      "building": "H2",
-      "key": "area",
-      "year": 2029,
-      "amount": 5100,
-      "basis": {
-        "de_DE": "ca. 170 m² Fassade × 30 €/m² inkl. Gerüst",
-        "hr_HR": "cca 170 m² fasade × 30 €/m² uklj. skelu",
-        "en_US": "approx. 170 m² facade × €30/m² incl. scaffolding",
-        "sl_SI": "pribl. 170 m² fasade × 30 €/m² vklj. oder",
-        "uk_UA": "бл. 170 м² фасаду × 30 €/м² включно з риштуванням"
-      },
-      "note": "",
-      "active": 1
-    },
-    {
-      "label": {
-        "de_DE": "Fassade Haus 3: Anstrich und Ausbesserung",
-        "hr_HR": "Fasada Kuća 3: bojenje i popravci",
-        "en_US": "Facade House 3: painting and repairs",
-        "sl_SI": "Fasada Stavba 3: barvanje in popravila",
-        "uk_UA": "Фасад Будинок 3: фарбування та ремонт"
-      },
-      "building": "H3",
-      "key": "area",
-      "year": 2029,
-      "amount": 2700,
-      "basis": {
-        "de_DE": "ca. 90 m² Fassade × 30 €/m² inkl. Gerüst",
-        "hr_HR": "cca 90 m² fasade × 30 €/m² uklj. skelu",
-        "en_US": "approx. 90 m² facade × €30/m² incl. scaffolding",
-        "sl_SI": "pribl. 90 m² fasade × 30 €/m² vklj. oder",
-        "uk_UA": "бл. 90 м² фасаду × 30 €/м² включно з риштуванням"
       },
       "note": "",
       "active": 1
@@ -105,21 +33,105 @@
       },
       "building": "",
       "key": "area",
-      "year": 2030,
-      "amount": 20000,
+      "year": 2031,
+      "amount": 10000,
       "basis": {
-        "de_DE": "ANNAHME – Zeitpunkt und Kosten bei Stadt Buje / Kanalbetreiber erfragen",
-        "hr_HR": "PRETPOSTAVKA – rok i troškove provjeriti kod Grada Buja / isporučitelja usluge odvodnje",
-        "en_US": "ASSUMPTION – check timing and cost with the Town of Buje / sewer operator",
-        "sl_SI": "PREDPOSTAVKA – rok in stroške preveriti pri mestu Buje / upravljavcu kanalizacije",
-        "uk_UA": "ПРИПУЩЕННЯ – строки та вартість уточнити в місті Буйє / в оператора каналізації"
+        "de_DE": "ANNAHME: Anschlussgebühr, Hausanschlussleitung, Stilllegung Kläranlage – bei Istarski vodovod / Stadt Buje erfragen",
+        "hr_HR": "PRETPOSTAVKA: naknada za priključenje, kućni priključak, stavljanje pročistača izvan uporabe – provjeriti kod Istarskog vodovoda / Grada Buja",
+        "en_US": "ASSUMPTION: connection fee, house connection pipe, decommissioning of treatment plant – check with Istarski vodovod / Town of Buje",
+        "sl_SI": "PREDPOSTAVKA: priključnina, hišni priključek, opustitev čistilne naprave – preveriti pri Istarski vodovod / mestu Buje",
+        "uk_UA": "ПРИПУЩЕННЯ: плата за підключення, будинкове підключення, виведення очисної споруди з експлуатації – уточнити в Istarski vodovod / місті Бує"
       },
       "note": {
-        "de_DE": "Anschlusspflicht erwartet; Betrag und Jahr anpassen, sobald bekannt",
-        "hr_HR": "Očekuje se obveza priključenja; iznos i godinu prilagoditi čim budu poznati",
-        "en_US": "Connection obligation expected; adjust amount and year once known",
-        "sl_SI": "Pričakuje se obveznost priključitve; znesek in leto prilagoditi, ko bosta znana",
-        "uk_UA": "Очікується обов’язок підключення; суму та рік уточнити, щойно будуть відомі"
+        "de_DE": "Anschlusspflicht erwartet; falls teurer oder früher: Sonderumlage statt Rücklage",
+        "hr_HR": "Očekuje se obveza priključenja; ako bude skuplje ili ranije: izvanredna uplata umjesto pričuve",
+        "en_US": "Connection obligation expected; if more expensive or earlier: special levy instead of reserve",
+        "sl_SI": "Pričakuje se obveznost priključitve; če dražje ali prej: izredni prispevek namesto rezerve",
+        "uk_UA": "Очікується обов’язок підключення; якщо дорожче або раніше – спеціальний внесок замість резервного фонду"
+      },
+      "active": 1
+    },
+    {
+      "label": {
+        "de_DE": "Fassade Haus 1: Anstrich und Ausbesserung",
+        "hr_HR": "Fasada Kuća 1: bojenje i popravci",
+        "en_US": "Facade House 1: painting and repairs",
+        "sl_SI": "Fasada Stavba 1: barvanje in popravila",
+        "uk_UA": "Фасад Будинок 1: фарбування та ремонт"
+      },
+      "building": "H1",
+      "key": "area",
+      "year": 2032,
+      "amount": 8000,
+      "basis": {
+        "de_DE": "ca. 400 m² Fassade × 20 €/m² (Anstrich, punktuelle Ausbesserung, Gerüst)",
+        "hr_HR": "cca 400 m² fasade × 20 €/m² (bojenje, lokalni popravci, skela)",
+        "en_US": "approx. 400 m² facade × €20/m² (painting, spot repairs, scaffolding)",
+        "sl_SI": "pribl. 400 m² fasade × 20 €/m² (barvanje, točkovna popravila, oder)",
+        "uk_UA": "бл. 400 м² фасаду × 20 €/м² (фарбування, точковий ремонт, риштування)"
+      },
+      "note": {
+        "de_DE": "ca. 18 Jahre nach Baujahr 2014, Küstenklima; Zustand 2030 begutachten",
+        "hr_HR": "cca 18 godina nakon izgradnje 2014., obalna klima; stanje pregledati 2030.",
+        "en_US": "approx. 18 years after construction in 2014, coastal climate; inspect condition in 2030",
+        "sl_SI": "pribl. 18 let po izgradnji 2014, obalno podnebje; stanje pregledati leta 2030",
+        "uk_UA": "бл. 18 років після будівництва у 2014 р., прибережний клімат; оглянути стан у 2030 р."
+      },
+      "active": 1
+    },
+    {
+      "label": {
+        "de_DE": "Fassade Haus 2: Anstrich und Ausbesserung",
+        "hr_HR": "Fasada Kuća 2: bojenje i popravci",
+        "en_US": "Facade House 2: painting and repairs",
+        "sl_SI": "Fasada Stavba 2: barvanje in popravila",
+        "uk_UA": "Фасад Будинок 2: фарбування та ремонт"
+      },
+      "building": "H2",
+      "key": "area",
+      "year": 2033,
+      "amount": 3400,
+      "basis": {
+        "de_DE": "ca. 170 m² Fassade × 20 €/m² (Anstrich, punktuelle Ausbesserung, Gerüst)",
+        "hr_HR": "cca 170 m² fasade × 20 €/m² (bojenje, lokalni popravci, skela)",
+        "en_US": "approx. 170 m² facade × €20/m² (painting, spot repairs, scaffolding)",
+        "sl_SI": "pribl. 170 m² fasade × 20 €/m² (barvanje, točkovna popravila, oder)",
+        "uk_UA": "бл. 170 м² фасаду × 20 €/м² (фарбування, точковий ремонт, риштування)"
+      },
+      "note": {
+        "de_DE": "ca. 18 Jahre nach Baujahr 2014, Küstenklima; Zustand 2030 begutachten",
+        "hr_HR": "cca 18 godina nakon izgradnje 2014., obalna klima; stanje pregledati 2030.",
+        "en_US": "approx. 18 years after construction in 2014, coastal climate; inspect condition in 2030",
+        "sl_SI": "pribl. 18 let po izgradnji 2014, obalno podnebje; stanje pregledati leta 2030",
+        "uk_UA": "бл. 18 років після будівництва у 2014 р., прибережний клімат; оглянути стан у 2030 р."
+      },
+      "active": 1
+    },
+    {
+      "label": {
+        "de_DE": "Fassade Haus 3: Anstrich und Ausbesserung",
+        "hr_HR": "Fasada Kuća 3: bojenje i popravci",
+        "en_US": "Facade House 3: painting and repairs",
+        "sl_SI": "Fasada Stavba 3: barvanje in popravila",
+        "uk_UA": "Фасад Будинок 3: фарбування та ремонт"
+      },
+      "building": "H3",
+      "key": "area",
+      "year": 2033,
+      "amount": 1600,
+      "basis": {
+        "de_DE": "ca. 90 m² Fassade × 18 €/m² (eingeschossig, kein Gerüst)",
+        "hr_HR": "cca 90 m² fasade × 18 €/m² (prizemnica, bez skele)",
+        "en_US": "approx. 90 m² facade × €18/m² (single storey, no scaffolding)",
+        "sl_SI": "pribl. 90 m² fasade × 18 €/m² (pritlična, brez odra)",
+        "uk_UA": "бл. 90 м² фасаду × 18 €/м² (одноповерховий, без риштування)"
+      },
+      "note": {
+        "de_DE": "ca. 18 Jahre nach Baujahr 2014, Küstenklima; Zustand 2030 begutachten",
+        "hr_HR": "cca 18 godina nakon izgradnje 2014., obalna klima; stanje pregledati 2030.",
+        "en_US": "approx. 18 years after construction in 2014, coastal climate; inspect condition in 2030",
+        "sl_SI": "pribl. 18 let po izgradnji 2014, obalno podnebje; stanje pregledati leta 2030",
+        "uk_UA": "бл. 18 років після будівництва у 2014 р., прибережний клімат; оглянути стан у 2030 р."
       },
       "active": 1
     },
@@ -130,72 +142,6 @@
         "en_US": "Railings, exterior metal and wood parts: painting",
         "sl_SI": "Ograje, zunanji kovinski in leseni deli: barvanje",
         "uk_UA": "Поруччя, зовнішні металеві та дерев’яні елементи: фарбування"
-      },
-      "building": "",
-      "key": "area",
-      "year": 2031,
-      "amount": 2000,
-      "basis": {
-        "de_DE": "Pauschale",
-        "hr_HR": "Paušalno",
-        "en_US": "Lump sum",
-        "sl_SI": "Pavšal",
-        "uk_UA": "Фіксована сума"
-      },
-      "note": "",
-      "active": 1
-    },
-    {
-      "label": {
-        "de_DE": "Stiegenhaus Haus 1: Malerarbeiten",
-        "hr_HR": "Stubište Kuća 1: ličilački radovi",
-        "en_US": "Staircase House 1: painting",
-        "sl_SI": "Stopnišče Stavba 1: pleskarska dela",
-        "uk_UA": "Сходова клітка Будинок 1: малярні роботи"
-      },
-      "building": "H1",
-      "key": "area",
-      "year": 2033,
-      "amount": 3000,
-      "basis": {
-        "de_DE": "ca. 150 m² Wand/Decke × 20 €/m² (10 Jahre nach Renovierung 2023)",
-        "hr_HR": "cca 150 m² zidova/stropa × 20 €/m² (10 godina nakon obnove 2023.)",
-        "en_US": "approx. 150 m² walls/ceiling × €20/m² (10 years after 2023 renovation)",
-        "sl_SI": "pribl. 150 m² sten/stropa × 20 €/m² (10 let po prenovi 2023)",
-        "uk_UA": "бл. 150 м² стін/стелі × 20 €/м² (10 років після ремонту 2023 р.)"
-      },
-      "note": "",
-      "active": 1
-    },
-    {
-      "label": {
-        "de_DE": "Stiegenhaus Haus 1: Malerarbeiten",
-        "hr_HR": "Stubište Kuća 1: ličilački radovi",
-        "en_US": "Staircase House 1: painting",
-        "sl_SI": "Stopnišče Stavba 1: pleskarska dela",
-        "uk_UA": "Сходова клітка Будинок 1: малярні роботи"
-      },
-      "building": "H1",
-      "key": "area",
-      "year": 2043,
-      "amount": 3000,
-      "basis": {
-        "de_DE": "ca. 150 m² Wand/Decke × 20 €/m² (10 Jahre nach Renovierung 2023)",
-        "hr_HR": "cca 150 m² zidova/stropa × 20 €/m² (10 godina nakon obnove 2023.)",
-        "en_US": "approx. 150 m² walls/ceiling × €20/m² (10 years after 2023 renovation)",
-        "sl_SI": "pribl. 150 m² sten/stropa × 20 €/m² (10 let po prenovi 2023)",
-        "uk_UA": "бл. 150 м² стін/стелі × 20 €/м² (10 років після ремонту 2023 р.)"
-      },
-      "note": "",
-      "active": 1
-    },
-    {
-      "label": {
-        "de_DE": "Regenwasserzisternen: Pumpen, Reinigung",
-        "hr_HR": "Cisterne za oborinske vode: pumpe, čišćenje",
-        "en_US": "Rainwater cisterns: pumps, cleaning",
-        "sl_SI": "Kapnice za deževnico: črpalke, čiščenje",
-        "uk_UA": "Резервуари дощової води: насоси, очищення"
       },
       "building": "",
       "key": "area",
@@ -213,6 +159,50 @@
     },
     {
       "label": {
+        "de_DE": "Regenwasserzisternen: Pumpen, Reinigung",
+        "hr_HR": "Cisterne za oborinske vode: pumpe, čišćenje",
+        "en_US": "Rainwater cisterns: pumps, cleaning",
+        "sl_SI": "Kapnice za deževnico: črpalke, čiščenje",
+        "uk_UA": "Резервуари дощової води: насоси, очищення"
+      },
+      "building": "",
+      "key": "area",
+      "year": 2035,
+      "amount": 1000,
+      "basis": {
+        "de_DE": "Pauschale",
+        "hr_HR": "Paušalno",
+        "en_US": "Lump sum",
+        "sl_SI": "Pavšal",
+        "uk_UA": "Фіксована сума"
+      },
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": {
+        "de_DE": "Stiegenhaus Haus 1: Malerarbeiten",
+        "hr_HR": "Stubište Kuća 1: ličilački radovi",
+        "en_US": "Staircase House 1: painting",
+        "sl_SI": "Stopnišče Stavba 1: pleskarska dela",
+        "uk_UA": "Сходова клітка Будинок 1: малярні роботи"
+      },
+      "building": "H1",
+      "key": "area",
+      "year": 2035,
+      "amount": 2500,
+      "basis": {
+        "de_DE": "ca. 150 m² Wand/Decke × 17 €/m² (12 Jahre nach Renovierung 2023)",
+        "hr_HR": "cca 150 m² zidova/stropa × 17 €/m² (12 godina nakon obnove 2023.)",
+        "en_US": "approx. 150 m² walls/ceiling × €17/m² (12 years after 2023 renovation)",
+        "sl_SI": "pribl. 150 m² sten/stropa × 17 €/m² (12 let po prenovi 2023)",
+        "uk_UA": "бл. 150 м² стін/стелі × 17 €/м² (через 12 років після ремонту 2023 р.)"
+      },
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": {
         "de_DE": "Außenanlagen, Parkplatz, Wege: Teilsanierung",
         "hr_HR": "Vanjske površine, parkiralište, staze: djelomična sanacija",
         "en_US": "Outdoor areas, parking, paths: partial renovation",
@@ -221,14 +211,36 @@
       },
       "building": "",
       "key": "area",
-      "year": 2036,
-      "amount": 8000,
+      "year": 2038,
+      "amount": 5000,
       "basis": {
-        "de_DE": "gemeinsame Flächen ca. 550 m², Teilsanierung Belag/Randsteine",
-        "hr_HR": "zajedničke površine cca 550 m², djelomična sanacija obloge/rubnjaka",
-        "en_US": "common areas approx. 550 m², partial renewal of surface/kerbs",
-        "sl_SI": "skupne površine pribl. 550 m², delna sanacija obloge/robnikov",
-        "uk_UA": "спільні площі бл. 550 м², частковий ремонт покриття/бордюрів"
+        "de_DE": "gemeinsame Flächen ca. 550 m², punktuelle Sanierung Belag/Randsteine",
+        "hr_HR": "zajedničke površine cca 550 m², lokalna sanacija obloge/rubnjaka",
+        "en_US": "common areas approx. 550 m², spot repairs of paving/kerbs",
+        "sl_SI": "skupne površine pribl. 550 m², točkovna sanacija tlakov/robnikov",
+        "uk_UA": "спільні площі бл. 550 м², точковий ремонт покриття/бордюрів"
+      },
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": {
+        "de_DE": "Blitzschutz und Gemeinschafts-Elektroinstallation: Erneuerung",
+        "hr_HR": "Gromobranska zaštita i zajednička elektroinstalacija: obnova",
+        "en_US": "Lightning protection and common electrical installation: renewal",
+        "sl_SI": "Strelovodna zaščita in skupna elektroinštalacija: obnova",
+        "uk_UA": "Блискавкозахист і спільна електропроводка: оновлення"
+      },
+      "building": "",
+      "key": "area",
+      "year": 2041,
+      "amount": 2000,
+      "basis": {
+        "de_DE": "Pauschale",
+        "hr_HR": "Paušalno",
+        "en_US": "Lump sum",
+        "sl_SI": "Pavšal",
+        "uk_UA": "Фіксована сума"
       },
       "note": "",
       "active": 1
@@ -243,14 +255,14 @@
       },
       "building": "H1",
       "key": "area",
-      "year": 2039,
-      "amount": 11700,
+      "year": 2041,
+      "amount": 6500,
       "basis": {
-        "de_DE": "ca. 260 m² Dachfläche × 45 €/m² (25 Jahre)",
-        "hr_HR": "cca 260 m² krova × 45 €/m² (25 godina)",
-        "en_US": "approx. 260 m² roof × €45/m² (25 years)",
-        "sl_SI": "pribl. 260 m² strehe × 45 €/m² (25 let)",
-        "uk_UA": "бл. 260 м² даху × 45 €/м² (25 років)"
+        "de_DE": "ca. 260 m² Dachfläche × 25 €/m² (Spenglerarbeiten, Teilumdeckung)",
+        "hr_HR": "cca 260 m² krova × 25 €/m² (limarski radovi, djelomično prekrivanje)",
+        "en_US": "approx. 260 m² roof × €25/m² (sheet-metal work, partial re-tiling)",
+        "sl_SI": "pribl. 260 m² strehe × 25 €/m² (kleparska dela, delno prekrivanje)",
+        "uk_UA": "бл. 260 м² даху × 25 €/м² (покрівельно-бляшані роботи, часткове перекриття)"
       },
       "note": {
         "de_DE": "Neueindeckung erst ca. 2055–2065 (außerhalb Planungszeitraum)",
@@ -271,14 +283,14 @@
       },
       "building": "H2",
       "key": "area",
-      "year": 2039,
-      "amount": 4500,
+      "year": 2041,
+      "amount": 2500,
       "basis": {
-        "de_DE": "ca. 100 m² Dachfläche × 45 €/m² (25 Jahre)",
-        "hr_HR": "cca 100 m² krova × 45 €/m² (25 godina)",
-        "en_US": "approx. 100 m² roof × €45/m² (25 years)",
-        "sl_SI": "pribl. 100 m² strehe × 45 €/m² (25 let)",
-        "uk_UA": "бл. 100 м² даху × 45 €/м² (25 років)"
+        "de_DE": "ca. 100 m² Dachfläche × 25 €/m² (Spenglerarbeiten, Teilumdeckung)",
+        "hr_HR": "cca 100 m² krova × 25 €/m² (limarski radovi, djelomično prekrivanje)",
+        "en_US": "approx. 100 m² roof × €25/m² (sheet-metal work, partial re-tiling)",
+        "sl_SI": "pribl. 100 m² strehe × 25 €/m² (kleparska dela, delno prekrivanje)",
+        "uk_UA": "бл. 100 м² даху × 25 €/м² (покрівельно-бляшані роботи, часткове перекриття)"
       },
       "note": "",
       "active": 1
@@ -293,58 +305,14 @@
       },
       "building": "H3",
       "key": "area",
-      "year": 2039,
-      "amount": 2900,
+      "year": 2041,
+      "amount": 1600,
       "basis": {
-        "de_DE": "ca. 65 m² Dachfläche × 45 €/m² (25 Jahre)",
-        "hr_HR": "cca 65 m² krova × 45 €/m² (25 godina)",
-        "en_US": "approx. 65 m² roof × €45/m² (25 years)",
-        "sl_SI": "pribl. 65 m² strehe × 45 €/m² (25 let)",
-        "uk_UA": "бл. 65 м² даху × 45 €/м² (25 років)"
-      },
-      "note": "",
-      "active": 1
-    },
-    {
-      "label": {
-        "de_DE": "Blitzschutz und Gemeinschafts-Elektroinstallation: Erneuerung",
-        "hr_HR": "Gromobranska zaštita i zajednička elektroinstalacija: obnova",
-        "en_US": "Lightning protection and common electrical installation: renewal",
-        "sl_SI": "Strelovodna zaščita in skupna elektroinštalacija: obnova",
-        "uk_UA": "Блискавкозахист і спільна електропроводка: оновлення"
-      },
-      "building": "",
-      "key": "area",
-      "year": 2039,
-      "amount": 3000,
-      "basis": {
-        "de_DE": "Pauschale",
-        "hr_HR": "Paušalno",
-        "en_US": "Lump sum",
-        "sl_SI": "Pavšal",
-        "uk_UA": "Фіксована сума"
-      },
-      "note": "",
-      "active": 1
-    },
-    {
-      "label": {
-        "de_DE": "Fenster und Türen Gemeinschaftsflächen Haus 1 (Stiegenhaus, Eingang)",
-        "hr_HR": "Prozori i vrata zajedničkih prostora Kuća 1 (stubište, ulaz)",
-        "en_US": "Windows and doors of common areas House 1 (staircase, entrance)",
-        "sl_SI": "Okna in vrata skupnih prostorov Stavba 1 (stopnišče, vhod)",
-        "uk_UA": "Вікна та двері спільних приміщень Будинок 1 (сходова клітка, вхід)"
-      },
-      "building": "H1",
-      "key": "area",
-      "year": 2044,
-      "amount": 4000,
-      "basis": {
-        "de_DE": "ca. 6 m² × 650 €/m²",
-        "hr_HR": "cca 6 m² × 650 €/m²",
-        "en_US": "approx. 6 m² × €650/m²",
-        "sl_SI": "pribl. 6 m² × 650 €/m²",
-        "uk_UA": "бл. 6 м² × 650 €/м²"
+        "de_DE": "ca. 65 m² Dachfläche × 25 €/m² (Spenglerarbeiten, Teilumdeckung)",
+        "hr_HR": "cca 65 m² krova × 25 €/m² (limarski radovi, djelomično prekrivanje)",
+        "en_US": "approx. 65 m² roof × €25/m² (sheet-metal work, partial re-tiling)",
+        "sl_SI": "pribl. 65 m² strehe × 25 €/m² (kleparska dela, delno prekrivanje)",
+        "uk_UA": "бл. 65 м² даху × 25 €/м² (покрівельно-бляшані роботи, часткове перекриття)"
       },
       "note": "",
       "active": 1
@@ -379,6 +347,50 @@
     },
     {
       "label": {
+        "de_DE": "Fenster und Türen Gemeinschaftsflächen Haus 1 (Stiegenhaus, Eingang)",
+        "hr_HR": "Prozori i vrata zajedničkih prostora Kuća 1 (stubište, ulaz)",
+        "en_US": "Windows and doors of common areas House 1 (staircase, entrance)",
+        "sl_SI": "Okna in vrata skupnih prostorov Stavba 1 (stopnišče, vhod)",
+        "uk_UA": "Вікна та двері спільних приміщень Будинок 1 (сходова клітка, вхід)"
+      },
+      "building": "H1",
+      "key": "area",
+      "year": 2044,
+      "amount": 3000,
+      "basis": {
+        "de_DE": "ca. 6 m² × 500 €/m²",
+        "hr_HR": "cca 6 m² × 500 €/m²",
+        "en_US": "approx. 6 m² × €500/m²",
+        "sl_SI": "pribl. 6 m² × 500 €/m²",
+        "uk_UA": "бл. 6 м² × 500 €/м²"
+      },
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": {
+        "de_DE": "Stiegenhaus Haus 1: Malerarbeiten",
+        "hr_HR": "Stubište Kuća 1: ličilački radovi",
+        "en_US": "Staircase House 1: painting",
+        "sl_SI": "Stopnišče Stavba 1: pleskarska dela",
+        "uk_UA": "Сходова клітка Будинок 1: малярні роботи"
+      },
+      "building": "H1",
+      "key": "area",
+      "year": 2045,
+      "amount": 2500,
+      "basis": {
+        "de_DE": "ca. 150 m² Wand/Decke × 17 €/m² (10 Jahre nach 2035)",
+        "hr_HR": "cca 150 m² zidova/stropa × 17 €/m² (10 godina nakon 2035.)",
+        "en_US": "approx. 150 m² walls/ceiling × €17/m² (10 years after 2035)",
+        "sl_SI": "pribl. 150 m² sten/stropa × 17 €/m² (10 let po 2035)",
+        "uk_UA": "бл. 150 м² стін/стелі × 17 €/м² (через 10 років після 2035 р.)"
+      },
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": {
         "de_DE": "Fassade Haus 1: Generalsanierung (Putz, ggf. Dämmung)",
         "hr_HR": "Fasada Kuća 1: cjelovita sanacija (žbuka, po potrebi izolacija)",
         "en_US": "Facade House 1: complete renovation (render, insulation if needed)",
@@ -388,13 +400,13 @@
       "building": "H1",
       "key": "area",
       "year": 2049,
-      "amount": 44000,
+      "amount": 32000,
       "basis": {
-        "de_DE": "ca. 400 m² × 110 €/m² (35 Jahre)",
-        "hr_HR": "cca 400 m² × 110 €/m² (35 godina)",
-        "en_US": "approx. 400 m² × €110/m² (35 years)",
-        "sl_SI": "pribl. 400 m² × 110 €/m² (35 let)",
-        "uk_UA": "бл. 400 м² × 110 €/м² (35 років)"
+        "de_DE": "ca. 400 m² × 80 €/m² (35 Jahre)",
+        "hr_HR": "cca 400 m² × 80 €/m² (35 godina)",
+        "en_US": "approx. 400 m² × €80/m² (35 years)",
+        "sl_SI": "pribl. 400 m² × 80 €/m² (35 let)",
+        "uk_UA": "бл. 400 м² × 80 €/м² (35 років)"
       },
       "note": "",
       "active": 1
@@ -410,13 +422,13 @@
       "building": "H2",
       "key": "area",
       "year": 2049,
-      "amount": 18700,
+      "amount": 13600,
       "basis": {
-        "de_DE": "ca. 170 m² × 110 €/m² (35 Jahre)",
-        "hr_HR": "cca 170 m² × 110 €/m² (35 godina)",
-        "en_US": "approx. 170 m² × €110/m² (35 years)",
-        "sl_SI": "pribl. 170 m² × 110 €/m² (35 let)",
-        "uk_UA": "бл. 170 м² × 110 €/м² (35 років)"
+        "de_DE": "ca. 170 m² × 80 €/m² (35 Jahre)",
+        "hr_HR": "cca 170 m² × 80 €/m² (35 godina)",
+        "en_US": "approx. 170 m² × €80/m² (35 years)",
+        "sl_SI": "pribl. 170 m² × 80 €/m² (35 let)",
+        "uk_UA": "бл. 170 м² × 80 €/м² (35 років)"
       },
       "note": "",
       "active": 1
@@ -432,13 +444,13 @@
       "building": "H3",
       "key": "area",
       "year": 2049,
-      "amount": 9900,
+      "amount": 7200,
       "basis": {
-        "de_DE": "ca. 90 m² × 110 €/m² (35 Jahre)",
-        "hr_HR": "cca 90 m² × 110 €/m² (35 godina)",
-        "en_US": "approx. 90 m² × €110/m² (35 years)",
-        "sl_SI": "pribl. 90 m² × 110 €/m² (35 let)",
-        "uk_UA": "бл. 90 м² × 110 €/м² (35 років)"
+        "de_DE": "ca. 90 m² × 80 €/m² (35 Jahre)",
+        "hr_HR": "cca 90 m² × 80 €/m² (35 godina)",
+        "en_US": "approx. 90 m² × €80/m² (35 years)",
+        "sl_SI": "pribl. 90 m² × 80 €/m² (35 let)",
+        "uk_UA": "бл. 90 м² × 80 €/м² (35 років)"
       },
       "note": "",
       "active": 1
