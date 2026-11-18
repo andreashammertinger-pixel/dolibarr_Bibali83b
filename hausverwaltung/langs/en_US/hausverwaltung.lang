@@ -206,3 +206,7 @@ HvNoOwnerMarked = no contact marked as owner
 HvNoOwnerContact = no contact marked as owner
 HvMailHelloCompany = Dear Sir or Madam,
 HvPdfRegNo = Reg. no.
+HvPreviewRefresh = Refresh preview
+HvPdfPreview = PDF preview
+HvPdfOriginal = Original
+HvPdfCopyShort = Copy

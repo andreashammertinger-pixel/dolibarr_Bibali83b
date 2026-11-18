@@ -141,7 +141,7 @@ foreach ($presets as $lbl => $p) {
 	print '<a class="butAction small" href="'.$_SERVER['PHP_SELF'].'?period='.$p[0].'&period_to='.$p[1].'">'.dol_escape_htmltag($lbl).'</a> ';
 }
 print '<br><br>';
-print '<button class="button" name="action" value="preview">'.$langs->trans('HvPreview').'</button> ';
+print '<button class="button" name="action" value="preview">'.$langs->trans('HvPreviewRefresh').'</button> ';
 print '<label class="marginleftonly"><input type="checkbox" name="validate" value="1"'.($validate ? ' checked' : '').'> '.$langs->trans('HvValidateDirectly').'</label> ';
 print '<label class="marginleftonly"><input type="checkbox" name="withfee" value="1"'.($withfee ? ' checked' : '').(getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID') > 0 ? '' : ' disabled').'> '.$langs->trans('HvCreateManagerFee').'</label> ';
 print '<button class="button button-save" name="action" value="generate">'.$langs->trans('HvCreateInvoices').'</button>';
@@ -167,16 +167,27 @@ if ($log) {
 }
 
 print load_fiche_titre($langs->trans('HvPreview').' '.HvInvoicer::periodLabel($period, $periodTo).($nMonths > 1 ? ' ('.$nMonths.' '.$langs->trans('HvMonths').')' : ''), '', '');
-print '<div class="div-table-responsive"><table class="noborder centpercent"><tr class="liste_titre"><th>'.$langs->trans('HvUnit').'</th><th>'.$langs->trans('HvOwner').'</th><th class="right">'.$langs->trans('HvBk').'</th><th class="right">'.$langs->trans('HvReserve').'</th><th class="right">'.$langs->trans('HvAdmin').'</th><th class="right">'.$langs->trans('HvTotalMonth').'</th>'.($nMonths > 1 ? '<th class="right">'.$langs->trans('Total').' '.HvInvoicer::periodLabel($period, $periodTo).'</th>' : '').'<th>'.$langs->trans('Status').'</th></tr>';
+print '<div class="div-table-responsive"><table class="noborder centpercent"><tr class="liste_titre"><th>'.$langs->trans('HvUnit').'</th><th>'.$langs->trans('HvOwner').'</th><th class="right">'.$langs->trans('HvBk').'</th><th class="right">'.$langs->trans('HvReserve').'</th><th class="right">'.$langs->trans('HvAdmin').'</th><th class="right">'.$langs->trans('HvTotalMonth').'</th>'.($nMonths > 1 ? '<th class="right">'.$langs->trans('Total').' '.HvInvoicer::periodLabel($period, $periodTo).'</th>' : '').'<th>'.$langs->trans('HvPdfPreview').'</th><th>'.$langs->trans('Status').'</th></tr>';
 $sum = 0;
 foreach ($rows as $r) {
 	$u = $r['unit'];
 	$st = $status[$u->ref] ?? null;
 	$sum += $r['total'];
 	print '<tr class="oddeven"><td>'.dol_escape_htmltag($u->ref).'</td><td>'.dol_escape_htmltag($u->socname).'</td><td class="right">'.hvMoney($r['bk']).'</td><td class="right">'.hvMoney($r['reserve']).'</td><td class="right">'.hvMoney($r['admin']).'</td><td class="right"><strong>'.hvMoney($r['total']).'</strong></td>'.($nMonths > 1 ? '<td class="right"><strong>'.hvMoney($r['total'] * $nMonths).'</strong></td>' : '');
+	$pl = '';
+	if (!empty($u->fk_soc)) {
+		$purl = dol_buildpath('/hausverwaltung/preview_pdf.php', 1).'?unit='.((int) $u->rowid).'&period='.urlencode($period).'&period_to='.urlencode($periodTo);
+		$pl = '<a href="'.$purl.'" target="_blank">'.img_picto('', 'pdf').' '.$langs->trans('HvPdfOriginal').'</a>';
+		$lrow = $db->getRow("SELECT default_lang FROM ".$db->prefix()."societe WHERE rowid = ".((int) $u->fk_soc));
+		$ul = $lrow ? (string) $lrow->default_lang : '';
+		if ($ul !== '' && substr($ul, 0, 2) !== substr(getDolGlobalString('HAUSVERWALTUNG_ORIGINAL_LANG', 'hr_HR'), 0, 2)) {
+			$pl .= ' · <a href="'.$purl.'&copy=1" target="_blank">'.$langs->trans('HvPdfCopyShort').' ('.substr($ul, 0, 2).')</a>';
+		}
+	}
+	print '<td class="nowraponall">'.$pl.'</td>';
 	print '<td>'.($st && $st['status'] !== 'dryrun' ? '<span class="opacitymedium">'.dol_escape_htmltag($st['message']).'</span>' : '').'</td></tr>';
 }
-print '<tr class="liste_total"><td colspan="5">'.$langs->trans('Total').'</td><td class="right">'.hvMoney($sum).'</td>'.($nMonths > 1 ? '<td class="right">'.hvMoney($sum * $nMonths).'</td>' : '').'<td></td></tr></table></div>';
+print '<tr class="liste_total"><td colspan="5">'.$langs->trans('Total').'</td><td class="right">'.hvMoney($sum).'</td>'.($nMonths > 1 ? '<td class="right">'.hvMoney($sum * $nMonths).'</td>' : '').'<td></td><td></td></tr></table></div>';
 
 llxFooter();
 $db->close();

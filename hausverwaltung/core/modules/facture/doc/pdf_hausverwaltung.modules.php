@@ -30,6 +30,8 @@ class pdf_hausverwaltung extends ModelePDFFactures
 	public $emetteur;
 	/** @var string '' = Original, sonst Sprachcode der Übersetzungskopie */
 	public $copylang = '';
+	/** @var string Vorschau: Zieldatei (keine Rechnung, keine Kopie, keine Ablage im Rechnungsordner) */
+	public $previewfile = '';
 
 	/** Sprache des Originals (Kroatien: hr_HR) */
 	public static function originalLang()
@@ -81,12 +83,16 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$this->emetteur = $mysoc;
 
 		$object->fetch_thirdparty();
-		if (empty($object->lines)) {
+		if (empty($object->lines) && !empty($object->id)) {
 			$object->fetch_lines();
 		}
 		$objectref = dol_sanitizeFileName($object->ref);
 		$dir = $conf->facture->multidir_output[$object->entity ?? $conf->entity].'/'.$objectref;
 		$file = $dir.'/'.$objectref.($this->copylang ? '_'.$this->copylang : '').'.pdf';
+		if ($this->previewfile !== '') {
+			$dir = dirname($this->previewfile);
+			$file = $this->previewfile;
+		}
 		if (!file_exists($dir) && dol_mkdir($dir) < 0) {
 			$this->error = $outputlangs->transnoentities('ErrorCanNotCreateDir', $dir);
 			return 0;
@@ -108,7 +114,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$pdf->SetAuthor($outputlangs->convToOutputCharset($mysoc->name));
 		$pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
 		$pdf->AddPage();
-		if (empty($object->array_options)) {
+		if (empty($object->array_options) && !empty($object->id)) {
 			$object->fetch_optionals();
 		}
 		$hvperiod = (string) ($object->array_options['options_hv_period'] ?? '');
@@ -185,7 +191,8 @@ class pdf_hausverwaltung extends ModelePDFFactures
 
 		// Empfänger: alle Rechnungskontakte (Eigentümer) mit OIB; Adresse vom ersten. Ohne Kontakt: Geschäftspartner.
 		$contacts = array();
-		foreach ($object->getIdContact('external', 'BILLING') as $cid) {
+		$billingIds = isset($object->hv_preview_contacts) ? (array) $object->hv_preview_contacts : $object->getIdContact('external', 'BILLING');
+		foreach ($billingIds as $cid) {
 			require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 			$c = new Contact($this->db);
 			if ($c->fetch($cid) > 0) {
@@ -456,8 +463,8 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		dolChmod($file);
 		$this->result = array('fullpath' => $file);
 
-		// Original erzeugt -> Übersetzungskopie für nicht-kroatische Eigentümer
-		if ($this->copylang === '') {
+		// Original erzeugt -> Übersetzungskopie für nicht-kroatische Eigentümer (nicht bei Vorschau)
+		if ($this->copylang === '' && $this->previewfile === '') {
 			$ownerlang = !empty($object->thirdparty->default_lang) ? $object->thirdparty->default_lang : '';
 			foreach (glob($dir.'/'.$objectref.'_??_??.pdf') ?: array() as $old) {
 				dol_delete_file($old, 0, 0, 0, null, false, 0);

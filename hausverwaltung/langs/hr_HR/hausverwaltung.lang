@@ -206,3 +206,7 @@ HvNoOwnerMarked = nijedan kontakt nije označen kao vlasnik
 HvNoOwnerContact = nijedan kontakt nije označen kao vlasnik
 HvMailHelloCompany = Poštovani,
 HvPdfRegNo = Reg. br.
+HvPreviewRefresh = Osvježi pregled
+HvPdfPreview = PDF pregled
+HvPdfOriginal = Izvornik
+HvPdfCopyShort = Kopija

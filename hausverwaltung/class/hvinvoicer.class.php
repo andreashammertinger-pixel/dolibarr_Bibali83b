@@ -232,6 +232,92 @@ class HvInvoicer
 		return $names;
 	}
 
+	/**
+	 * Positionen einer Vorschreibung: [fk_product, Text, Satz €/m² und Monat]
+	 */
+	public function lineDefs($r, $building, $fkReserveProduct, $fkBk, $fkAdmin, Translate $outlangs, $mlabel)
+	{
+		$u = $r['unit'];
+		$bname = $building ? (preg_match('/\d/', $building->ref) ? $outlangs->transnoentities('HvBuildingNo', preg_replace('/\D/', '', $building->ref)) : $building->label) : '';
+		return array(
+			array($fkBk, $outlangs->transnoentities('HvLineBk', $mlabel, $u->ref), $r['bk_rate']),
+			array($fkReserveProduct, $outlangs->transnoentities('HvLineReserve', $bname, $mlabel), $r['reserve_rate']),
+			array($fkAdmin, $outlangs->transnoentities('HvLineAdmin', $mlabel), $r['admin_rate']),
+		);
+	}
+
+	/**
+	 * Vorschau: Rechnung nur im Speicher aufbauen (wird nicht gespeichert), für die PDF-Vorschau.
+	 *
+	 * @return Facture|null
+	 */
+	public function previewInvoice($unitId, $period, $periodTo = '')
+	{
+		global $conf;
+		$periodTo = $periodTo ?: $period;
+		$nMonths = self::months($period, $periodTo);
+		if ($nMonths <= 0) {
+			return null;
+		}
+		$calc = new HvCalculator($this->db);
+		$rows = $calc->compute();
+		if (!isset($rows[$unitId]) || empty($rows[$unitId]['unit']->fk_soc)) {
+			return null;
+		}
+		$r = $rows[$unitId];
+		$u = $r['unit'];
+		$building = $calc->buildings[(int) $u->fk_building] ?? null;
+		preg_match('/^(\d{4})-(\d{2})$/', $period, $m);
+		$dueDay = max(1, min(28, getDolGlobalInt('HAUSVERWALTUNG_DUE_DAY', 5)));
+		$ol = new Translate('', $conf);
+		$ol->setDefaultLang(getDolGlobalString('HAUSVERWALTUNG_ORIGINAL_LANG', 'hr_HR'));
+		$ol->loadLangs(array('main', 'bills', 'hausverwaltung@hausverwaltung'));
+		$pBk = new Product($this->db);
+		$pBk->fetch(0, self::REF_BK);
+		$pAdmin = new Product($this->db);
+		$pAdmin->fetch(0, self::REF_ADMIN);
+
+		$f = new Facture($this->db);
+		$f->id = 0;
+		$f->entity = $conf->entity;
+		$f->ref = 'PREVIEW';
+		$f->statut = Facture::STATUS_DRAFT;
+		$f->status = Facture::STATUS_DRAFT;
+		$f->socid = (int) $u->fk_soc;
+		$f->fetch_thirdparty();
+		$f->date = dol_mktime(12, 0, 0, (int) $m[2], 1, (int) $m[1]);
+		$f->date_lim_reglement = dol_mktime(12, 0, 0, (int) $m[2], $dueDay, (int) $m[1]);
+		$f->fk_account = getDolGlobalInt('HAUSVERWALTUNG_BANK_ACCOUNT');
+		$f->array_options = array('options_hv_period' => $period, 'options_hv_period_to' => ($periodTo !== $period ? $periodTo : ''), 'options_hv_unit' => (int) $unitId);
+		$f->hv_preview_contacts = $this->ownerContacts((int) $u->fk_soc);
+		$f->lines = array();
+		$tot = 0;
+		foreach ($this->lineDefs($r, $building, $building ? (int) $building->fk_product_reserve : 0, (int) $pBk->id, (int) $pAdmin->id, $ol, self::periodLabel($period, $periodTo)) as $l) {
+			if ((float) $l[2] == 0) {
+				continue;
+			}
+			$ln = new FactureLigne($this->db);
+			$ln->fk_product = (int) $l[0];
+			$ln->desc = $l[1];
+			$ln->tva_tx = self::vatRate();
+			if ($nMonths > 1) {
+				$ln->subprice = round($l[2] * (float) $r['area'], 2);
+				$ln->qty = $nMonths;
+			} else {
+				$ln->subprice = $l[2];
+				$ln->qty = (float) $r['area'];
+			}
+			$ln->total_ht = round($ln->subprice * $ln->qty, 2);
+			$ln->total_tva = round($ln->total_ht * $ln->tva_tx / 100, 2);
+			$ln->total_ttc = $ln->total_ht + $ln->total_tva;
+			$tot += $ln->total_ttc;
+			$f->lines[] = $ln;
+		}
+		$f->total_ht = $f->total_ttc = round($tot, 2);
+		$f->total_tva = 0;
+		return $f;
+	}
+
 	/** Existiert für Einheit + Periode bereits eine (nicht stornierte) Vorschreibung? */
 	public function findExisting($unitId, $period, $periodTo = '')
 	{
@@ -354,11 +440,7 @@ class HvInvoicer
 				}
 			}
 
-			$lines = array(
-				array($pBk->id, $outlangs->transnoentities('HvLineBk', $mlabel, $u->ref), $r['bk_rate']),
-				array($fkReserveProduct, $outlangs->transnoentities('HvLineReserve', $building ? (preg_match('/\d/', $building->ref) ? $outlangs->transnoentities('HvBuildingNo', preg_replace('/\D/', '', $building->ref)) : $building->label) : '', $mlabel), $r['reserve_rate']),
-				array($pAdmin->id, $outlangs->transnoentities('HvLineAdmin', $mlabel), $r['admin_rate']),
-			);
+			$lines = $this->lineDefs($r, $building, $fkReserveProduct, (int) $pBk->id, (int) $pAdmin->id, $outlangs, $mlabel);
 			foreach ($lines as $l) {
 				if ($err) {
 					break;

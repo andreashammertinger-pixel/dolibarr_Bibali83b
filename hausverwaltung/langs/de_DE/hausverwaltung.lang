@@ -207,3 +207,7 @@ HvNoOwnerMarked = kein Kontakt als Eigentümer markiert
 HvNoOwnerContact = kein Kontakt als Eigentümer markiert
 HvMailHelloCompany = Sehr geehrte Damen und Herren,
 HvPdfRegNo = Reg.-Nr.
+HvPreviewRefresh = Vorschau aktualisieren
+HvPdfPreview = PDF-Vorschau
+HvPdfOriginal = Original
+HvPdfCopyShort = Kopie

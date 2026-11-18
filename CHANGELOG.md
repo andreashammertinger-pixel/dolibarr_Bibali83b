@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.3
+- *Vorschreibung erstellen*: Spalte **PDF-Vorschau** je Einheit (Original und Übersetzungskopie) mit Wasserzeichen „Entwurf“ – es wird keine Rechnung angelegt
+- Knopf „Vorschau“ heißt jetzt „Vorschau aktualisieren“ (berechnet die Tabelle für geänderte Zeiträume neu)
+
 ## 1.5.2
 - Registrierungsnummer der Gemeinschaft (Firma → Prof-ID 2) im Absenderblock unter der OIB, nur wenn befüllt (hr „Reg. br.“, de „Reg.-Nr.“)
 
