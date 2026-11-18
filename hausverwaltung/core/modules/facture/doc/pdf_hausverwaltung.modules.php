@@ -236,7 +236,9 @@ class pdf_hausverwaltung extends ModelePDFFactures
 
 		// Absender: Gemeinschaft (Name, OIB, Adresse, Kontakt) + Verwalter (Name, OIB, Kontakt)
 		$oib = hvOib($mysoc);
-		$from = $mysoc->name."\n".($oib ? "OIB: ".$oib."\n" : '').$this->addressLines($mysoc)."\n";
+		// Registrierungsnummer (Prof-ID 2), nur wenn befüllt – z. B. Registar zajednica suvlasnika
+		$regno = trim((string) ($mysoc->idprof2 ?? ''));
+		$from = $mysoc->name."\n".($oib ? "OIB: ".$oib."\n" : '').($regno !== '' ? $outputlangs->transnoentities('HvPdfRegNo').': '.$regno."\n" : '').$this->addressLines($mysoc)."\n";
 		if (!empty($mysoc->email)) {
 			$from .= "\n".$outputlangs->transnoentities('Email').': '.$mysoc->email;
 		}

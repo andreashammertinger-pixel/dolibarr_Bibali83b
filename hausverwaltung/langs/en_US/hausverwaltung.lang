@@ -205,3 +205,4 @@ HvOwnersMarked = Owners (contacts)
 HvNoOwnerMarked = no contact marked as owner
 HvNoOwnerContact = no contact marked as owner
 HvMailHelloCompany = Dear Sir or Madam,
+HvPdfRegNo = Reg. no.

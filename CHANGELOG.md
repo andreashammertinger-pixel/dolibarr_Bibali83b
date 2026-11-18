@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.5.2
+- Registrierungsnummer der Gemeinschaft (Firma → Prof-ID 2) im Absenderblock unter der OIB, nur wenn befüllt (hr „Reg. br.“, de „Reg.-Nr.“)
+
 ## 1.5.1
 - Firma als Eigentümer: Kontakt mit Firmenname als Nachname, leerem Vornamen, Firmen-OIB und Eigentümer = Ja; E-Mail-Anrede dann „Sehr geehrte Damen und Herren“ (hr: „Poštovani,“)
 

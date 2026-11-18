@@ -205,3 +205,4 @@ HvOwnersMarked = Vlasnici (kontakti)
 HvNoOwnerMarked = nijedan kontakt nije označen kao vlasnik
 HvNoOwnerContact = nijedan kontakt nije označen kao vlasnik
 HvMailHelloCompany = Poštovani,
+HvPdfRegNo = Reg. br.

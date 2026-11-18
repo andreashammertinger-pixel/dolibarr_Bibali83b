@@ -82,8 +82,8 @@ Auf der Vorschreibung: Einzelpreis = **€/m²**, Menge = **m² des Apartments**
 | Wer | Feld in Dolibarr |
 |---|---|
 | Eigentümer | Kontakt → Feld **OIB** (je Person; Fallback Prof-ID 1 / USt-ID des Apartments) |
-| Gemeinschaft (Firma 5) | *Firma/Institution* → Prof-ID 1 (oder USt-ID) |
-| Verwalter (Green Villa) | Geschäftspartner → Prof-ID 1 (oder USt-ID) |
+| Gemeinschaft (Firma 5) | *Firma/Institution* → Prof-ID 1 (oder USt-ID); Registrierungsnummer in Prof-ID 2 wird mitgedruckt |
+| Verwalter (Green Villa) | Geschäftspartner → USt-ID `HR…` (oder Prof-ID 1) |
 
 Alle OIB werden mit der Prüfziffer kontrolliert; fehlende/ungültige zeigt *Vorschreibung erstellen* als Warnung.
 

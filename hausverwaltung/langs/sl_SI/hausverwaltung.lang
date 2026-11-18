@@ -50,3 +50,4 @@ HvPdfDueOn = zapadlost %s
 HvPdfStandingOrder = Prosimo, za mesečne obroke uredite trajni nalog z navedenim sklicem.
 HvMailAmountRange = Skupaj: %s v %s mesečnih obrokih po %s, zapadlost vsakega %s. v mesecu (prvi obrok %s). Najlažje s trajnim nalogom.
 HvMailHelloCompany = Spoštovani,
+HvPdfRegNo = Reg. št.
