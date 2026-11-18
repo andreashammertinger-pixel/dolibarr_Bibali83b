@@ -54,5 +54,6 @@ Svaka poruka sadrži:
 ## Nakon slanja
 
 - **Povratne poruke** (pogrešna adresa) stižu na adresu pošiljatelja – provjeriti pretinac.
+- Sve poslane datoteke dodatno se nalaze kod **apartmana → Povezane datoteke**, s datumom slanja na početku naziva (npr. `2026-11-18_IN2611-0001.pdf`). Testno slanje ništa ne sprema.
 - Vlasnici vide zaduženje i objašnjenje i u svom [pristupu](eigentuemer-zugang.md).
 - Uplate: vidi [Uplate](zahlungen.md).

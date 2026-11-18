@@ -22,6 +22,57 @@ class HvMailer
 		return getDolGlobalString('HAUSVERWALTUNG_INFO_ATTACH', '1') === '1';
 	}
 
+	/** Versendete Dokumente beim Apartment ablegen (Einstellung, Standard an) */
+	public static function archiveEnabled()
+	{
+		return getDolGlobalString('HAUSVERWALTUNG_SENT_TO_THIRDPARTY', '1') === '1';
+	}
+
+	/**
+	 * Kopie der versendeten Dateien in die Dokumente des Geschäftspartners (Reiter „Verknüpfte Dokumente“),
+	 * Dateiname mit Versanddatum vorne, z. B. 2026-11-18_IN2611-0001.pdf
+	 *
+	 * @return int Anzahl abgelegter Dateien
+	 */
+	public static function archiveSent($socid, $files, $when = 0)
+	{
+		if ((int) $socid <= 0 || !$files) {
+			return 0;
+		}
+		dol_include_once('/hausverwaltung/class/hvstatementpdf.class.php');
+		$dir = HvStatementPdf::thirdpartyDir((int) $socid);
+		dol_mkdir($dir);
+		$prefix = dol_print_date($when ?: dol_now(), '%Y-%m-%d').'_';
+		$n = 0;
+		foreach ($files as $fl) {
+			if (is_readable($fl) && dol_copy($fl, $dir.'/'.$prefix.basename($fl), '0', 1) > 0) {
+				$n++;
+			}
+		}
+		return $n;
+	}
+
+	/** Einmalig: bereits versendete Vorschreibungen nachträglich beim Apartment ablegen */
+	public static function backfillArchive($db)
+	{
+		global $conf;
+		if (!self::archiveEnabled() || getDolGlobalString('HAUSVERWALTUNG_SENT_ARCHIVE_BACKFILL') === '1') {
+			return 0;
+		}
+		require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+		$n = 0;
+		$res = $db->query("SELECT fk_invoice, MIN(datec) as d FROM ".$db->prefix()."hv_mail_log WHERE entity = ".((int) $conf->entity)." AND status = 'ok' AND fk_invoice > 0 GROUP BY fk_invoice");
+		$m = new self($db);
+		while ($res && ($o = $db->fetch_object($res))) {
+			$f = new Facture($db);
+			if ($f->fetch((int) $o->fk_invoice) > 0) {
+				$n += self::archiveSent((int) $f->socid, $m->files($f), $db->jdate($o->d));
+			}
+		}
+		dolibarr_set_const($db, 'HAUSVERWALTUNG_SENT_ARCHIVE_BACKFILL', '1', 'chaine', 0, '', $conf->entity);
+		return $n;
+	}
+
 	/** IBAN lesbar in 4er-Gruppen */
 	public static function formatIban($iban)
 	{
@@ -227,6 +278,9 @@ class HvMailer
 		}
 		if ($testto === '') {
 			$this->log($user, $f, $to, $names, 'ok', '');
+			if (self::archiveEnabled()) {
+				self::archiveSent((int) $f->socid, $files);
+			}
 			// Agenda-Eintrag an der Rechnung (wie beim Dolibarr-Versand)
 			$f->sendtoid = array_values(array_filter(array_column($rcpt, 'id')));
 			$f->actiontypecode = 'AC_OTH_AUTO';
@@ -343,6 +397,9 @@ class HvMailer
 		if (!empty($mail->error) || !$mail->sendfile()) {
 			$this->error = $mail->error ?: 'Versand fehlgeschlagen';
 			return -5;
+		}
+		if ($testto === '' && self::archiveEnabled()) {
+			self::archiveSent((int) $d['unit']->fk_soc, $files);
 		}
 		if ($testto === '') {
 			$this->db->query("INSERT INTO ".$this->db->prefix()."hv_mail_log (entity, fk_invoice, sendto, files, status, error, datec, fk_user) VALUES (".((int) $conf->entity).", ".($fi ? (int) $fi->id : 0).", '".$this->db->escape(implode(', ', $to))."', '".$this->db->escape(implode(', ', $names))."', 'ok', '', '".$this->db->idate(dol_now())."', ".((int) $user->id).")");

@@ -21,7 +21,7 @@ Pod *Plaćanja* vidite koje su uplate već proknjižene.
 
 Izbornik **Treće osobe** → Vaš apartman (npr. *Bibali 83 B - Apt 1.8*) → kartica **Povezane datoteke**
 
-Ondje su **godišnji obračuni** (`ABR-2026-…pdf`) i ostali dokumenti Vašeg apartmana.
+Ondje je **sve što smo Vam poslali** – zaduženja, objašnjenja, godišnji obračuni – s datumom slanja na početku naziva (npr. `2026-11-18_IN2611-0001.pdf`), te ostali dokumenti Vašeg apartmana.
 
 !!! note "E-pošta"
     Sve dokumente dobivate i e-poštom. Papirnata verzija se ne dostavlja.

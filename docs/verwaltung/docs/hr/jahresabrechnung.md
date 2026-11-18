@@ -19,4 +19,4 @@ Pričuva i upravljanje se **ne** obračunavaju.
 3. **Izradi obračunske listove** – po apartmanu jedan PDF (hrvatski + kopija) sa svim vrstama troška, udjelom, akontacijama i saldom.
 4. Testno slanje na vlastitu adresu, zatim **Pošalji obračunske listove vlasnicima** (račun za nedoplatu je u privitku).
 
-Obračunski listovi nalaze se i u **dokumentima apartmana** – ondje ih vlasnik vidi u svom pristupu.
+Nakon slanja obračunski list i račun za nedoplatu nalaze se i kod **apartmana → Povezane datoteke** (s datumom slanja) – ondje ih vlasnik vidi u svom pristupu.

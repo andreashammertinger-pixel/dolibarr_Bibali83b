@@ -21,7 +21,7 @@ Unter *Zahlungen* sehen Sie, welche Zahlungen bereits verbucht sind.
 
 Menü **Geschäftspartner** → Ihr Apartment (z. B. *Bibali 83 B - Apt 1.8*) → Reiter **Verknüpfte Dokumente**
 
-Hier liegen die **Jahresabrechnungen** (`ABR-2026-…pdf`) und weitere Unterlagen zu Ihrem Apartment.
+Hier liegt **alles, was wir Ihnen geschickt haben** – Vorschreibungen, Erläuterungen, Jahresabrechnungen –, jeweils mit dem Versanddatum vorne im Dateinamen (z. B. `2026-11-18_IN2611-0001.pdf`), dazu weitere Unterlagen zu Ihrem Apartment.
 
 !!! note "E-Mail"
     Alle Dokumente erhalten Sie zusätzlich per E-Mail. Es erfolgt kein Versand in Papierform.

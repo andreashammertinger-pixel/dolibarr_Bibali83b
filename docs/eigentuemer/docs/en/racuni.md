@@ -21,7 +21,7 @@ Under *Payments* you see which payments have already been recorded.
 
 Menu **Third parties** → your apartment (e.g. *Bibali 83 B - Apt 1.8*) → tab **Linked files**
 
-Here you find the **annual statements** (`ABR-2026-…pdf`) and other documents for your apartment.
+Here you find **everything we have sent you** – service charges, explanations, annual statements – each with the sending date at the start of the file name (e.g. `2026-11-18_IN2611-0001.pdf`), plus other documents for your apartment.
 
 !!! note "E-mail"
     You also receive all documents by e-mail. No paper copies are sent.

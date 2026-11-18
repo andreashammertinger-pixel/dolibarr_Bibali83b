@@ -11,6 +11,7 @@
 | Verwalter | Firma, die verwaltet (steht auf allen Dokumenten) |
 | Absender / BCC | E-Mail-Absender, Kopie jeder Vorschreibung |
 | Digitaler Hinweis | „Digitales Dokument – kein Papierversand“ |
+| Versendete Dokumente beim Apartment ablegen | Kopie jeder versendeten Datei unter *Verknüpfte Dokumente* des Apartments |
 | Erläuterung anhängen | Erläuterung zur Vorschreibung mitsenden |
 | Adresse Eigentümer-Zugang | erscheint in der Erläuterung |
 | Hilfe-Adresse | Basisadresse dieses Handbuchs |

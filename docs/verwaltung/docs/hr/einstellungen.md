@@ -11,6 +11,7 @@
 | Upravitelj | tvrtka koja upravlja (navodi se na svim dokumentima) |
 | Pošiljatelj / BCC | adresa pošiljatelja, kopija svakog zaduženja |
 | Napomena o digitalnom dokumentu | „Digitalni dokument – papirnata verzija se ne dostavlja“ |
+| Poslane dokumente spremi kod apartmana | kopija svake poslane datoteke pod *Povezane datoteke* apartmana |
 | Priloži objašnjenje | slanje objašnjenja zaduženja |
 | Adresa pristupa za vlasnike | navodi se u objašnjenju |
 | Adresa pomoći | osnovna adresa ovog priručnika |

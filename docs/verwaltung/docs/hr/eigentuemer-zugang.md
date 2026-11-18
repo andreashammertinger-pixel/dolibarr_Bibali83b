@@ -31,5 +31,5 @@ Prava grupe u tvrtki *Bibali 83B*:
 ## Što vlasnik vidi
 
 - *Računi | Plaćanja → Izlazni računi*: svoja zaduženja s PDF-om (izvornik, kopija, objašnjenje)
-- apartman → *Dokumenti*: obračunski listovi
+- apartman → *Povezane datoteke*: sve što mu je poslano (zaduženja, objašnjenja, obračuni) s datumom slanja
 - upute za vlasnike: [Pomoć za vlasnike](../../../eigentuemer/)

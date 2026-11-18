@@ -54,5 +54,6 @@ Jede Mail enthält:
 ## Nach dem Versand
 
 - **Rückläufer** (falsche Adresse) kommen an die Absenderadresse – Postfach prüfen.
+- Alle versendeten Dateien liegen zusätzlich beim **Apartment → Verknüpfte Dokumente**, mit Versanddatum vorne im Dateinamen (z. B. `2026-11-18_IN2611-0001.pdf`). Der Testversand legt nichts ab.
 - Die Eigentümer sehen Vorschreibung und Erläuterung auch in ihrem [Zugang](eigentuemer-zugang.md).
 - Zahlungen siehe [Zahlungen](zahlungen.md).

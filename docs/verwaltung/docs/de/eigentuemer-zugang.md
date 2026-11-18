@@ -31,5 +31,5 @@ Rechte der Gruppe in der Firma *Bibali 83B*:
 ## Was der Eigentümer sieht
 
 - *Rechnung | Zahlung → Kundenrechnungen*: seine Vorschreibungen mit PDF (Original, Kopie, Erläuterung)
-- Apartment → *Dokumente*: Abrechnungsblätter
+- Apartment → *Verknüpfte Dokumente*: alles, was an ihn versendet wurde (Vorschreibungen, Erläuterungen, Abrechnungen) mit Versanddatum
 - Anleitung für Eigentümer: [Hilfe für Eigentümer](../../eigentuemer/de/)

@@ -19,4 +19,4 @@ Rücklage und Verwaltung werden **nicht** abgerechnet.
 3. **Abrechnungsblätter erzeugen** – je Apartment ein PDF (kroatisch + Kopie) mit allen Kostenarten, Anteil, Vorauszahlungen und Saldo.
 4. Testversand an die eigene Adresse, dann **Abrechnungsblätter an Eigentümer senden** (Nachzahlungsrechnung hängt an).
 
-Die Abrechnungsblätter liegen außerdem in den **Dokumenten des Apartments** – dort sieht sie der Eigentümer in seinem Zugang.
+Nach dem Versand liegen Abrechnungsblatt und Nachzahlungsrechnung zusätzlich beim **Apartment → Verknüpfte Dokumente** (mit Versanddatum) – dort sieht sie auch der Eigentümer in seinem Zugang.

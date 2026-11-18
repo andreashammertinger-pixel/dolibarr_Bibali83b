@@ -224,7 +224,7 @@ function hvExternalWithRights()
 
 /**
  * Adresse der Online-Hilfe (Handbuch für die Verwaltung bzw. Hilfe für Eigentümer) in der Sprache des Benutzers.
- * Basisadresse: Einstellung HAUSVERWALTUNG_HELP_URL, z. B. https://hilfe.greenresorts.hr/
+ * Basisadresse: Einstellung HAUSVERWALTUNG_HELP_URL, z. B. https://helpdolibarr.greenresorts.hr/
  *
  * @param string $page    Seite relativ zum Bereich, z. B. 'vorschreibung/'
  * @param string $section 'verwaltung' oder 'eigentuemer'

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.11.0
+- **Versendete Dokumente beim Apartment**: Jede an Eigentümer versendete Datei (Vorschreibung, Übersetzung, Erläuterung, Abrechnungsblatt, Nachzahlungsrechnung) liegt zusätzlich unter Geschäftspartner → *Verknüpfte Dokumente*, mit Versanddatum im Dateinamen; sichtbar auch im Eigentümer-Zugang. Testversand legt nichts ab.
+- Einmalig beim Aktivieren: bereits versendete Vorschreibungen werden nachträglich abgelegt
+- Abrechnungsblätter erscheinen beim Apartment erst nach dem Versand (nicht schon beim Erzeugen)
+- Einstellung „Versendete Dokumente beim Apartment ablegen“ (Standard an)
+- Doku (Handbuch de/hr, Eigentümerhilfe 5 Sprachen) angepasst
+
 ## 1.10.0
 - **Online-Hilfe**: Handbuch für die Verwaltung (de/hr), Hilfe für Eigentümer (hr/de/en/sl/uk), News und Recht mit Quellen – Website im Ordner `docs/`, automatische Veröffentlichung per GitHub Action
 - Fragezeichen oben rechts auf jeder Seite der Hausverwaltung öffnet das passende Kapitel in der Sprache des Benutzers; Menüpunkt „Handbuch (online)“

@@ -21,7 +21,7 @@ Pod *Plačila* vidite, katera plačila so že knjižena.
 
 Meni **Partnerji** → vaš apartma (npr. *Bibali 83 B - Apt 1.3*) → zavihek **Povezane datoteke**
 
-Tu so **letni obračuni** (`ABR-2026-…pdf`) in drugi dokumenti vašega apartmaja.
+Tu je **vse, kar smo vam poslali** – obremenitve, pojasnila, letni obračuni – z datumom pošiljanja na začetku imena datoteke (npr. `2026-11-18_IN2611-0001.pdf`), ter drugi dokumenti vašega apartmaja.
 
 !!! note "E-pošta"
     Vse dokumente prejmete tudi po e-pošti. Papirnih izvodov ne pošiljamo.
