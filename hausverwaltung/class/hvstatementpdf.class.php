@@ -10,6 +10,7 @@ require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 dol_include_once('/hausverwaltung/lib/hausverwaltung.lib.php');
 dol_include_once('/hausverwaltung/class/hvsettlement.class.php');
 dol_include_once('/hausverwaltung/core/modules/facture/doc/pdf_hausverwaltung.modules.php');
+dol_include_once('/hausverwaltung/class/hvmailer.class.php');
 
 /**
  * Abrechnungsblatt (Jahresabrechnung Betriebskosten) je Einheit.
@@ -292,7 +293,7 @@ class HvStatementPdf
 				$fi = new Facture($this->db);
 				if ($fi->fetch((int) $d['booked']->fk_invoice) > 0) {
 					$acc = new Account($this->db);
-					$iban = (!empty($fi->fk_account) && $acc->fetch($fi->fk_account) > 0) ? $acc->iban : '';
+					$iban = (!empty($fi->fk_account) && $acc->fetch($fi->fk_account) > 0) ? HvMailer::formatIban($acc->iban) : '';
 					$txt = $T->transnoentities('HvStmtAdditionalInvoice', $fi->ref, dol_print_date($fi->date_lim_reglement, 'day', false, $T), $iban);
 				}
 			}

@@ -16,6 +16,25 @@ dol_include_once('/hausverwaltung/class/hvsettlement.class.php');
  */
 class HvMailer
 {
+	/** IBAN lesbar in 4er-Gruppen */
+	public static function formatIban($iban)
+	{
+		return trim(chunk_split(strtoupper(preg_replace('/\s+/', '', (string) $iban)), 4, ' '));
+	}
+
+	/** Zahlungsangaben untereinander */
+	public static function bankBlock($ol, $holder, $iban, $bic, $ref)
+	{
+		$t = $ol->transnoentities('HvMailBankTitle')."\n";
+		$t .= $ol->transnoentities('HvMailLblHolder').': '.$holder."\n";
+		$t .= 'IBAN: '.self::formatIban($iban)."\n";
+		if (trim((string) $bic) !== '') {
+			$t .= 'BIC: '.trim($bic)."\n";
+		}
+		$t .= $ol->transnoentities('HvMailLblRef').': '.$ref."\n\n";
+		return $t;
+	}
+
 	public $db;
 	public $error = '';
 
@@ -108,9 +127,10 @@ class HvMailer
 			}
 		}
 		$acc = new Account($this->db);
-		$iban = $holder = '';
+		$iban = $holder = $bic = '';
 		if (!empty($f->fk_account) && $acc->fetch($f->fk_account) > 0) {
 			$iban = $acc->iban;
+			$bic = (string) $acc->bic;
 			$holder = !empty($acc->owner_name) ? $acc->owner_name : (!empty($acc->proprio) ? $acc->proprio : $mysoc->name);
 		}
 		$names = implode(', ', array_column($rcpt, 'name'));
@@ -128,13 +148,18 @@ class HvMailer
 		$body = ($persons ? $ol->transnoentities('HvMailHello', implode(', ', $persons)) : $ol->transnoentities('HvMailHelloCompany'))."\n\n";
 		$body .= $ol->transnoentities($isSettlement ? 'HvMailIntroSettlement' : 'HvMailIntro', $unitRef, $plabel)."\n\n";
 		if ((float) $f->total_ttc > 0) {
+			$body .= $ol->transnoentities('HvMailLblTotal').': '.$amount."\n";
 			if ($nMonths > 1) {
 				$plan = HvInvoicer::installments($f->total_ttc, $period, $periodTo);
-				$body .= $ol->transnoentities('HvMailAmountRange', $amount, $nMonths, price($plan[0]['amount'], 0, $ol, 1, 2, 2, $conf->currency), getDolGlobalInt('HAUSVERWALTUNG_DUE_DAY', 5), dol_print_date($plan[0]['due'], 'day', false, $ol))."\n";
+				$body .= $ol->transnoentities('HvMailLblRate').': '.price($plan[0]['amount'], 0, $ol, 1, 2, 2, $conf->currency).' ('.$ol->transnoentities('HvMailRateInfo', $nMonths, getDolGlobalInt('HAUSVERWALTUNG_DUE_DAY', 5)).")\n";
+				$body .= $ol->transnoentities('HvMailLblFirstDue').': '.dol_print_date($plan[0]['due'], 'day', false, $ol)."\n\n";
 			} else {
-				$body .= $ol->transnoentities('HvMailAmount', $amount, $due)."\n";
+				$body .= $ol->transnoentities('HvMailLblDue').': '.$due."\n\n";
 			}
-			$body .= $ol->transnoentities('HvMailBank', $holder, $iban, $f->ref)."\n\n";
+			$body .= self::bankBlock($ol, $holder, $iban, $bic, $f->ref);
+			if ($nMonths > 1) {
+				$body .= $ol->transnoentities('HvMailStandingOrder')."\n\n";
+			}
 		} else {
 			$body .= $ol->transnoentities('HvMailNothingToPay')."\n\n";
 		}
@@ -260,6 +285,10 @@ class HvMailer
 			$body .= $ol->transnoentities('HvMailStatementCredit', $amt)."\n\n";
 		} else {
 			$body .= $ol->transnoentities('HvMailStatementAdditional', $amt, $fi ? $fi->ref : '-', $fi ? dol_print_date($fi->date_lim_reglement, 'day', false, $ol) : '-')."\n\n";
+			$sacc = new Account($this->db);
+			if ($fi && !empty($fi->fk_account) && $sacc->fetch($fi->fk_account) > 0) {
+				$body .= self::bankBlock($ol, !empty($sacc->owner_name) ? $sacc->owner_name : (!empty($sacc->proprio) ? $sacc->proprio : $mysoc->name), $sacc->iban, $sacc->bic, $fi->ref);
+			}
 		}
 		if (substr($lang, 0, 2) !== substr($orig, 0, 2)) {
 			$body .= $ol->transnoentities('HvMailCopyNote')."\n\n";

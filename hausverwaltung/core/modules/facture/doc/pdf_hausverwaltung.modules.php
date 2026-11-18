@@ -421,7 +421,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		}
 		$bank = array(
 			array('HvPdfAccountHolder', $acc && $acc->owner_name ? $acc->owner_name : ($acc && !empty($acc->proprio) ? $acc->proprio : $mysoc->name)),
-			array('IBAN', $acc ? $acc->iban : ''),
+			array('IBAN', $acc ? trim(chunk_split(strtoupper(preg_replace('/\s+/', '', (string) $acc->iban)), 4, ' ')) : ''),
 			array('BIC', $acc ? $acc->bic : ''),
 			array('HvPdfPaymentRef', $object->ref),
 		);

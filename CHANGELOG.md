@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.2
+- E-Mail Vorschreibung übersichtlicher: Gesamtbetrag, Monatsrate, erste Fälligkeit und Zahlungsangaben (Empfänger, IBAN, BIC, Zahlungsreferenz) jeweils in eigener Zeile – in allen Sprachen
+- Gleicher Zahlungsblock in der E-Mail zur Nachzahlung (Abrechnung)
+- IBAN in E-Mail, Vorschreibung und Abrechnungsblatt lesbar in 4er-Gruppen
+
 ## 1.8.1
 - Import Rücklagen-Plan: Option „bestehende Planpositionen ersetzen“ (Standard an); ohne Option werden gleiche Positionen (Bezeichnung, Gebäude, Jahr) nicht doppelt angelegt
 - Rücklagen-Plan Bibali überarbeitet: Ansätze so bemessen, dass die aktuellen Sätze bei 3 % Baukostensteigerung über 20 Jahre reichen
