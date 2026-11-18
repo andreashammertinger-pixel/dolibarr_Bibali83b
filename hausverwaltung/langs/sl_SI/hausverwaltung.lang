@@ -110,3 +110,5 @@ HvPdfWEmail = E-pošta
 HvPdfWWeb = Splet
 HvStmtColItem = Vrsta stroška
 HvInvoiceNoteRange = Akontacija obratovalnih stroškov %s: %s mesečnih obrokov, zapadlost vsakega %s. v mesecu.
+HvPlanReplace = zamenjaj obstoječe postavke načrta (najprej izbriši vse)
+HvPlanDupes = %s postavk že obstaja – niso podvojene

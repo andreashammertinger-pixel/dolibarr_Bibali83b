@@ -110,6 +110,16 @@ if ($canwrite && $action === 'import') {
 		}
 		$n = 0;
 		$skipped = array();
+		$dupes = 0;
+		$existing = array();
+		if (GETPOSTINT('replace')) {
+			// Bestehenden Plan ersetzen (nur nach gültiger Datei)
+			$db->query("DELETE FROM ".$db->prefix()."hv_reserve_plan WHERE entity = ".((int) $conf->entity));
+		} else {
+			foreach ($repo->getReservePlan(false) as $ex) {
+				$existing[mb_strtolower(trim($ex->label)).'|'.((int) $ex->fk_building).'|'.((int) $ex->year_planned)] = 1;
+			}
+		}
 		$base = function ($v) use ($langs) {
 			if (!is_array($v)) {
 				return (string) $v;
@@ -125,6 +135,12 @@ if ($canwrite && $action === 'import') {
 				}
 				$fkb = $bmap[$p['building']];
 			}
+			$dk = mb_strtolower(trim($base($p['label']))).'|'.$fkb.'|'.((int) $p['year']);
+			if (isset($existing[$dk])) {
+				$dupes++;
+				continue;
+			}
+			$existing[$dk] = 1;
 			$tr = array();
 			foreach (array('label', 'basis', 'note') as $f) {
 				if (isset($p[$f]) && is_array($p[$f])) {
@@ -135,7 +151,14 @@ if ($canwrite && $action === 'import') {
 				$n++;
 			}
 		}
-		setEventMessages($langs->trans('HvPlanImported', $n), $skipped ? array($langs->trans('HvPlanSkipped').': '.implode(', ', $skipped)) : null, $skipped ? 'warnings' : 'mesgs');
+		$warn = array();
+		if ($skipped) {
+			$warn[] = $langs->trans('HvPlanSkipped').': '.implode(', ', $skipped);
+		}
+		if ($dupes) {
+			$warn[] = $langs->trans('HvPlanDupes', $dupes);
+		}
+		setEventMessages($langs->trans('HvPlanImported', $n), $warn ?: null, $warn ? 'warnings' : 'mesgs');
 	}
 	header('Location: '.$_SERVER['PHP_SELF']);
 	exit;
@@ -290,7 +313,7 @@ if ($print) {
 if ($canwrite) {
 	print '<br>'.load_fiche_titre($langs->trans('HvPlanImport'), '', '');
 	print '<p>'.$langs->trans('HvPlanImportHelp').' <a href="'.dol_buildpath('/hausverwaltung/data/vorlage_ruecklagenplan.json', 1).'" download>'.$langs->trans('HvImportTemplate').'</a></p>';
-	print '<form method="POST" enctype="multipart/form-data" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="import"><input type="file" name="planfile" accept=".json,application/json"> <input type="submit" class="button" value="'.$langs->trans('HvPlanImport').'"></form>';
+	print '<form method="POST" enctype="multipart/form-data" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="import"><input type="file" name="planfile" accept=".json,application/json"> <label><input type="checkbox" name="replace" value="1" checked> '.$langs->trans('HvPlanReplace').'</label> <input type="submit" class="button" value="'.$langs->trans('HvPlanImport').'"></form>';
 }
 llxFooter();
 $db->close();

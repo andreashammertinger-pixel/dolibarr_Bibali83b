@@ -293,3 +293,5 @@ HvPdfWEmail = E-pošta
 HvPdfWWeb = Web
 HvStmtColItem = Vrsta troška
 HvLangSkipped = %s stavki nije pridruženo (vrsta troška/stavka plana nije pronađena)
+HvPlanReplace = zamijeni postojeće stavke plana (prethodno obriši sve)
+HvPlanDupes = %s stavki već postoji – nisu dvostruko unesene

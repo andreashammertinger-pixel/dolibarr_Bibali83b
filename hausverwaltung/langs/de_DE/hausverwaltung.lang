@@ -294,3 +294,5 @@ HvPdfWEmail = E-Mail
 HvPdfWWeb = Web
 HvStmtColItem = Kostenart
 HvLangSkipped = %s Einträge nicht zugeordnet (Kostenart/Planposition nicht gefunden)
+HvPlanReplace = bestehende Planpositionen ersetzen (vorher alle löschen)
+HvPlanDupes = %s Positionen bereits vorhanden – nicht doppelt angelegt

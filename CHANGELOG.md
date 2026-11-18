@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.1
+- Import Rücklagen-Plan: Option „bestehende Planpositionen ersetzen“ (Standard an); ohne Option werden gleiche Positionen (Bezeichnung, Gebäude, Jahr) nicht doppelt angelegt
+- Rücklagen-Plan Bibali überarbeitet: Ansätze so bemessen, dass die aktuellen Sätze bei 3 % Baukostensteigerung über 20 Jahre reichen
+
 ## 1.8.0
 - **Abrechnungsblatt je Einheit** (Betriebskostenabrechnung): kroatisches Original + Kopie in der Sprache des Eigentümers; Kostenarten mit Gesamtkosten, Schlüssel, Anteil; Vorauszahlungen, Guthaben/Nachzahlung (mit Rechnungsnummer, Fälligkeit, IBAN), Rücklagen-Information. Nach dem Buchen gelten die festgeschriebenen Werte.
 - *Jahresabrechnung*: Abrechnungsblätter erzeugen, Testversand, Versand an alle Eigentümer (mit Nachzahlungsrechnung als Anhang), Versandprotokoll
