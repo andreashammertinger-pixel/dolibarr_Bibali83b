@@ -191,7 +191,7 @@ if ($action === 'import') {
 	exit;
 }
 
-llxHeader('', $langs->trans('HvLanguages'), '', '', 0, 0, '', '', '', 'mod-hausverwaltung');
+llxHeader('', $langs->trans('HvLanguages'), hvHelpUrl('sprachen/'), '', 0, 0, '', '', '', 'mod-hausverwaltung');
 print load_fiche_titre($langs->trans('HvLanguages'), '', 'language');
 print '<div class="opacitymedium">'.$langs->trans('HvLanguagesHelp', $orig).'</div><br>';
 

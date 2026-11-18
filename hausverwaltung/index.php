@@ -47,7 +47,7 @@ $rows = $calc->compute();
 $areas = $calc->areas();
 $mc = $calc->monthlyCostsByBuilding();
 
-llxHeader('', $langs->trans('Hausverwaltung'), '', '', 0, 0, '', '', '', 'mod-hausverwaltung page-index');
+llxHeader('', $langs->trans('Hausverwaltung'), hvHelpUrl(''), '', 0, 0, '', '', '', 'mod-hausverwaltung page-index');
 print load_fiche_titre($langs->trans('HvOverview'), '', 'building');
 
 if (empty($calc->units)) {

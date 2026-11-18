@@ -346,3 +346,9 @@ HvInfoAttachSetting = Erläuterung zur Vorschreibung anhängen
 HvInfoAttachHelp = PDF je Apartment: Sätze, Kostenarten, Rücklage, Ablauf – Original + Übersetzung
 HvOwnerPortalSetting = Adresse Eigentümer-Zugang
 HvOwnerPortalHelp = z. B. Login-Adresse von Dolibarr; erscheint in der Erläuterung (leer = nicht anzeigen)
+HvHelp = Hilfe
+HvHelpManual = Handbuch (online)
+HvHelpNotConfigured = Die Online-Hilfe ist noch nicht eingerichtet (Einstellungen Hausverwaltung → Hilfe-Adresse).
+HvHelpUrlSetting = Hilfe-Adresse
+HvHelpUrlHelp = Basisadresse der Online-Hilfe, z. B. https://hilfe.greenresorts.hr/ – Handbuch unter /verwaltung/, Hilfe für Eigentümer unter /eigentuemer/
+HvInfoHelp = Anleitungen und Antworten auf häufige Fragen: %s

@@ -329,6 +329,10 @@ class HvInfoPdf extends HvStatementPdf
 		if ($url !== '') {
 			$pts[] = $T->transnoentities('HvInfoPortal', $url);
 		}
+		$help = hvHelpUrl('', 'eigentuemer', $lang);
+		if ($help !== '') {
+			$pts[] = $T->transnoentities('HvInfoHelp', $help);
+		}
 		$mgr = $helper->manager();
 		if ($mgr) {
 			$pts[] = $T->transnoentities('HvInfoContact', $mgr->name.(!empty($mgr->email) ? ', '.$mgr->email : '').(!empty($mgr->phone) ? ', '.$mgr->phone : ''));

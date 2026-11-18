@@ -53,6 +53,8 @@ if ($action === 'save') {
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_PLAN_INFLATION', price2num(GETPOST('HAUSVERWALTUNG_PLAN_INFLATION', 'alphanohtml')), 'chaine', 0, '', $conf->entity);
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_PLAN_YEARS', max(5, min(40, GETPOSTINT('HAUSVERWALTUNG_PLAN_YEARS'))), 'chaine', 0, '', $conf->entity);
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_INFO_ATTACH', GETPOSTINT('HAUSVERWALTUNG_INFO_ATTACH') ? '1' : '0', 'chaine', 0, '', $conf->entity);
+	$hurl = trim(GETPOST('HAUSVERWALTUNG_HELP_URL', 'alphanohtml'));
+	dolibarr_set_const($db, 'HAUSVERWALTUNG_HELP_URL', preg_match('#^https?://#i', $hurl) ? $hurl : '', 'chaine', 0, '', $conf->entity);
 	$purl = trim(GETPOST('HAUSVERWALTUNG_OWNER_PORTAL_URL', 'alphanohtml'));
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_OWNER_PORTAL_URL', preg_match('#^https?://#i', $purl) ? $purl : '', 'chaine', 0, '', $conf->entity);
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_PDF_DIGITAL_NOTE', GETPOSTINT('HAUSVERWALTUNG_PDF_DIGITAL_NOTE') ? '1' : '0', 'chaine', 0, '', $conf->entity);
@@ -173,7 +175,7 @@ if ($action === 'importseed') {
 	exit;
 }
 
-llxHeader('', $langs->trans('HvSetupPage'), '', '', 0, 0, '', '', '', 'mod-hausverwaltung page-admin');
+llxHeader('', $langs->trans('HvSetupPage'), hvHelpUrl('einstellungen/'), '', 0, 0, '', '', '', 'mod-hausverwaltung page-admin');
 $linkback = '<a href="'.DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1">'.$langs->trans('BackToModuleList').'</a>';
 print load_fiche_titre($langs->trans('HvSetupPage'), $linkback, 'title_setup');
 print dol_get_fiche_head(hvAdminPrepareHead(), 'settings', '', -1, 'building');
@@ -193,6 +195,7 @@ print '<tr class="oddeven"><td>'.$langs->trans('HvPlanInflationSetting').'</td><
 print '<tr class="oddeven"><td>'.$langs->trans('HvDigitalNoteSetting').'</td><td><input type="checkbox" name="HAUSVERWALTUNG_PDF_DIGITAL_NOTE" value="1"'.(getDolGlobalString('HAUSVERWALTUNG_PDF_DIGITAL_NOTE', '1') === '1' ? ' checked' : '').'> <span class="opacitymedium">'.$langs->trans('HvPdfDigitalNote').'</span></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvMailFromSetting').'</td><td><input name="HAUSVERWALTUNG_MAIL_FROM" class="minwidth250" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_MAIL_FROM')).'" placeholder="'.dol_escape_htmltag($mysoc->email).'"></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvInfoAttachSetting').'</td><td><input type="checkbox" name="HAUSVERWALTUNG_INFO_ATTACH" value="1"'.(getDolGlobalString('HAUSVERWALTUNG_INFO_ATTACH', '1') === '1' ? ' checked' : '').'> <span class="opacitymedium">'.$langs->trans('HvInfoAttachHelp').'</span></td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans('HvHelpUrlSetting').'</td><td><input name="HAUSVERWALTUNG_HELP_URL" class="minwidth300" placeholder="https://…" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_HELP_URL')).'"> <span class="opacitymedium">'.$langs->trans('HvHelpUrlHelp').'</span></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvOwnerPortalSetting').'</td><td><input name="HAUSVERWALTUNG_OWNER_PORTAL_URL" class="minwidth300" placeholder="https://…" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_OWNER_PORTAL_URL')).'"> <span class="opacitymedium">'.$langs->trans('HvOwnerPortalHelp').'</span></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvMailBccSetting').'</td><td><input name="HAUSVERWALTUNG_MAIL_BCC" class="minwidth250" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_MAIL_BCC')).'"></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('VAT').' (Vorschreibung)</td><td><input name="HAUSVERWALTUNG_VAT_RATE" class="width50" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_VAT_RATE', '0')).'"> %</td></tr>';

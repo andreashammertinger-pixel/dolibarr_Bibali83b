@@ -56,6 +56,10 @@ Texte wie „Apartment“ lassen sich je Firma über *Einstellungen → Überset
 * **Neue Sprache (z. B. Italienisch):** beim Apartment (Geschäftspartner) die *Standardsprache* setzen → erscheint automatisch unter *Hausverwaltung → Sprachen*. Dort fehlende Texte direkt übersetzen oder **„Export für Übersetzer“** (JSON mit Deutsch + Kroatisch als Vorlage) → ausfüllen lassen → **importieren**. Übersetzungen werden in der Datenbank gespeichert (bleiben bei Modul-Updates erhalten). Solange etwas fehlt, wird Englisch verwendet.
 * **Kostenarten / Planpositionen:** Bezeichnungen je Sprache auf derselben Seite (oder beim Bearbeiten der Kostenart). Für Bibali: `data/bibali83b_uebersetzungen.json` importieren (hr/en/sl/uk).
 
+### Online-Hilfe
+* Website im Ordner `docs/` (siehe `docs/README.md`): Handbuch Verwaltung, Hilfe für Eigentümer, News und Recht.
+* In den Einstellungen die **Hilfe-Adresse** eintragen (z. B. `https://hilfe.greenresorts.hr/`) – dann führen das Fragezeichen jeder Seite und das Menü *Hilfe* der Eigentümer direkt in die passende Sprache.
+
 ### Eigentümer-Zugang (externe Benutzer)
 * Kontakte der Eigentümer können als **externe Benutzer** (verknüpft mit dem Apartment) angelegt werden. Sie sehen nur Daten ihres Apartments.
 * Rechte der Eigentümer-Gruppe (je Firma/Entität): *Kundenrechnungen einsehen* und *Geschäftspartner einsehen* – dann sehen sie unter *Rechnungen* ihre Vorschreibungen samt PDF (Original + Übersetzung) und unter dem Apartment → *Dokumente* ihre Abrechnungsblätter.

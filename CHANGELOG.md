@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.10.0
+- **Online-Hilfe**: Handbuch für die Verwaltung (de/hr), Hilfe für Eigentümer (hr/de/en/sl/uk), News und Recht mit Quellen – Website im Ordner `docs/`, automatische Veröffentlichung per GitHub Action
+- Fragezeichen oben rechts auf jeder Seite der Hausverwaltung öffnet das passende Kapitel in der Sprache des Benutzers; Menüpunkt „Handbuch (online)“
+- Menü **Hilfe** für Eigentümer (externe Benutzer) öffnet die Eigentümerhilfe in ihrer Sprache (Modul dafür für externe Benutzer freigegeben – die Hausverwaltung selbst bleibt gesperrt)
+- Einstellung „Hilfe-Adresse“; Erläuterung zur Vorschreibung verweist auf die Eigentümerhilfe
+
 ## 1.9.2
 - Erläuterung: Hinweis zu den geplanten Maßnahmen ergänzt (jährliche Begehung, Zeitpunkt und Umfang können sich verschieben), mehrzeilig, in allen Sprachen
 

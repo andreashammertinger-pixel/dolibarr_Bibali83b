@@ -345,3 +345,9 @@ HvInfoAttachSetting = Priloži objašnjenje zaduženja
 HvInfoAttachHelp = PDF po apartmanu: stope, vrste troškova, pričuva, postupak – izvornik + prijevod
 HvOwnerPortalSetting = Adresa pristupa za vlasnike
 HvOwnerPortalHelp = npr. adresa prijave u Dolibarr; prikazuje se u objašnjenju (prazno = ne prikazuje se)
+HvHelp = Pomoć
+HvHelpManual = Priručnik (online)
+HvHelpNotConfigured = Online pomoć još nije postavljena (postavke upravljanja zgradom → adresa pomoći).
+HvHelpUrlSetting = Adresa pomoći
+HvHelpUrlHelp = Osnovna adresa online pomoći, npr. https://hilfe.greenresorts.hr/ – priručnik pod /verwaltung/, pomoć za vlasnike pod /eigentuemer/
+HvInfoHelp = Upute i odgovori na česta pitanja: %s

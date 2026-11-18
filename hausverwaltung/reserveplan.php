@@ -203,7 +203,7 @@ if ($print) {
 	}
 	print '<h2>'.$T->trans('HvReservePlan').' – '.dol_escape_htmltag($mysoc->name).'</h2><p>'.$T->trans('HvPlanAssumptions', price($proj['inflation'], 0, $T), dol_print_date(dol_now(), 'day', false, $T)).'</p>';
 } else {
-	llxHeader('', $langs->trans('HvReservePlan'), '', '', 0, 0, '', '', '', 'mod-hausverwaltung');
+	llxHeader('', $langs->trans('HvReservePlan'), hvHelpUrl('ruecklage/'), '', 0, 0, '', '', '', 'mod-hausverwaltung');
 	$btn = '';
 	foreach ($docLangs as $l) {
 		$btn .= '<a class="butAction small" href="'.$_SERVER['PHP_SELF'].'?print=1&lang='.$l.'" target="_blank">'.$langs->trans('HvPrintView').' '.strtoupper(substr($l, 0, 2)).'</a>';

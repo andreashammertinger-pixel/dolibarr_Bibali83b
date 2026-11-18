@@ -29,7 +29,7 @@ class modHausverwaltung extends DolibarrModules
 		$this->descriptionlong = 'Kostenplan je Gebäude/alle Gebäude, Verteilung nach m², monatliche Vorschreibung als Kundenrechnung, automatische Rücklagen-Umbuchung bei Zahlungseingang, Jahresabrechnung und mobile Belegerfassung.';
 		$this->editor_name = 'Green Villa and Apartment Resorts d.o.o.';
 		$this->editor_url = 'https://www.greenresorts.hr';
-		$this->version = '1.9.2';
+		$this->version = '1.10.0';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->picto = 'building';
 
@@ -39,7 +39,7 @@ class modHausverwaltung extends DolibarrModules
 			'css' => array(),
 			'js' => array(),
 			'hooks' => array(),
-			'moduleforexternal' => 0,
+			'moduleforexternal' => 1, // nur für das Menü „Hilfe“ der Eigentümer; alle Seiten der Hausverwaltung bleiben für externe Benutzer gesperrt
 		);
 
 		$this->dirs = array('/hausverwaltung/temp');
@@ -102,6 +102,14 @@ class modHausverwaltung extends DolibarrModules
 			array('HvSettlement', '/hausverwaltung/settlement.php', 'read', 'hv_settlement'),
 			array('HvMobile', '/hausverwaltung/mobile.php', 'capture', 'hv_mobile'),
 			array('HvLanguages', '/hausverwaltung/languages.php', 'write', 'hv_languages'),
+			array('HvHelpManual', '/hausverwaltung/help.php', 'read', 'hv_help'),
+		);
+		// Hilfe für Eigentümer (externe Benutzer): eigenes Hauptmenü, öffnet die Eigentümer-Hilfe in ihrer Sprache
+		$this->menu[$r++] = array(
+			'fk_menu' => '', 'type' => 'top', 'titre' => 'HvHelp', 'prefix' => img_picto('', 'question', 'class="pictofixedwidth valignmiddle"'),
+			'mainmenu' => 'hvhelp', 'leftmenu' => '', 'url' => '/hausverwaltung/help.php',
+			'langs' => 'hausverwaltung@hausverwaltung', 'position' => 1100, 'enabled' => 'isModEnabled("hausverwaltung") && getDolGlobalString("HAUSVERWALTUNG_HELP_URL")',
+			'perms' => '!empty($user->socid)', 'target' => '_blank', 'user' => 1,
 		);
 		$pos = 1001;
 		foreach ($left as $l) {
@@ -109,7 +117,7 @@ class modHausverwaltung extends DolibarrModules
 				'fk_menu' => 'fk_mainmenu=hausverwaltung', 'type' => 'left', 'titre' => $l[0],
 				'mainmenu' => 'hausverwaltung', 'leftmenu' => $l[3], 'url' => $l[1],
 				'langs' => 'hausverwaltung@hausverwaltung', 'position' => $pos++, 'enabled' => 'isModEnabled("hausverwaltung")',
-				'perms' => '$user->hasRight("hausverwaltung", "'.$l[2].'") && empty($user->socid)', 'target' => '', 'user' => 0,
+				'perms' => '$user->hasRight("hausverwaltung", "'.$l[2].'") && empty($user->socid)', 'target' => ($l[3] === 'hv_help' ? '_blank' : ''), 'user' => 0,
 			);
 		}
 	}

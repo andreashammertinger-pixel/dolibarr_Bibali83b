@@ -61,7 +61,7 @@ while ($res && ($o = $db->fetch_object($res))) {
 	$sums[(int) $o->fk_building][$o->direction] = (float) $o->total;
 }
 
-llxHeader('', $langs->trans('HvReserves'), '', '', 0, 0, '', '', '', 'mod-hausverwaltung');
+llxHeader('', $langs->trans('HvReserves'), hvHelpUrl('ruecklage/'), '', 0, 0, '', '', '', 'mod-hausverwaltung');
 print load_fiche_titre($langs->trans('HvReserves').' '.$year, '<form method="GET"><input type="number" name="year" class="width75" value="'.$year.'"> <input type="submit" class="button small" value="OK"></form>', 'bank_account');
 
 print '<div class="div-table-responsive"><table class="noborder centpercent"><tr class="liste_titre"><th>'.$langs->trans('HvBuilding').'</th><th>'.$langs->trans('HvReserveAccount').'</th><th class="right">'.$langs->trans('HvMonthly').' ('.$langs->trans('HvBudget').')</th><th class="right">'.$langs->trans('HvMovesIn').' '.$year.'</th><th class="right">'.$langs->trans('HvMovesOut').' '.$year.'</th><th class="right">'.$langs->trans('HvBalance').'</th></tr>';

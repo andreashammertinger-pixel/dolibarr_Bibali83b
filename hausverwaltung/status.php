@@ -53,7 +53,7 @@ $sql .= " WHERE f.entity = ".((int) $conf->entity)." AND f.fk_statut IN (1,2) AN
 $sql .= " ORDER BY u.position, u.ref, fe.hv_period";
 $res = $db->query($sql);
 
-llxHeader('', $langs->trans('HvPaymentStatus'), '', '', 0, 0, '', '', '', 'mod-hausverwaltung');
+llxHeader('', $langs->trans('HvPaymentStatus'), hvHelpUrl('zahlungen/'), '', 0, 0, '', '', '', 'mod-hausverwaltung');
 print load_fiche_titre($langs->trans('HvPaymentStatus').' '.$year, '<form method="GET"><input type="number" name="year" class="width75" value="'.$year.'"> <input type="submit" class="button small" value="OK"></form>', 'payment');
 print '<div class="div-table-responsive"><table class="noborder centpercent"><tr class="liste_titre"><th>'.$langs->trans('HvUnit').'</th><th>'.$langs->trans('HvOwner').'</th><th>'.$langs->trans('Invoice').'</th><th>'.$langs->trans('HvPeriod').'</th><th class="right">'.$langs->trans('Total').'</th><th class="right">'.$langs->trans('HvDueUntilToday').'</th><th class="right">'.$langs->trans('AlreadyPaid').'</th><th class="right">'.$langs->trans('HvArrears').'</th><th>'.$langs->trans('HvNextDue').'</th></tr>';
 $tot = array('total' => 0, 'due' => 0, 'paid' => 0, 'arr' => 0);

@@ -82,7 +82,7 @@ if ($canwrite && $action === 'confirm_delete' && GETPOST('confirm') === 'yes') {
 
 $units = $repo->getUnits(false);
 
-llxHeader('', $langs->trans('HvUnits'), '', '', 0, 0, '', '', '', 'mod-hausverwaltung');
+llxHeader('', $langs->trans('HvUnits'), hvHelpUrl('eigentuemer-zugang/'), '', 0, 0, '', '', '', 'mod-hausverwaltung');
 $newbtn = $canwrite ? dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', $_SERVER['PHP_SELF'].'?action=create') : '';
 print load_fiche_titre($langs->trans('HvUnits'), $newbtn, 'building');
 

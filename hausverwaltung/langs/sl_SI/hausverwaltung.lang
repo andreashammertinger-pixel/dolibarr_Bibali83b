@@ -157,3 +157,5 @@ HvInfoCycleFixed = Rezervni sklad in nadomestilo za upravljanje sta fiksna znesk
 HvInfoPortal = Svoje obremenitve, obračune in dokumente najdete kadar koli na spletu: %s
 HvInfoContact = Za vprašanja se obrnite na upravnika: %s
 HvMailInfoAttached = V prilogi je tudi pojasnilo, kako je znesek sestavljen.
+HvHelp = Pomoč
+HvInfoHelp = Navodila in odgovori na pogosta vprašanja: %s

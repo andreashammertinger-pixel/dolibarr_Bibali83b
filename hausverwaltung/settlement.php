@@ -87,7 +87,7 @@ if ($canInvoice && in_array($action, array('stmttest', 'confirm_stmtsend'), true
 $data = $st->compute($year);
 $calc = new HvCalculator($db);
 
-llxHeader('', $langs->trans('HvSettlement'), '', '', 0, 0, '', '', '', 'mod-hausverwaltung');
+llxHeader('', $langs->trans('HvSettlement'), hvHelpUrl('jahresabrechnung/'), '', 0, 0, '', '', '', 'mod-hausverwaltung');
 print load_fiche_titre($langs->trans('HvSettlement').' '.$year, '<form method="GET"><input type="number" name="year" class="width75" value="'.$year.'"> <input type="submit" class="button small" value="OK"></form>', 'bill');
 
 if ($action === 'stmtsend') {

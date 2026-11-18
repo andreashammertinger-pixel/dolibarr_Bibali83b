@@ -93,7 +93,7 @@ $items = $repo->getCostItems(false);
 $chk = new HvCalculator($db);
 $chk->compute();
 
-llxHeader('', $langs->trans('HvCostPlan'), '', '', 0, 0, '', '', '', 'mod-hausverwaltung');
+llxHeader('', $langs->trans('HvCostPlan'), hvHelpUrl('kosten/'), '', 0, 0, '', '', '', 'mod-hausverwaltung');
 $newbtn = $canwrite ? dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', $_SERVER['PHP_SELF'].'?action=create') : '';
 print load_fiche_titre($langs->trans('HvCostPlan'), $newbtn, 'bill');
 if (!empty($chk->warnings)) {

@@ -221,3 +221,28 @@ function hvExternalWithRights()
 	}
 	return $out;
 }
+
+/**
+ * Adresse der Online-Hilfe (Handbuch für die Verwaltung bzw. Hilfe für Eigentümer) in der Sprache des Benutzers.
+ * Basisadresse: Einstellung HAUSVERWALTUNG_HELP_URL, z. B. https://hilfe.greenresorts.hr/
+ *
+ * @param string $page    Seite relativ zum Bereich, z. B. 'vorschreibung/'
+ * @param string $section 'verwaltung' oder 'eigentuemer'
+ * @param string $lang    Sprache (leer = Sprache des Benutzers)
+ */
+function hvHelpUrl($page = '', $section = 'verwaltung', $lang = '')
+{
+	global $langs;
+	$base = rtrim(getDolGlobalString('HAUSVERWALTUNG_HELP_URL'), '/');
+	if ($base === '' || !preg_match('#^https?://#i', $base)) {
+		return '';
+	}
+	$l = substr($lang !== '' ? $lang : (is_object($langs) ? $langs->defaultlang : 'de_DE'), 0, 2);
+	if ($section === 'eigentuemer') {
+		$prefix = $l === 'hr' ? '' : (in_array($l, array('de', 'en', 'sl', 'uk'), true) ? $l.'/' : 'en/');
+	} else {
+		$section = 'verwaltung';
+		$prefix = $l === 'hr' ? 'hr/' : '';
+	}
+	return $base.'/'.$section.'/'.$prefix.$page;
+}

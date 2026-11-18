@@ -345,3 +345,9 @@ HvInfoAttachSetting = Attach explanation to service charge
 HvInfoAttachHelp = PDF per apartment: rates, cost types, reserve, procedure – original + translation
 HvOwnerPortalSetting = Owner access address
 HvOwnerPortalHelp = e.g. Dolibarr login address; shown in the explanation (empty = not shown)
+HvHelp = Help
+HvHelpManual = Manual (online)
+HvHelpNotConfigured = Online help is not set up yet (property management settings → help address).
+HvHelpUrlSetting = Help address
+HvHelpUrlHelp = Base address of the online help, e.g. https://hilfe.greenresorts.hr/ – manual under /verwaltung/, owner help under /eigentuemer/
+HvInfoHelp = Guides and answers to frequent questions: %s
