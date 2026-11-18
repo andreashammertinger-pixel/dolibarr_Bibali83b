@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.9.2
+- Erläuterung: Hinweis zu den geplanten Maßnahmen ergänzt (jährliche Begehung, Zeitpunkt und Umfang können sich verschieben), mehrzeilig, in allen Sprachen
+
 ## 1.9.1
 - Fix: SQL-Fehler „Filter error – Bad syntax of the search string“ in Rechnungs-, Eingangsrechnungs- und Produktlisten. Filter der Auswahllisten (Apartment, Kostenart, KPD) auf die Syntax von Dolibarr ≥ 19 umgestellt; bestehende Installationen werden beim erneuten Aktivieren korrigiert
 

@@ -313,7 +313,7 @@ class HvInfoPdf extends HvStatementPdf
 			}
 			$pdf->SetX($L + 3);
 			$pdf->SetFont('', 'I', $fs - 3);
-			$pdf->Cell($W - 3, 4.2, $T->transnoentities('HvInfoPlanNote'), 0, 1, 'L');
+			$pdf->MultiCell($W - 3, 4, $T->transnoentities('HvInfoPlanNote'), 0, 'L');
 		}
 		$pdf->SetY($pdf->GetY() + 3);
 
