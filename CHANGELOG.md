@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.8.3
+- Verspätete Ausstellung: Ist eine Rate bei der Freigabe schon fällig (z. B. Freigabe am 18.11., Fälligkeit 5.11.), gilt eine Frist von 7 Tagen ab Freigabe (Einstellung `HAUSVERWALTUNG_LATE_DAYS`). Wirkt auf PDF (Fälligkeit, Zahlungsplan), E-Mail („binnen 7 Tagen“), Zahlungsstatus und das Fälligkeitsdatum der Rechnung; folgende Raten bleiben am Fälligkeitstag.
+
 ## 1.8.2
 - E-Mail Vorschreibung übersichtlicher: Gesamtbetrag, Monatsrate, erste Fälligkeit und Zahlungsangaben (Empfänger, IBAN, BIC, Zahlungsreferenz) jeweils in eigener Zeile – in allen Sprachen
 - Gleicher Zahlungsblock in der E-Mail zur Nachzahlung (Abrechnung)

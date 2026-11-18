@@ -301,3 +301,4 @@ HvMailBankTitle = Molimo uplatu na:
 HvMailLblHolder = Primatelj
 HvMailLblRef = Poziv na broj
 HvMailStandingOrder = Najjednostavnije putem trajnog naloga.
+HvMailWithinDays = u roku od %s dana

@@ -302,3 +302,4 @@ HvMailBankTitle = Bitte überweisen Sie an:
 HvMailLblHolder = Empfänger
 HvMailLblRef = Zahlungsreferenz
 HvMailStandingOrder = Am einfachsten per Dauerauftrag.
+HvMailWithinDays = binnen %s Tagen

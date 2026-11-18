@@ -148,7 +148,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$y = $this->marge_haute + 12;
 		$rows = array(
 			array($outputlangs->transnoentities('HvPdfWDate').':', dol_print_date($object->date, 'day', false, $outputlangs, true)),
-			array($outputlangs->transnoentities('HvPdfWDateDue').':', dol_print_date($object->date_lim_reglement, 'day', false, $outputlangs, true)),
+			array($outputlangs->transnoentities('HvPdfWDateDue').':', dol_print_date(HvInvoicer::effectiveDue($object)[0], 'day', false, $outputlangs, true)),
 			array($outputlangs->transnoentities('HvPdfWRef').':', $object->ref),
 		);
 		foreach ($rows as $r) {
@@ -381,7 +381,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 
 		// --- Zahlungsplan (Zeitraum): monatliche Raten
 		if ($nMonths > 1 && (float) $object->total_ttc > 0) {
-			$plan = HvInvoicer::installments($object->total_ttc, $period, $periodTo);
+			$plan = HvInvoicer::installments($object->total_ttc, $period, $periodTo, HvInvoicer::issued($object));
 			$y += 4;
 			$pdf->SetFont('', 'B', $fs - 1);
 			$pdf->SetXY($L, $y);

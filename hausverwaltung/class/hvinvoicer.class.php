@@ -55,7 +55,35 @@ class HvInvoicer
 	 *
 	 * @return array<int,array{due:int,amount:float,label:string}>
 	 */
-	public static function installments($total, $from, $to)
+	/** Frist für bereits überfällige Raten (Tage ab Freigabe) */
+	public static function lateDays()
+	{
+		return max(1, getDolGlobalInt('HAUSVERWALTUNG_LATE_DAYS', 7));
+	}
+
+	/** Ausstellungszeitpunkt: Freigabe, bei Entwurf/Vorschau heute */
+	public static function issued($f)
+	{
+		return (!empty($f->statut) || !empty($f->status)) && !empty($f->date_validation) ? (int) $f->date_validation : dol_now();
+	}
+
+	/** Fälligkeit verschieben, wenn sie zum Ausstellungszeitpunkt schon vorbei ist */
+	public static function shiftDue($due, $issued)
+	{
+		if ($issued > 0 && $due > 0 && dol_mktime(23, 59, 59, (int) dol_print_date($due, '%m'), (int) dol_print_date($due, '%d'), (int) dol_print_date($due, '%Y')) < $issued) {
+			$d = $issued + self::lateDays() * 86400;
+			return array(dol_mktime(12, 0, 0, (int) dol_print_date($d, '%m'), (int) dol_print_date($d, '%d'), (int) dol_print_date($d, '%Y')), true);
+		}
+		return array($due, false);
+	}
+
+	/** Fälligkeit einer Einzel-Vorschreibung unter Berücksichtigung verspäteter Ausstellung */
+	public static function effectiveDue($f)
+	{
+		return self::shiftDue((int) $f->date_lim_reglement, self::issued($f));
+	}
+
+	public static function installments($total, $from, $to, $issued = 0)
 	{
 		$n = self::months($from, $to);
 		if ($n <= 0) {
@@ -71,7 +99,8 @@ class HvInvoicer
 			$mo = ((int) $a[2] - 1 + $i) % 12 + 1;
 			$amt = ($i === $n - 1) ? round((float) $total - $sum, 2) : $rate;
 			$sum += $amt;
-			$out[] = array('due' => dol_mktime(12, 0, 0, $mo, $dueDay, $y), 'amount' => $amt, 'label' => sprintf('%02d/%04d', $mo, $y));
+			list($due, $late) = self::shiftDue(dol_mktime(12, 0, 0, $mo, $dueDay, $y), (int) $issued);
+			$out[] = array('due' => $due, 'late' => $late, 'amount' => $amt, 'label' => sprintf('%02d/%04d', $mo, $y));
 		}
 		return $out;
 	}

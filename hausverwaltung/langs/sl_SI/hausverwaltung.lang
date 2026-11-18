@@ -118,3 +118,4 @@ HvMailBankTitle = Prosimo, nakažite na:
 HvMailLblHolder = Prejemnik
 HvMailLblRef = Sklic
 HvMailStandingOrder = Najlažje s trajnim nalogom.
+HvMailWithinDays = v %s dneh

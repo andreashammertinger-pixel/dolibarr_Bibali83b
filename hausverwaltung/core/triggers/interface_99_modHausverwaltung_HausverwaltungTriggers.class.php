@@ -27,6 +27,17 @@ class InterfaceHausverwaltungTriggers extends DolibarrTriggers
 		if ($action === 'PAYMENT_ADD_TO_BANK') {
 			$res = $r->onPaymentAddedToBank($object, $user);
 		} elseif ($action === 'BILL_VALIDATE') {
+			// Vorschreibung erst nach der Fälligkeit freigegeben: Frist ab Freigabe (Standard 7 Tage)
+			$rs = $this->db->query("SELECT hv_unit FROM ".$this->db->prefix()."facture_extrafields WHERE fk_object = ".((int) $object->id));
+			$ob = $rs ? $this->db->fetch_object($rs) : null;
+			if ($ob && (int) $ob->hv_unit > 0) {
+				dol_include_once('/hausverwaltung/class/hvinvoicer.class.php');
+				list($nd, $late) = HvInvoicer::shiftDue((int) $object->date_lim_reglement, dol_now());
+				if ($late) {
+					$this->db->query("UPDATE ".$this->db->prefix()."facture SET date_lim_reglement = '".$this->db->idate($nd)."' WHERE rowid = ".((int) $object->id));
+					$object->date_lim_reglement = $nd;
+				}
+			}
 			$res = $r->onInvoiceValidated($object, $user);
 		} elseif ($action === 'BILL_UNVALIDATE' || $action === 'BILL_DELETE') {
 			$res = $r->onInvoiceUnvalidated($object, $user);

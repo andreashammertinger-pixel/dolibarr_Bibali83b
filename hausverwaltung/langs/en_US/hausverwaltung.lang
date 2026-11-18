@@ -301,3 +301,4 @@ HvMailBankTitle = Please transfer to:
 HvMailLblHolder = Beneficiary
 HvMailLblRef = Payment reference
 HvMailStandingOrder = A standing order is easiest.
+HvMailWithinDays = within %s days

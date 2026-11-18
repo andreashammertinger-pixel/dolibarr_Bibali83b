@@ -61,9 +61,9 @@ while ($res && ($o = $db->fetch_object($res))) {
 	$f = new Facture($db);
 	$f->fetch($o->rowid);
 	if ($isSettlement || empty($o->hv_period_to)) {
-		$plan = array(array('due' => $f->date_lim_reglement, 'amount' => (float) $o->total_ttc));
+		$plan = array(array('due' => HvInvoicer::effectiveDue($f)[0], 'amount' => (float) $o->total_ttc));
 	} else {
-		$plan = HvInvoicer::installments($o->total_ttc, $o->hv_period, $o->hv_period_to);
+		$plan = HvInvoicer::installments($o->total_ttc, $o->hv_period, $o->hv_period_to, HvInvoicer::issued($f));
 	}
 	$due = 0;
 	$next = null;

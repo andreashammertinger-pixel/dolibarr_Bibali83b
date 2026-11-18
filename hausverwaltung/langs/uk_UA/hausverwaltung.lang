@@ -118,3 +118,4 @@ HvMailBankTitle = Будь ласка, перекажіть на:
 HvMailLblHolder = Отримувач
 HvMailLblRef = Призначення платежу
 HvMailStandingOrder = Найзручніше – постійним дорученням.
+HvMailWithinDays = протягом %s днів

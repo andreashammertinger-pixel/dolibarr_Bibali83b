@@ -150,11 +150,12 @@ class HvMailer
 		if ((float) $f->total_ttc > 0) {
 			$body .= $ol->transnoentities('HvMailLblTotal').': '.$amount."\n";
 			if ($nMonths > 1) {
-				$plan = HvInvoicer::installments($f->total_ttc, $period, $periodTo);
+				$plan = HvInvoicer::installments($f->total_ttc, $period, $periodTo, HvInvoicer::issued($f));
 				$body .= $ol->transnoentities('HvMailLblRate').': '.price($plan[0]['amount'], 0, $ol, 1, 2, 2, $conf->currency).' ('.$ol->transnoentities('HvMailRateInfo', $nMonths, getDolGlobalInt('HAUSVERWALTUNG_DUE_DAY', 5)).")\n";
-				$body .= $ol->transnoentities('HvMailLblFirstDue').': '.dol_print_date($plan[0]['due'], 'day', false, $ol)."\n\n";
+				$body .= $ol->transnoentities('HvMailLblFirstDue').': '.dol_print_date($plan[0]['due'], 'day', false, $ol).(!empty($plan[0]['late']) ? ' ('.$ol->transnoentities('HvMailWithinDays', HvInvoicer::lateDays()).')' : '')."\n\n";
 			} else {
-				$body .= $ol->transnoentities('HvMailLblDue').': '.$due."\n\n";
+				list($ed, $late) = HvInvoicer::effectiveDue($f);
+				$body .= $ol->transnoentities('HvMailLblDue').': '.dol_print_date($ed, 'day', false, $ol).($late ? ' ('.$ol->transnoentities('HvMailWithinDays', HvInvoicer::lateDays()).')' : '')."\n\n";
 			}
 			$body .= self::bankBlock($ol, $holder, $iban, $bic, $f->ref);
 			if ($nMonths > 1) {
