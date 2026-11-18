@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.9.1
+- Fix: SQL-Fehler „Filter error – Bad syntax of the search string“ in Rechnungs-, Eingangsrechnungs- und Produktlisten. Filter der Auswahllisten (Apartment, Kostenart, KPD) auf die Syntax von Dolibarr ≥ 19 umgestellt; bestehende Installationen werden beim erneuten Aktivieren korrigiert
+
 ## 1.9.0
 - **Erläuterung zur Vorschreibung** je Apartment (PDF, kroatisches Original + Übersetzung): monatliche Zusammensetzung (Satz × m² für Betriebskosten, Rücklage, Verwaltung), Betriebskosten je Kostenart mit Anteil, Sätze je Haus mit Begründung, Rücklage (Kontostand, Mindestsatz laut Plan, nächste Maßnahmen), Ablauf/Zahlung/Kontakt
 - Wird beim Versand der Vorschreibung automatisch erzeugt, angehängt (Hinweis im Mailtext) und neben der Rechnung abgelegt – damit auch im Eigentümer-Zugang sichtbar

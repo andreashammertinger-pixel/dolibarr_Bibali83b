@@ -29,7 +29,7 @@ class modHausverwaltung extends DolibarrModules
 		$this->descriptionlong = 'Kostenplan je Gebäude/alle Gebäude, Verteilung nach m², monatliche Vorschreibung als Kundenrechnung, automatische Rücklagen-Umbuchung bei Zahlungseingang, Jahresabrechnung und mobile Belegerfassung.';
 		$this->editor_name = 'Green Villa and Apartment Resorts d.o.o.';
 		$this->editor_url = 'https://www.greenresorts.hr';
-		$this->version = '1.9.0';
+		$this->version = '1.9.1';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->picto = 'building';
 
@@ -131,20 +131,28 @@ class modHausverwaltung extends DolibarrModules
 		$en = 'isModEnabled("hausverwaltung")';
 		$lf = 'hausverwaltung@hausverwaltung';
 
+		// Filter der Auswahllisten in der Syntax von Dolibarr ≥ 19 (Universal Search Filter)
+		$unitparam = array('options' => array('hv_unit:ref:rowid::(entity:=:$ENTITY$)' => null));
+		$ciparam = array('options' => array('hv_costitem:label:rowid::(entity:=:$ENTITY$) AND (active:=:1)' => null));
+
 		// Kundenrechnung (Vorschreibung)
 		$ef->addExtraField('hv_period', 'HvPeriod', 'varchar', 100, 7, 'facture', 0, 0, '', '', 1, '', '1', 'HvPeriodHelp', '', '0', $lf, $en);
 		$ef->addExtraField('hv_period_to', 'HvPeriodTo', 'varchar', 100, 7, 'facture', 0, 0, '', '', 1, '', '1', 'HvPeriodToHelp', '', '0', $lf, $en);
-		$ef->addExtraField('hv_unit', 'HvUnit', 'sellist', 101, '', 'facture', 0, 0, '', array('options' => array('hv_unit:ref:rowid::entity=$ENTITY$' => null)), 1, '', '1', '', '', '0', $lf, $en);
+		$ef->addExtraField('hv_unit', 'HvUnit', 'sellist', 101, '', 'facture', 0, 0, '', $unitparam, 1, '', '1', '', '', '0', $lf, $en);
 		// Lieferantenrechnung (Eingangsrechnung)
-		$ef->addExtraField('hv_costitem', 'HvCostItem', 'sellist', 100, '', 'facture_fourn', 0, 0, '', array('options' => array('hv_costitem:label:rowid::entity=$ENTITY$ AND active=1' => null)), 1, '', '1', 'HvCostItemHelp', '', '0', $lf, $en);
+		$ef->addExtraField('hv_costitem', 'HvCostItem', 'sellist', 100, '', 'facture_fourn', 0, 0, '', $ciparam, 1, '', '1', 'HvCostItemHelp', '', '0', $lf, $en);
 		// KPD 2025 (Klasifikacija proizvoda po djelatnostima) je Produkt/Leistung – Pflichtangabe je Position auf eRačun (Fiskalizacija 2.0)
 		// Auswahl aus der KPD-Tabelle (nur gültige 6-stellige Codes), Anzeige Code + deutscher + kroatischer Name
-		$kpdparam = array('options' => array('c_hv_kpd:code|label_de|label_hr:code::active=1' => null));
+		$kpdparam = array('options' => array('c_hv_kpd:code|label_de|label_hr:code::(active:=:1)' => null));
 		$ef->addExtraField('kpd', 'HvKpd', 'sellist', 50, '', 'product', 0, 0, '', $kpdparam, 1, '', '1', 'HvKpdHelp', '', '0', $lf, '1');
 		// Ältere Installation (Freitextfeld) auf Auswahlliste umstellen
 		$resk = $this->db->query("SELECT type FROM ".$this->db->prefix()."extrafields WHERE name = 'kpd' AND elementtype = 'product'");
 		if ($resk && ($ok = $this->db->fetch_object($resk)) && $ok->type !== 'sellist') {
 			$ef->update('kpd', 'HvKpd', 'sellist', '', 'product', 0, 0, 50, $kpdparam, 1, '', '1', 'HvKpdHelp', '', '', '0', $lf, '1');
+		}
+		// Ältere Installation: Filter der Auswahllisten in die neue Syntax bringen (sonst SQL-Fehler in den Listen)
+		foreach (array(array('hv_unit', 'facture', $unitparam), array('hv_costitem', 'facture_fourn', $ciparam), array('kpd', 'product', $kpdparam)) as $fx) {
+			$this->db->query("UPDATE ".$this->db->prefix()."extrafields SET param = '".$this->db->escape(serialize($fx[2]))."' WHERE name = '".$this->db->escape($fx[0])."' AND elementtype = '".$this->db->escape($fx[1])."' AND type = 'sellist'");
 		}
 		// Kennzeichen "Eigentümer" am Kontakt: nur diese Kontakte erhalten Vorschreibungen/Abrechnungen
 		$ownerFieldExisted = false;
