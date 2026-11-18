@@ -43,4 +43,6 @@ jobs:
           PROTO="${PROTO:-ftps}"
           if [ "$PROTO" = "sftp" ]; then URL="sftp://$HOST"; SET="set sftp:auto-confirm yes;"; else URL="ftp://$HOST"; SET="set ftp:ssl-force true; set ftp:ssl-protect-data true;"; fi
           # .htaccess/.htpasswd (z. B. Verzeichnisschutz für /verwaltung aus dem world4you-Kundenbereich) werden nie überschrieben oder gelöscht
-          lftp -u "$USER","$PASS" "$URL" -e "$SET set net:max-retries 3; mirror -R --delete --verbose=1 --exclude-glob .ht* --exclude-glob '*/.ht*' docs/site/ $DIR; quit"
+          # Passwort über Umgebungsvariable (sicher bei Sonderzeichen wie , @ : im Passwort)
+          export LFTP_PASSWORD="$PASS"
+          lftp --env-password -u "$USER" "$URL" -e "$SET set net:max-retries 3; mirror -R --delete --verbose=1 --exclude-glob .ht* --exclude-glob '*/.ht*' docs/site/ $DIR; quit"
