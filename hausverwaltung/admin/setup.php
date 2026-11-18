@@ -127,8 +127,21 @@ if ($action === 'importseed') {
 		}
 	}
 	if (!empty($data['reserveplan']) && count($repo->getReservePlan(false)) == 0) {
+		$base = function ($v) {
+			return is_array($v) ? (string) ($v['de_DE'] ?? reset($v)) : (string) $v;
+		};
 		foreach ($data['reserveplan'] as $i => $p) {
-			$repo->save('hv_reserve_plan', array('label' => (string) $p['label'], 'fk_building' => !empty($p['building']) ? (int) ($bmap[$p['building']] ?? 0) : 0, 'alloc_key' => in_array($p['key'] ?? 'area', array('area', 'share', 'units'), true) ? ($p['key'] ?? 'area') : 'area', 'year_planned' => (int) $p['year'], 'amount' => (float) $p['amount'], 'basis' => (string) ($p['basis'] ?? ''), 'note' => (string) ($p['note'] ?? ''), 'position' => $i + 1, 'active' => isset($p['active']) ? (int) $p['active'] : 1));
+			$tr = array();
+			foreach (array('label', 'basis', 'note') as $f) {
+				foreach ((is_array($p[$f] ?? null) ? $p[$f] : array()) as $l => $v) {
+					$tr[$l][$f] = $v;
+				}
+			}
+			$p['label'] = $base($p['label']);
+			$p['basis'] = $base($p['basis'] ?? '');
+			$p['note'] = $base($p['note'] ?? '');
+			$p['i18n'] = $tr ? json_encode($tr, JSON_UNESCAPED_UNICODE) : null;
+			$repo->save('hv_reserve_plan', array('i18n' => $p['i18n'], 'label' => (string) $p['label'], 'fk_building' => !empty($p['building']) ? (int) ($bmap[$p['building']] ?? 0) : 0, 'alloc_key' => in_array($p['key'] ?? 'area', array('area', 'share', 'units'), true) ? ($p['key'] ?? 'area') : 'area', 'year_planned' => (int) $p['year'], 'amount' => (float) $p['amount'], 'basis' => (string) ($p['basis'] ?? ''), 'note' => (string) ($p['note'] ?? ''), 'position' => $i + 1, 'active' => isset($p['active']) ? (int) $p['active'] : 1));
 		}
 	}
 	if (count($repo->getCostItems(false)) == 0) {

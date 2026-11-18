@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.7.0
+- Rücklagen-Planung **mehrsprachig**: Druckansicht je Dokumentsprache (Standard hr/de/en/sl/uk, Einstellung `HAUSVERWALTUNG_DOC_LANGS`), Kroatisch = Original, andere Sprachen mit Hinweis „Kopie – Übersetzung“
+- Planpositionen mit Übersetzungen je Sprache (Bezeichnung, Schätzgrundlage, Hinweis); Import akzeptiert Texte als `{"hr_HR": "...", "de_DE": "..."}`
+- Gebäudenamen sprachneutral („Kuća 1 / Haus 1 / Будинок 1“)
+- Bibali-Plan in allen fünf Sprachen
+- Fix: Feldnamen mit Ziffern beim Speichern
+
 ## 1.6.0
 - Neue Seite **Rücklagen-Planung** (Mehrjahresprogramm): Planpositionen je Gebäude oder „alle Gebäude“ (Aufteilung nach Schlüssel), Jahr, Betrag zu heutigen Preisen, Schätzgrundlage, aktiv/inaktiv
 - Prognose je Gebäude über den Planungszeitraum: Start = Kontostand Rücklagenkonto, Zuführung = aktuelle Sätze, Entnahmen mit Baukostensteigerung; Ampel, niedrigster Stand, **Mindestsatz €/m²** ohne Unterdeckung

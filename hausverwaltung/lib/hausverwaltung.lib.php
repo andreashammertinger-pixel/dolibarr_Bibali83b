@@ -82,6 +82,39 @@ function hvOibValid($oib)
 	return $check == (int) $oib[10];
 }
 
+/** Sprachen, in denen Dokumente für Eigentümer erstellt werden (erste = Original) */
+function hvDocLangs()
+{
+	$orig = getDolGlobalString('HAUSVERWALTUNG_ORIGINAL_LANG', 'hr_HR');
+	$list = array_filter(array_map('trim', explode(',', getDolGlobalString('HAUSVERWALTUNG_DOC_LANGS', 'hr_HR,de_DE,en_US,sl_SI,uk_UA'))));
+	return array_values(array_unique(array_merge(array($orig), $list)));
+}
+
+/** Übersetzter Text eines Datensatzes (Feld i18n als JSON), Rückfall auf das Originalfeld */
+function hvI18n($obj, $field, $lang)
+{
+	$tr = !empty($obj->i18n) ? json_decode($obj->i18n, true) : array();
+	if (!empty($tr[$lang][$field])) {
+		return $tr[$lang][$field];
+	}
+	$short = substr($lang, 0, 2);
+	foreach ((array) $tr as $l => $v) {
+		if (substr($l, 0, 2) === $short && !empty($v[$field])) {
+			return $v[$field];
+		}
+	}
+	return (string) ($obj->$field ?? '');
+}
+
+/** Gebäudebezeichnung sprachneutral: "Haus 1" in der Ausgabesprache, sonst Bezeichnung */
+function hvBuildingName($b, $outlangs)
+{
+	if (!$b) {
+		return $outlangs->transnoentities('HvAllBuildings');
+	}
+	return preg_match('/\d/', $b->ref) ? $outlangs->transnoentities('HvBuildingNo', preg_replace('/\D/', '', $b->ref)) : $b->label;
+}
+
 function hvMoney($v)
 {
 	global $langs, $conf;

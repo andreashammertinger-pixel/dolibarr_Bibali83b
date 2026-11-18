@@ -185,7 +185,7 @@ class HvRepository
 		}
 		$set = array();
 		foreach ($fields as $k => $v) {
-			if (!preg_match('/^[a-z_]+$/', $k)) {
+			if (!preg_match('/^[a-z][a-z0-9_]*$/', $k)) {
 				return -2;
 			}
 			if ($v === null || $v === '') {

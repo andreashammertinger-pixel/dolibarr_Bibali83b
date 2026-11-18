@@ -239,3 +239,6 @@ HvPlanImported = %s Planpositionen importiert
 HvPlanSkipped = übersprungen (Gebäude unbekannt)
 HvPlanInflationSetting = Rücklagen-Planung: Baukostensteigerung
 HvPlanYearsSetting = Planungszeitraum (Jahre)
+HvPlanDisclaimer = Die Beträge sind Schätzungen zu heutigen Preisen und ersetzen keine Angebote. Grundlage für den Beschluss über das Instandhaltungsprogramm der Eigentümergemeinschaft.
+HvPlanTranslations = Übersetzungen
+HvPlanTranslationsHelp = Übersetzungen für die Druckansicht in der Sprache der Eigentümer. Leere Felder verwenden den Text oben.

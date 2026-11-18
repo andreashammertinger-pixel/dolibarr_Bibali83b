@@ -238,3 +238,6 @@ HvPlanImported = %s plan items imported
 HvPlanSkipped = skipped (unknown building)
 HvPlanInflationSetting = Reserve planning: construction cost increase
 HvPlanYearsSetting = Planning period (years)
+HvPlanDisclaimer = Amounts are estimates at today's prices and do not replace quotations. Basis for the owners' decision on the maintenance programme.
+HvPlanTranslations = Translations
+HvPlanTranslationsHelp = Translations for the print view in the owners' languages. Empty fields use the text above.

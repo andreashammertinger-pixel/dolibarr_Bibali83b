@@ -238,3 +238,6 @@ HvPlanImported = Uvezeno %s stavki plana
 HvPlanSkipped = preskočeno (nepoznata zgrada)
 HvPlanInflationSetting = Plan pričuve: rast građevinskih cijena
 HvPlanYearsSetting = Plansko razdoblje (godina)
+HvPlanDisclaimer = Iznosi su procjene prema današnjim cijenama i ne zamjenjuju ponude. Osnova za odluku suvlasnika o programu održavanja.
+HvPlanTranslations = Prijevodi
+HvPlanTranslationsHelp = Prijevodi za prikaz za ispis na jeziku vlasnika. Prazna polja koriste gornji tekst.

@@ -99,7 +99,7 @@ class HvReservePlan
 					continue;
 				}
 				$withdraw[$bid][$yr] = ($withdraw[$bid][$yr] ?? 0) + $amt * $sh;
-				$details[$bid][$yr][] = array('label' => $it->label, 'amount' => $amt * $sh);
+				$details[$bid][$yr][] = array('label' => $it->label, 'amount' => $amt * $sh, 'obj' => $it);
 			}
 		}
 		foreach ($out as $bid => &$o) {
