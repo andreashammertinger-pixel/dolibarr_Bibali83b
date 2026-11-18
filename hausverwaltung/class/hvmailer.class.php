@@ -16,6 +16,12 @@ dol_include_once('/hausverwaltung/class/hvsettlement.class.php');
  */
 class HvMailer
 {
+	/** Erläuterung zur Vorschreibung anhängen (Einstellung, Standard an) */
+	public static function infoEnabled()
+	{
+		return getDolGlobalString('HAUSVERWALTUNG_INFO_ATTACH', '1') === '1';
+	}
+
 	/** IBAN lesbar in 4er-Gruppen */
 	public static function formatIban($iban)
 	{
@@ -75,6 +81,10 @@ class HvMailer
 		foreach (glob($dir.'/'.$ref.'_??_??.pdf') ?: array() as $p) {
 			$files[] = $p;
 		}
+		if ($files && self::infoEnabled()) {
+			dol_include_once('/hausverwaltung/class/hvinfopdf.class.php');
+			$files = array_merge($files, HvInfoPdf::infoFiles($f));
+		}
 		return $files;
 	}
 
@@ -107,6 +117,13 @@ class HvMailer
 		if (!$files) {
 			$this->error = 'Kein PDF vorhanden – bitte Rechnung freigeben/PDF erzeugen';
 			return -2;
+		}
+		// Erläuterung zur Vorschreibung (nicht bei Abrechnungs-Rechnungen) frisch erzeugen und anhängen
+		$withInfo = false;
+		if (self::infoEnabled() && !preg_match('/-A$/', (string) ($f->array_options['options_hv_period'] ?? ''))) {
+			dol_include_once('/hausverwaltung/class/hvinfopdf.class.php');
+			$withInfo = (bool) (new HvInfoPdf($this->db))->generateForInvoice($f);
+			$files = $this->files($f);
 		}
 		$lang = !empty($f->thirdparty->default_lang) ? $f->thirdparty->default_lang : getDolGlobalString('HAUSVERWALTUNG_ORIGINAL_LANG', 'hr_HR');
 		$ol = new Translate('', $conf);
@@ -163,6 +180,9 @@ class HvMailer
 			}
 		} else {
 			$body .= $ol->transnoentities('HvMailNothingToPay')."\n\n";
+		}
+		if ($withInfo) {
+			$body .= $ol->transnoentities('HvMailInfoAttached')."\n\n";
 		}
 		if (substr($lang, 0, 2) !== substr($orig, 0, 2)) {
 			$body .= $ol->transnoentities('HvMailCopyNote')."\n\n";

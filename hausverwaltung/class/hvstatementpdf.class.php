@@ -137,7 +137,7 @@ class HvStatementPdf
 		$top = 15;
 		$dark = array(46, 90, 63);
 		$pdf->SetMargins($L, $top, 15);
-		$pdf->SetTitle($T->transnoentities('HvStmtTitle', $year));
+		$pdf->SetTitle($this->docTitle($T, $d, $year));
 		$pdf->AddPage();
 		$fm = function ($v) use ($T, $conf) {
 			return price($v, 0, $T, 1, 2, 2, $conf->currency);
@@ -147,11 +147,11 @@ class HvStatementPdf
 		$pdf->SetTextColor($dark[0], $dark[1], $dark[2]);
 		$pdf->SetFont('', 'B', $fs + 8);
 		$pdf->SetXY($mid, $top);
-		$pdf->Cell($R - $mid, 10, $T->transnoentities('HvStmtTitleShort'), 0, 1, 'R');
+		$pdf->Cell($R - $mid, 10, $this->titleShort($T), 0, 1, 'R');
 		$pdf->SetTextColor(0, 0, 0);
 		$pdf->SetFont('', '', $fs - 1);
 		$y = $top + 12;
-		foreach (array(array($T->transnoentities('HvPdfWDate').':', dol_print_date(dol_now(), 'day', false, $T, true)), array($T->transnoentities('HvStmtPeriod').':', '01.01.–31.12.'.$year), array($T->transnoentities('HvPdfWRef').':', 'ABR-'.$year.'-'.$d['unit']->ref)) as $r) {
+		foreach ($this->headRows($T, $d, $year) as $r) {
 			$pdf->SetXY($mid, $y);
 			$pdf->Cell(($R - $mid) * 0.5, 5, $r[0], 0, 0, 'R');
 			$pdf->Cell(($R - $mid) * 0.5, 5, $r[1], 0, 1, 'R');
@@ -229,6 +229,57 @@ class HvStatementPdf
 		$pdf->MultiCell($R - $mid, 4.2, $from, 0, 'L');
 		$y = max(110, $pdf->GetY() + 6, $yTo + 6);
 
+		$this->body($pdf, $T, $d, $soc, $year, $lang, compact('L', 'R', 'W', 'mid', 'top', 'dark', 'fs', 'fm', 'orig', 'helper', 'ph', 'pw', 'y'));
+
+		// Fußzeile (ohne automatischen Seitenumbruch auf die letzte Seite)
+		$pdf->SetAutoPageBreak(false, 0);
+		if (getDolGlobalString('HAUSVERWALTUNG_PDF_DIGITAL_NOTE', '1') === '1') {
+			$pdf->SetFont('', 'I', $fs - 2);
+			$pdf->SetTextColor(90, 90, 90);
+			$pdf->SetXY($L, $ph - 12 - 12.5);
+			$pdf->Cell($W, 4.5, $T->transnoentities('HvPdfDigitalNote'), 0, 0, 'C');
+		}
+		$parts = array($mysoc->name);
+		foreach (array($mysoc->url, $mysoc->email) as $p) {
+			if (!empty($p)) {
+				$parts[] = $p;
+			}
+		}
+		if ($oib) {
+			$parts[] = 'OIB '.$oib;
+		}
+		$pdf->SetDrawColor($dark[0], $dark[1], $dark[2]);
+		$pdf->Line($L, $ph - 12 - 7, $R, $ph - 12 - 7);
+		$pdf->SetFont('', '', $fs - 3);
+		$pdf->SetTextColor(90, 90, 90);
+		$pdf->SetXY($L, $ph - 12 - 6);
+		$pdf->Cell($W, 4, implode('  |  ', $parts), 0, 0, 'C');
+		$pdf->Close();
+		$pdf->Output($file, 'F');
+		dolChmod($file);
+		return is_readable($file);
+	}
+
+	protected function docTitle($T, $d, $year)
+	{
+		return $T->transnoentities('HvStmtTitle', $year);
+	}
+
+	protected function titleShort($T)
+	{
+		return $T->transnoentities('HvStmtTitleShort');
+	}
+
+	protected function headRows($T, $d, $year)
+	{
+		return array(array($T->transnoentities('HvPdfWDate').':', dol_print_date(dol_now(), 'day', false, $T, true)), array($T->transnoentities('HvStmtPeriod').':', '01.01.–31.12.'.$year), array($T->transnoentities('HvPdfWRef').':', 'ABR-'.$year.'-'.$d['unit']->ref));
+	}
+
+	/** Inhalt zwischen Adressblock und Fußzeile */
+	protected function body($pdf, $T, $d, $soc, $year, $lang, $ctx)
+	{
+		global $conf, $mysoc;
+		extract($ctx);
 		// Betreff
 		$pdf->SetFont('', 'B', $fs + 1);
 		$pdf->SetXY($L, $y);
@@ -336,33 +387,5 @@ class HvStatementPdf
 		}
 		$pdf->SetX($L);
 		$pdf->MultiCell($W, 4.5, $T->transnoentities('HvStmtReserveText', $year, $fm($d['reserve'])).($bal !== null ? ' '.$T->transnoentities('HvStmtReserveBalance', $fm($bal)) : ''), 0, 'L');
-
-		// Fußzeile (ohne automatischen Seitenumbruch auf die letzte Seite)
-		$pdf->SetAutoPageBreak(false, 0);
-		if (getDolGlobalString('HAUSVERWALTUNG_PDF_DIGITAL_NOTE', '1') === '1') {
-			$pdf->SetFont('', 'I', $fs - 2);
-			$pdf->SetTextColor(90, 90, 90);
-			$pdf->SetXY($L, $ph - 12 - 12.5);
-			$pdf->Cell($W, 4.5, $T->transnoentities('HvPdfDigitalNote'), 0, 0, 'C');
-		}
-		$parts = array($mysoc->name);
-		foreach (array($mysoc->url, $mysoc->email) as $p) {
-			if (!empty($p)) {
-				$parts[] = $p;
-			}
-		}
-		if ($oib) {
-			$parts[] = 'OIB '.$oib;
-		}
-		$pdf->SetDrawColor($dark[0], $dark[1], $dark[2]);
-		$pdf->Line($L, $ph - 12 - 7, $R, $ph - 12 - 7);
-		$pdf->SetFont('', '', $fs - 3);
-		$pdf->SetTextColor(90, 90, 90);
-		$pdf->SetXY($L, $ph - 12 - 6);
-		$pdf->Cell($W, 4, implode('  |  ', $parts), 0, 0, 'C');
-		$pdf->Close();
-		$pdf->Output($file, 'F');
-		dolChmod($file);
-		return is_readable($file);
 	}
 }

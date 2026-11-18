@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.0
+- **Erläuterung zur Vorschreibung** je Apartment (PDF, kroatisches Original + Übersetzung): monatliche Zusammensetzung (Satz × m² für Betriebskosten, Rücklage, Verwaltung), Betriebskosten je Kostenart mit Anteil, Sätze je Haus mit Begründung, Rücklage (Kontostand, Mindestsatz laut Plan, nächste Maßnahmen), Ablauf/Zahlung/Kontakt
+- Wird beim Versand der Vorschreibung automatisch erzeugt, angehängt (Hinweis im Mailtext) und neben der Rechnung abgelegt – damit auch im Eigentümer-Zugang sichtbar
+- Einstellungen: Erläuterung anhängen (Standard an), Adresse Eigentümer-Zugang (erscheint in der Erläuterung)
+- Texte in hr/de/en/sl/uk, über die Sprachen-Seite übersetzbar
+
 ## 1.8.4
 - Eigentümer-Zugang (externe Benutzer): Hausverwaltungs-Seiten, Menü und API für externe Benutzer immer gesperrt (auch bei versehentlich vergebenen Rechten); Warnung in der Übersicht, falls externe Benutzer Hausverwaltungs-Rechte haben
 - Abrechnungsblätter zusätzlich in den Dokumenten des Apartments (Geschäftspartner) – dort sieht sie der Eigentümer mit seinem Zugang
