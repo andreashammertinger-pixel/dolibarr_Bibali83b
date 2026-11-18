@@ -17,15 +17,15 @@ jobs:
   build-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with: { python-version: '3.12' }
       - name: Werkzeuge installieren
         run: pip install "mkdocs-material>=9.5,<10" "mkdocs-static-i18n>=1.2,<2"
       - name: Website bauen
         env: { NO_MKDOCS_2_WARNING: '1' }
         run: ./docs/build-docs.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with: { name: hilfe-website, path: docs/site, retention-days: 14 }
       - name: Auf Webspace hochladen
         env:
