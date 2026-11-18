@@ -213,3 +213,29 @@ HvPdfOriginal = Original
 HvPdfCopyShort = Kopie
 HvPdfDigitalNote = Digitales Dokument – es erfolgt kein Versand in Papierform.
 HvDigitalNoteSetting = Hinweis „Digitales Dokument“ auf der Vorschreibung
+HvReservePlan = Rücklagen-Planung
+HvPlanYear = Jahr
+HvPlanAmount = Betrag (heutige Preise)
+HvPlanBasis = Schätzgrundlage
+HvPlanKeyHelp = nur bei „Alle Gebäude“: Aufteilung auf die Gebäude-Rücklagen
+HvPlanActiveHelp = nur aktive Positionen gehen in die Prognose ein
+HvPlanAssumptions = Annahmen: Baukostensteigerung %s %% pro Jahr, Startstand = aktueller Kontostand der Rücklagenkonten, Zuführung = aktuelle Rücklagen-Sätze. Stand %s.
+HvPrintView = Druckansicht
+HvPlanMonthly = Zuführung / Monat
+HvPlanCurrentRate = Satz aktuell
+HvPlanRequiredRate = Mindestsatz lt. Plan
+HvPlanMinBalance = niedrigster Stand
+HvPlanOk = gedeckt
+HvPlanShortfall = Unterdeckung ab %s
+HvPlanRequiredHelp = Mindestsatz = kleinster gleichbleibender Rücklagen-Satz (€/m² und Monat), mit dem die Rücklage des Gebäudes im Planungszeitraum nie negativ wird.
+HvPlanProjection = Prognose je Gebäude
+HvPlanEndBalance = Stand Jahresende
+HvPlanMeasures = Maßnahmen
+HvPlanItems = Planpositionen
+HvPlanTodayPrices = heutige Preise
+HvPlanImport = Planpositionen importieren
+HvPlanImportHelp = JSON-Datei mit dem Abschnitt „reserveplan“ (Gebäude = Kürzel wie bei den Gebäuden, leer = alle).
+HvPlanImported = %s Planpositionen importiert
+HvPlanSkipped = übersprungen (Gebäude unbekannt)
+HvPlanInflationSetting = Rücklagen-Planung: Baukostensteigerung
+HvPlanYearsSetting = Planungszeitraum (Jahre)

@@ -212,3 +212,29 @@ HvPdfOriginal = Izvornik
 HvPdfCopyShort = Kopija
 HvPdfDigitalNote = Digitalni dokument – papirnata verzija se ne dostavlja.
 HvDigitalNoteSetting = Napomena „digitalni dokument“ na zaduženju
+HvReservePlan = Plan pričuve
+HvPlanYear = Godina
+HvPlanAmount = Iznos (današnje cijene)
+HvPlanBasis = Osnova procjene
+HvPlanKeyHelp = samo kod „Sve zgrade“: raspodjela na pričuve zgrada
+HvPlanActiveHelp = u prognozu ulaze samo aktivne stavke
+HvPlanAssumptions = Pretpostavke: rast građevinskih cijena %s %% godišnje, početno stanje = trenutačno stanje računa pričuve, uplate = trenutačne stope pričuve. Stanje %s.
+HvPrintView = Prikaz za ispis
+HvPlanMonthly = Uplata / mjesec
+HvPlanCurrentRate = Trenutačna stopa
+HvPlanRequiredRate = Minimalna stopa prema planu
+HvPlanMinBalance = Najniže stanje
+HvPlanOk = pokriveno
+HvPlanShortfall = manjak od %s
+HvPlanRequiredHelp = Minimalna stopa = najniža stalna stopa pričuve (€/m² mjesečno) uz koju pričuva zgrade u planskom razdoblju nikad nije negativna.
+HvPlanProjection = Prognoza po zgradi
+HvPlanEndBalance = Stanje na kraju godine
+HvPlanMeasures = Mjere
+HvPlanItems = Stavke plana
+HvPlanTodayPrices = današnje cijene
+HvPlanImport = Uvoz stavki plana
+HvPlanImportHelp = JSON datoteka s odjeljkom „reserveplan“ (zgrada = oznaka zgrade, prazno = sve).
+HvPlanImported = Uvezeno %s stavki plana
+HvPlanSkipped = preskočeno (nepoznata zgrada)
+HvPlanInflationSetting = Plan pričuve: rast građevinskih cijena
+HvPlanYearsSetting = Plansko razdoblje (godina)

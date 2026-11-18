@@ -212,3 +212,29 @@ HvPdfOriginal = Original
 HvPdfCopyShort = Copy
 HvPdfDigitalNote = Digital document – no paper copy will be sent.
 HvDigitalNoteSetting = Note "digital document" on the service charge
+HvReservePlan = Reserve fund planning
+HvPlanYear = Year
+HvPlanAmount = Amount (today's prices)
+HvPlanBasis = Basis of estimate
+HvPlanKeyHelp = only for "all buildings": split across building reserves
+HvPlanActiveHelp = only active items are included in the projection
+HvPlanAssumptions = Assumptions: construction cost increase %s %% p.a., start = current balance of reserve accounts, contributions = current reserve rates. As of %s.
+HvPrintView = Print view
+HvPlanMonthly = Contribution / month
+HvPlanCurrentRate = Current rate
+HvPlanRequiredRate = Minimum rate per plan
+HvPlanMinBalance = Lowest balance
+HvPlanOk = covered
+HvPlanShortfall = shortfall from %s
+HvPlanRequiredHelp = Minimum rate = lowest constant reserve rate (€/m² per month) keeping the building reserve non-negative over the planning period.
+HvPlanProjection = Projection per building
+HvPlanEndBalance = Year-end balance
+HvPlanMeasures = Measures
+HvPlanItems = Plan items
+HvPlanTodayPrices = today's prices
+HvPlanImport = Import plan items
+HvPlanImportHelp = JSON file with section "reserveplan" (building = building code, empty = all).
+HvPlanImported = %s plan items imported
+HvPlanSkipped = skipped (unknown building)
+HvPlanInflationSetting = Reserve planning: construction cost increase
+HvPlanYearsSetting = Planning period (years)

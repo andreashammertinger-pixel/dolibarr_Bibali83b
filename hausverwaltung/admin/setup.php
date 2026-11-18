@@ -50,6 +50,8 @@ if ($action === 'save') {
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_BANK_ACCOUNT', GETPOSTINT('HAUSVERWALTUNG_BANK_ACCOUNT'), 'chaine', 0, '', $conf->entity);
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_PAYMENT_MODE', GETPOSTINT('HAUSVERWALTUNG_PAYMENT_MODE'), 'chaine', 0, '', $conf->entity);
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_DUE_DAY', max(1, min(28, GETPOSTINT('HAUSVERWALTUNG_DUE_DAY'))), 'chaine', 0, '', $conf->entity);
+	dolibarr_set_const($db, 'HAUSVERWALTUNG_PLAN_INFLATION', price2num(GETPOST('HAUSVERWALTUNG_PLAN_INFLATION', 'alphanohtml')), 'chaine', 0, '', $conf->entity);
+	dolibarr_set_const($db, 'HAUSVERWALTUNG_PLAN_YEARS', max(5, min(40, GETPOSTINT('HAUSVERWALTUNG_PLAN_YEARS'))), 'chaine', 0, '', $conf->entity);
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_PDF_DIGITAL_NOTE', GETPOSTINT('HAUSVERWALTUNG_PDF_DIGITAL_NOTE') ? '1' : '0', 'chaine', 0, '', $conf->entity);
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_MAIL_FROM', GETPOST('HAUSVERWALTUNG_MAIL_FROM', 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_MAIL_BCC', GETPOST('HAUSVERWALTUNG_MAIL_BCC', 'alphanohtml'), 'chaine', 0, '', $conf->entity);
@@ -124,6 +126,11 @@ if ($action === 'importseed') {
 			$linked++;
 		}
 	}
+	if (!empty($data['reserveplan']) && count($repo->getReservePlan(false)) == 0) {
+		foreach ($data['reserveplan'] as $i => $p) {
+			$repo->save('hv_reserve_plan', array('label' => (string) $p['label'], 'fk_building' => !empty($p['building']) ? (int) ($bmap[$p['building']] ?? 0) : 0, 'alloc_key' => in_array($p['key'] ?? 'area', array('area', 'share', 'units'), true) ? ($p['key'] ?? 'area') : 'area', 'year_planned' => (int) $p['year'], 'amount' => (float) $p['amount'], 'basis' => (string) ($p['basis'] ?? ''), 'note' => (string) ($p['note'] ?? ''), 'position' => $i + 1, 'active' => isset($p['active']) ? (int) $p['active'] : 1));
+		}
+	}
 	if (count($repo->getCostItems(false)) == 0) {
 		foreach ($data['costitems'] as $i => $c) {
 			$repo->save('hv_costitem', array('label' => $c['label'], 'fk_building' => !empty($c['building']) ? (int) $bmap[$c['building']] : 0, 'alloc_key' => in_array($c['key'] ?? 'area', array('area', 'share', 'units'), true) ? ($c['key'] ?? 'area') : 'area', 'period_months' => (int) $c['period'], 'amount_net' => (float) $c['net'], 'vat_rate' => (float) $c['vat'], 'reference' => $c['reference'] ?? '', 'note' => $c['note'] ?? '', 'position' => $i + 1, 'active' => 1));
@@ -166,6 +173,7 @@ print '</td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvDueDay').'</td><td><input name="HAUSVERWALTUNG_DUE_DAY" class="width50" value="'.getDolGlobalInt('HAUSVERWALTUNG_DUE_DAY', 5).'"></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvManager').'</td><td>'.$form->select_company(getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID'), 'HAUSVERWALTUNG_MANAGER_SOCID', '(s.fournisseur:=:1)', 1, 0, 0, array(), 0, 'minwidth300').'</td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvAdminVatRate').'</td><td><input name="HAUSVERWALTUNG_ADMIN_VAT_RATE" class="width50" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_ADMIN_VAT_RATE', '25')).'"> %</td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans('HvPlanInflationSetting').'</td><td><input name="HAUSVERWALTUNG_PLAN_INFLATION" class="width50" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_PLAN_INFLATION', '3')).'"> % '.$langs->trans('HvPlanYearsSetting').' <input name="HAUSVERWALTUNG_PLAN_YEARS" class="width50" value="'.getDolGlobalInt('HAUSVERWALTUNG_PLAN_YEARS', 20).'"></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvDigitalNoteSetting').'</td><td><input type="checkbox" name="HAUSVERWALTUNG_PDF_DIGITAL_NOTE" value="1"'.(getDolGlobalString('HAUSVERWALTUNG_PDF_DIGITAL_NOTE', '1') === '1' ? ' checked' : '').'> <span class="opacitymedium">'.$langs->trans('HvPdfDigitalNote').'</span></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvMailFromSetting').'</td><td><input name="HAUSVERWALTUNG_MAIL_FROM" class="minwidth250" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_MAIL_FROM')).'" placeholder="'.dol_escape_htmltag($mysoc->email).'"></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvMailBccSetting').'</td><td><input name="HAUSVERWALTUNG_MAIL_BCC" class="minwidth250" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_MAIL_BCC')).'"></td></tr>';

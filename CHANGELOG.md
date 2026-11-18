@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.6.0
+- Neue Seite **Rücklagen-Planung** (Mehrjahresprogramm): Planpositionen je Gebäude oder „alle Gebäude“ (Aufteilung nach Schlüssel), Jahr, Betrag zu heutigen Preisen, Schätzgrundlage, aktiv/inaktiv
+- Prognose je Gebäude über den Planungszeitraum: Start = Kontostand Rücklagenkonto, Zuführung = aktuelle Sätze, Entnahmen mit Baukostensteigerung; Ampel, niedrigster Stand, **Mindestsatz €/m²** ohne Unterdeckung
+- Druckansicht (für Eigentümerversammlung / Beschluss), Import von Planpositionen aus JSON, API `/hausverwaltung/reserveplan`
+- Einstellungen: Baukostensteigerung (Standard 3 %), Planungszeitraum (Standard 20 Jahre)
+- Beispiel-Plan Bibali 83b (`data/bibali83b_ruecklagenplan.json`) und leere Vorlage
+
 ## 1.5.4
 - Hinweis „Digitales Dokument – es erfolgt kein Versand in Papierform“ in der Dokumentsprache über der Fußzeile; in den Einstellungen abschaltbar (für Objekte mit Postversand)
 

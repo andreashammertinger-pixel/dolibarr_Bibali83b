@@ -180,7 +180,7 @@ class HvRepository
 	 */
 	public function save($table, array $fields, $rowid = 0)
 	{
-		if (!in_array($table, array('hv_building', 'hv_unit', 'hv_costitem'), true)) {
+		if (!in_array($table, array('hv_building', 'hv_unit', 'hv_costitem', 'hv_reserve_plan'), true)) {
 			return -1;
 		}
 		$set = array();
@@ -216,7 +216,7 @@ class HvRepository
 
 	public function delete($table, $rowid)
 	{
-		if (!in_array($table, array('hv_building', 'hv_unit', 'hv_costitem'), true)) {
+		if (!in_array($table, array('hv_building', 'hv_unit', 'hv_costitem', 'hv_reserve_plan'), true)) {
 			return -1;
 		}
 		$sql = "DELETE FROM ".$this->db->prefix().$table." WHERE rowid = ".((int) $rowid)." AND entity = ".$this->entity();
@@ -225,6 +225,17 @@ class HvRepository
 			return -2;
 		}
 		return 1;
+	}
+
+	/** @return array<int,object> Rücklagen-Planpositionen */
+	public function getReservePlan($onlyactive = false)
+	{
+		$sql = "SELECT * FROM ".$this->db->prefix()."hv_reserve_plan WHERE entity = ".$this->entity();
+		if ($onlyactive) {
+			$sql .= " AND active = 1";
+		}
+		$sql .= " ORDER BY year_planned, position, label";
+		return $this->fetchAll($sql);
 	}
 
 	/** Gebäude anhand Bankkonto der Rücklage */

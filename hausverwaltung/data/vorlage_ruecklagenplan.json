@@ -1,0 +1,35 @@
+{
+  "_hinweis": "Rücklagen-Planung (Mehrjahresprogramm). building = Gebäude-Kürzel (leer = alle Gebäude), key = Aufteilung bei 'alle' (area | share | units), year = geplantes Jahr, amount = geschätzter Betrag brutto zu heutigen Preisen, basis = Schätzgrundlage, active = 1/0.",
+  "reserveplan": [
+    {
+      "label": "Fassade: Anstrich und Ausbesserung",
+      "building": "A",
+      "key": "area",
+      "year": 2030,
+      "amount": 10000,
+      "basis": "ca. 330 m² Fassade × 30 €/m² inkl. Gerüst",
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": "Dach: Spenglerarbeiten, Rinnen, Abdichtung",
+      "building": "A",
+      "key": "area",
+      "year": 2035,
+      "amount": 8000,
+      "basis": "ca. 180 m² Dachfläche × 45 €/m²",
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": "Außenanlagen / Zufahrt",
+      "building": "",
+      "key": "area",
+      "year": 2036,
+      "amount": 6000,
+      "basis": "Pauschale",
+      "note": "",
+      "active": 1
+    }
+  ]
+}

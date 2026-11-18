@@ -102,6 +102,34 @@ class Hausverwaltung extends DolibarrApi
 	}
 
 	/**
+	 * Rücklagen-Planung: Positionen und Prognose je Gebäude
+	 *
+	 * @return array
+	 *
+	 * @url GET reserveplan
+	 */
+	public function reserveplan()
+	{
+		$this->check();
+		dol_include_once('/hausverwaltung/class/hvreserveplan.class.php');
+		$repo = new HvRepository($this->db);
+		$items = array();
+		foreach ($repo->getReservePlan(false) as $p) {
+			$items[] = array('label' => $p->label, 'building_id' => (int) $p->fk_building, 'key' => $p->alloc_key, 'year' => (int) $p->year_planned, 'amount' => (float) $p->amount, 'basis' => $p->basis, 'active' => (int) $p->active, 'note' => $p->note);
+		}
+		$pr = (new HvReservePlan($this->db))->projection();
+		$b = array();
+		foreach ($pr['buildings'] as $bid => $o) {
+			$rows = array();
+			foreach ($o['rows'] as $yr => $r) {
+				$rows[$yr] = array('in' => round($r['in'], 2), 'out' => round($r['out'], 2), 'end' => round($r['end'], 2));
+			}
+			$b[] = array('ref' => $o['building']->ref, 'start' => $o['start'], 'monthly' => $o['monthly'], 'current_rate' => round($o['current_rate'], 3), 'required_rate' => round($o['required_rate'], 3), 'min_balance' => round($o['min_balance'], 2), 'shortfall_year' => $o['shortfall_year'], 'years' => $rows);
+		}
+		return array('inflation' => $pr['inflation'], 'items' => $items, 'buildings' => $b);
+	}
+
+	/**
 	 * Jahresabrechnung (Berechnung + gebuchter Stand)
 	 *
 	 * @param int $year Jahr

@@ -188,5 +188,197 @@
       "vat": 25,
       "note": "Annahme"
     }
+  ],
+  "reserveplan": [
+    {
+      "label": "Bio-Kläranlage: Verschleißteile (Pumpen, Gebläse)",
+      "building": "",
+      "key": "area",
+      "year": 2028,
+      "amount": 2500,
+      "basis": "Erfahrungswert Verschleißteile; entfällt nach Kanalanschluss weitgehend",
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": "Fassade Haus 1: Anstrich und Ausbesserung",
+      "building": "H1",
+      "key": "area",
+      "year": 2029,
+      "amount": 12000,
+      "basis": "ca. 400 m² Fassade × 30 €/m² inkl. Gerüst (15 Jahre nach Baujahr 2014, Küstenklima)",
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": "Fassade Haus 2: Anstrich und Ausbesserung",
+      "building": "H2",
+      "key": "area",
+      "year": 2029,
+      "amount": 5100,
+      "basis": "ca. 170 m² Fassade × 30 €/m² inkl. Gerüst",
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": "Fassade Haus 3: Anstrich und Ausbesserung",
+      "building": "H3",
+      "key": "area",
+      "year": 2029,
+      "amount": 2700,
+      "basis": "ca. 90 m² Fassade × 30 €/m²",
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": "Kanalanschluss (Anschlussgebühr, Hausanschlussleitung, Stilllegung Kläranlage)",
+      "building": "",
+      "key": "area",
+      "year": 2030,
+      "amount": 20000,
+      "basis": "ANNAHME – Zeitpunkt und Kosten bei Stadt Buje / Kanalbetreiber erfragen",
+      "note": "Anschlusspflicht erwartet; Betrag und Jahr anpassen, sobald bekannt",
+      "active": 1
+    },
+    {
+      "label": "Geländer, Metall- und Holzteile außen: Anstrich",
+      "building": "",
+      "key": "area",
+      "year": 2031,
+      "amount": 2000,
+      "basis": "Pauschale",
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": "Stiegenhaus Haus 1: Malerarbeiten",
+      "building": "H1",
+      "key": "area",
+      "year": 2033,
+      "amount": 3000,
+      "basis": "ca. 150 m² Wand/Decke × 20 €/m² (10 Jahre nach Renovierung 2023)",
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": "Regenwasserzisternen: Pumpen, Reinigung",
+      "building": "",
+      "key": "area",
+      "year": 2034,
+      "amount": 1500,
+      "basis": "Pauschale",
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": "Außenanlagen, Parkplatz, Wege: Teilsanierung",
+      "building": "",
+      "key": "area",
+      "year": 2036,
+      "amount": 8000,
+      "basis": "gemeinsame Flächen ca. 550 m², Teilsanierung Belag/Randsteine",
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": "Dach Haus 1: Spenglerarbeiten, Rinnen, Anschlüsse, Ziegel umdecken",
+      "building": "H1",
+      "key": "area",
+      "year": 2039,
+      "amount": 11700,
+      "basis": "ca. 260 m² Dachfläche × 45 €/m² (25 Jahre)",
+      "note": "Neueindeckung erst ca. 2055–2065 (außerhalb Planungszeitraum)",
+      "active": 1
+    },
+    {
+      "label": "Dach Haus 2: Spenglerarbeiten, Rinnen, Anschlüsse, Ziegel umdecken",
+      "building": "H2",
+      "key": "area",
+      "year": 2039,
+      "amount": 4500,
+      "basis": "ca. 100 m² Dachfläche × 45 €/m²",
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": "Dach Haus 3: Spenglerarbeiten, Rinnen, Anschlüsse",
+      "building": "H3",
+      "key": "area",
+      "year": 2039,
+      "amount": 2900,
+      "basis": "ca. 65 m² Dachfläche × 45 €/m²",
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": "Blitzschutz und Gemeinschafts-Elektroinstallation: Erneuerung",
+      "building": "",
+      "key": "area",
+      "year": 2039,
+      "amount": 3000,
+      "basis": "Pauschale",
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": "Stiegenhaus Haus 1: Malerarbeiten",
+      "building": "H1",
+      "key": "area",
+      "year": 2043,
+      "amount": 3000,
+      "basis": "wie 2033",
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": "Fenster und Türen Gemeinschaftsflächen Haus 1 (Stiegenhaus, Eingang)",
+      "building": "H1",
+      "key": "area",
+      "year": 2044,
+      "amount": 4000,
+      "basis": "ca. 6 m² × 650 €/m²",
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": "Fenster der Wohnungen (nur falls von der Gemeinschaft beschlossen)",
+      "building": "",
+      "key": "area",
+      "year": 2044,
+      "amount": 75000,
+      "basis": "ca. 100 m² Fenster × 750 €/m²",
+      "note": "Fenster gehören i. d. R. zur Wohnung (Sondereigentum) und sind im Miteigentumsvertrag §5 nicht als gemeinsamer Teil genannt – daher inaktiv. Nur aktivieren, wenn die Eigentümer gemeinsame Erneuerung beschließen.",
+      "active": 0
+    },
+    {
+      "label": "Fassade Haus 1: Generalsanierung (Putz, ggf. Dämmung)",
+      "building": "H1",
+      "key": "area",
+      "year": 2049,
+      "amount": 44000,
+      "basis": "ca. 400 m² × 110 €/m² (35 Jahre)",
+      "note": "nur sichtbar bei Planungszeitraum ≥ 24 Jahre",
+      "active": 1
+    },
+    {
+      "label": "Fassade Haus 2: Generalsanierung",
+      "building": "H2",
+      "key": "area",
+      "year": 2049,
+      "amount": 18700,
+      "basis": "ca. 170 m² × 110 €/m²",
+      "note": "",
+      "active": 1
+    },
+    {
+      "label": "Fassade Haus 3: Generalsanierung",
+      "building": "H3",
+      "key": "area",
+      "year": 2049,
+      "amount": 9900,
+      "basis": "ca. 90 m² × 110 €/m²",
+      "note": "",
+      "active": 1
+    }
   ]
 }
