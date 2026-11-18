@@ -13,6 +13,7 @@ CREATE TABLE llx_hv_costitem (
   position       integer DEFAULT 0,
   active         smallint DEFAULT 1 NOT NULL,
   note           text,
+  i18n           text,                              -- Übersetzungen JSON {"hr_HR":{"label":..}, ...}
   datec          datetime,
   tms            timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=innodb;

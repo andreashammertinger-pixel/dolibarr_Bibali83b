@@ -1,0 +1,126 @@
+{
+  "_hinweis": "Übersetzungen der Kostenarten Bibali 83b. Import unter Hausverwaltung → Sprachen → Übersetzungsdatei importieren. Zuordnung über die deutsche Bezeichnung (match).",
+  "data": [
+    {
+      "table": "hv_costitem",
+      "match": "Gebäudeversicherung Haus 1",
+      "field": "label",
+      "i18n": {
+        "hr_HR": "Osiguranje zgrade – Kuća 1",
+        "en_US": "Building insurance – House 1",
+        "sl_SI": "Zavarovanje stavbe – Hiša 1",
+        "uk_UA": "Страхування будівлі – Будинок 1"
+      }
+    },
+    {
+      "table": "hv_costitem",
+      "match": "Gebäudeversicherung Haus 2",
+      "field": "label",
+      "i18n": {
+        "hr_HR": "Osiguranje zgrade – Kuća 2",
+        "en_US": "Building insurance – House 2",
+        "sl_SI": "Zavarovanje stavbe – Hiša 2",
+        "uk_UA": "Страхування будівлі – Будинок 2"
+      }
+    },
+    {
+      "table": "hv_costitem",
+      "match": "Gebäudeversicherung Haus 3",
+      "field": "label",
+      "i18n": {
+        "hr_HR": "Osiguranje zgrade – Kuća 3",
+        "en_US": "Building insurance – House 3",
+        "sl_SI": "Zavarovanje stavbe – Hiša 3",
+        "uk_UA": "Страхування будівлі – Будинок 3"
+      }
+    },
+    {
+      "table": "hv_costitem",
+      "match": "Wartung Bio-Kläranlage",
+      "field": "label",
+      "i18n": {
+        "hr_HR": "Održavanje biološkog uređaja za pročišćavanje",
+        "en_US": "Maintenance of biological sewage treatment plant",
+        "sl_SI": "Vzdrževanje biološke čistilne naprave",
+        "uk_UA": "Обслуговування біологічної очисної установки"
+      }
+    },
+    {
+      "table": "hv_costitem",
+      "match": "Wartung Dach und Dachrinnen",
+      "field": "label",
+      "i18n": {
+        "hr_HR": "Održavanje krova i oluka",
+        "en_US": "Maintenance of roof and gutters",
+        "sl_SI": "Vzdrževanje strehe in žlebov",
+        "uk_UA": "Обслуговування даху та водостоків"
+      }
+    },
+    {
+      "table": "hv_costitem",
+      "match": "Wartung Klimaanlagen",
+      "field": "label",
+      "i18n": {
+        "hr_HR": "Održavanje klima uređaja",
+        "en_US": "Air-conditioning maintenance",
+        "sl_SI": "Vzdrževanje klimatskih naprav",
+        "uk_UA": "Обслуговування кондиціонерів"
+      }
+    },
+    {
+      "table": "hv_costitem",
+      "match": "Gartenpflege Haus 3 (eigener Garten)",
+      "field": "label",
+      "i18n": {
+        "hr_HR": "Održavanje vrta – Kuća 3 (vlastiti vrt)",
+        "en_US": "Garden maintenance – House 3 (own garden)",
+        "sl_SI": "Vzdrževanje vrta – Hiša 3 (lasten vrt)",
+        "uk_UA": "Догляд за садом – Будинок 3 (власний сад)"
+      }
+    },
+    {
+      "table": "hv_costitem",
+      "match": "Gartenpflege allgemeine Flächen (Hof zdz-5/zdz-6)",
+      "field": "label",
+      "i18n": {
+        "hr_HR": "Održavanje zajedničkih zelenih površina (dvorište zdz-5/zdz-6)",
+        "en_US": "Maintenance of common green areas (yard zdz-5/zdz-6)",
+        "sl_SI": "Vzdrževanje skupnih zelenih površin (dvorišče zdz-5/zdz-6)",
+        "uk_UA": "Догляд за спільними зеленими зонами (подвір'я zdz-5/zdz-6)"
+      }
+    },
+    {
+      "table": "hv_costitem",
+      "match": "Stiegenhausreinigung",
+      "field": "label",
+      "i18n": {
+        "hr_HR": "Čišćenje stubišta",
+        "en_US": "Stairwell cleaning",
+        "sl_SI": "Čiščenje stopnišča",
+        "uk_UA": "Прибирання сходової клітки"
+      }
+    },
+    {
+      "table": "hv_costitem",
+      "match": "Strom Stiegenhaus",
+      "field": "label",
+      "i18n": {
+        "hr_HR": "Struja stubišta",
+        "en_US": "Stairwell electricity",
+        "sl_SI": "Elektrika stopnišča",
+        "uk_UA": "Електроенергія сходової клітки"
+      }
+    },
+    {
+      "table": "hv_costitem",
+      "match": "Sonstiges / Puffer",
+      "field": "label",
+      "i18n": {
+        "hr_HR": "Ostalo / rezerva",
+        "en_US": "Other / buffer",
+        "sl_SI": "Drugo / rezerva",
+        "uk_UA": "Інше / резерв"
+      }
+    }
+  ]
+}

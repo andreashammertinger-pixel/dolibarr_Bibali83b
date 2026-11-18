@@ -99,7 +99,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		}
 
 		$pdf = pdf_getInstance($this->format);
-		$fs = pdf_getPDFFontSize($outputlangs);
+		$fs = (int) getDolGlobalString('MAIN_PDF_FORCE_FONT_SIZE', '10'); // gleiche Schriftgröße in allen Sprachen
 		$pdf->SetAutoPageBreak(1, 0);
 		if (class_exists('TCPDF')) {
 			$pdf->setPrintHeader(false);
@@ -147,9 +147,9 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$pdf->SetFont('', '', $fs - 1);
 		$y = $this->marge_haute + 12;
 		$rows = array(
-			array($outputlangs->transnoentities('Date').':', dol_print_date($object->date, 'day', false, $outputlangs, true)),
-			array($outputlangs->transnoentities('DateDue').':', dol_print_date($object->date_lim_reglement, 'day', false, $outputlangs, true)),
-			array($outputlangs->transnoentities('Ref').':', $object->ref),
+			array($outputlangs->transnoentities('HvPdfWDate').':', dol_print_date($object->date, 'day', false, $outputlangs, true)),
+			array($outputlangs->transnoentities('HvPdfWDateDue').':', dol_print_date($object->date_lim_reglement, 'day', false, $outputlangs, true)),
+			array($outputlangs->transnoentities('HvPdfWRef').':', $object->ref),
 		);
 		foreach ($rows as $r) {
 			$pdf->SetXY($mid, $y);
@@ -216,7 +216,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 					$infoLines[] = ($multi ? '   ' : '').'OIB: '.$oib;
 				}
 				if ($mail) {
-					$infoLines[] = ($multi ? '   ' : '').$outputlangs->transnoentities('Email').': '.$mail;
+					$infoLines[] = ($multi ? '   ' : '').$outputlangs->transnoentities('HvPdfWEmail').': '.$mail;
 				}
 			}
 			$src = (!empty($contacts[0]->address) || !empty($contacts[0]->town)) ? $contacts[0] : $object->thirdparty;
@@ -227,7 +227,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 				$infoLines[] = 'OIB: '.$oib;
 			}
 			if (!empty($object->thirdparty->email)) {
-				$infoLines[] = $outputlangs->transnoentities('Email').': '.$object->thirdparty->email;
+				$infoLines[] = $outputlangs->transnoentities('HvPdfWEmail').': '.$object->thirdparty->email;
 			}
 			$src = $object->thirdparty;
 		}
@@ -247,20 +247,20 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$regno = trim((string) ($mysoc->idprof2 ?? ''));
 		$from = $mysoc->name."\n".($oib ? "OIB: ".$oib."\n" : '').($regno !== '' ? $outputlangs->transnoentities('HvPdfRegNo').': '.$regno."\n" : '').$this->addressLines($mysoc)."\n";
 		if (!empty($mysoc->email)) {
-			$from .= "\n".$outputlangs->transnoentities('Email').': '.$mysoc->email;
+			$from .= "\n".$outputlangs->transnoentities('HvPdfWEmail').': '.$mysoc->email;
 		}
 		if (!empty($mysoc->url)) {
-			$from .= "\n".$outputlangs->transnoentities('Web').': '.$mysoc->url;
+			$from .= "\n".$outputlangs->transnoentities('HvPdfWWeb').': '.$mysoc->url;
 		}
 		$mgr = $this->manager();
 		if ($mgr) {
 			$mgroib = hvOib($mgr);
 			$from .= "\n\n".$outputlangs->transnoentities('HvPdfManagedBy').":\n".$mgr->name.($mgroib ? "\nOIB: ".$mgroib : '');
 			if (!empty($mgr->email)) {
-				$from .= "\n".$outputlangs->transnoentities('Email').': '.$mgr->email;
+				$from .= "\n".$outputlangs->transnoentities('HvPdfWEmail').': '.$mgr->email;
 			}
 			if (!empty($mgr->url)) {
-				$from .= "\n".$outputlangs->transnoentities('Web').': '.$mgr->url;
+				$from .= "\n".$outputlangs->transnoentities('HvPdfWWeb').': '.$mgr->url;
 			}
 		}
 		$pdf->SetFont('', '', $fs - 2);
@@ -540,7 +540,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 	}
 
 	/** Adresszeilen (Straße, PLZ Ort, Land auf Englisch) */
-	protected function addressLines($o)
+	public function addressLines($o)
 	{
 		global $conf;
 		$lines = array();
@@ -617,7 +617,7 @@ class pdf_hausverwaltung extends ModelePDFFactures
 	}
 
 	/** Hausverwalter (Lieferant aus den Moduleinstellungen) */
-	protected function manager()
+	public function manager()
 	{
 		$id = getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID');
 		if ($id <= 0) {

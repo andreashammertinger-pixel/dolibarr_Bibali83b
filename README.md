@@ -52,6 +52,9 @@ Texte wie „Apartment“ lassen sich je Firma über *Einstellungen → Überset
 * **Vorschreibung:** Das **Original ist immer kroatisch** (`IN….pdf`, Positionstexte in der Datenbank ebenfalls kroatisch) – das ist das Dokument für Finanz und Steuerberater.
   Ist die *Standardsprache* des Apartments nicht Kroatisch, wird automatisch zusätzlich eine **Übersetzungskopie** `IN…_de_DE.pdf` (de, sl, uk, en) erzeugt, deutlich markiert „KOPIE – Übersetzung, maßgeblich ist das kroatische Original“.
   Kroatische Eigentümer erhalten nur das Original. Einstellung `HAUSVERWALTUNG_ORIGINAL_LANG` (Standard `hr_HR`).
+* **Alle Eigentümer-Dokumente mehrsprachig:** Vorschreibung, Abrechnungsblatt, E-Mails, Rücklagen-Plan – jeweils kroatisches Original + Kopie in der Sprache des Eigentümers.
+* **Neue Sprache (z. B. Italienisch):** beim Apartment (Geschäftspartner) die *Standardsprache* setzen → erscheint automatisch unter *Hausverwaltung → Sprachen*. Dort fehlende Texte direkt übersetzen oder **„Export für Übersetzer“** (JSON mit Deutsch + Kroatisch als Vorlage) → ausfüllen lassen → **importieren**. Übersetzungen werden in der Datenbank gespeichert (bleiben bei Modul-Updates erhalten). Solange etwas fehlt, wird Englisch verwendet.
+* **Kostenarten / Planpositionen:** Bezeichnungen je Sprache auf derselben Seite (oder beim Bearbeiten der Kostenart). Für Bibali: `data/bibali83b_uebersetzungen.json` importieren (hr/en/sl/uk).
 
 ### PDF-Vorlage „hausverwaltung“
 Layout nach Excel-Blatt *Rechnung*: Titel „Vorschreibung“, Datum/Fälligkeit, Empfänger (An) = Kontakt mit Funktion **Eigentümer** (sonst Adresse des Geschäftspartners), Absender (Von) = Gemeinschaft + Verwalter, Positionen, Gesamtbetrag ohne USt-Ausweis, Bankverbindung des Betriebskontos mit Zahlungsreferenz, Fußzeile mit OIB.

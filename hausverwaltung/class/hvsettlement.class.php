@@ -1,6 +1,7 @@
 <?php
 /* Copyright (C) 2026 Green Villa and Apartment Resorts d.o.o. — GPL v3+ */
 
+require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 dol_include_once('/hausverwaltung/class/hvinvoicer.class.php');
 
 /**
@@ -173,6 +174,56 @@ class HvSettlement
 			$log[] = $e;
 		}
 		return $log;
+	}
+
+	/**
+	 * Detail für das Abrechnungsblatt einer Einheit: je Kostenart Gesamtkosten, Schlüssel, Anteil.
+	 *
+	 * @return array|null
+	 */
+	public function detail($year, $unitId)
+	{
+		global $conf;
+		$data = $this->compute($year);
+		if (!isset($data['units'][$unitId])) {
+			return null;
+		}
+		$calc = new HvCalculator($this->db);
+		$u = $calc->units[$unitId];
+		$lines = array();
+		foreach ($data['actual'] as $cid => $amount) {
+			$c = $data['costitems'][$cid] ?? null;
+			if (!$c) {
+				continue;
+			}
+			$fkb = (int) $c->fk_building;
+			if ($fkb > 0 && (int) $u->fk_building !== $fkb) {
+				continue;
+			}
+			$key = $c->alloc_key ?: 'area';
+			$alloc = $calc->allocate($amount, $fkb, $key);
+			$mine = $alloc[$unitId] ?? 0;
+			$lines[] = array('costitem' => $c, 'total' => (float) $amount, 'key' => $key, 'pct' => $amount != 0 ? $mine / $amount * 100 : 0, 'amount' => round($mine, 2));
+		}
+		usort($lines, function ($a, $b) {
+			return strcmp((string) $a['costitem']->label, (string) $b['costitem']->label);
+		});
+		// Rücklagenzuführung der Einheit im Jahr (vorgeschrieben)
+		$reserve = 0;
+		$b = $calc->buildings[(int) $u->fk_building] ?? null;
+		if ($b && !empty($b->fk_product_reserve)) {
+			$sql = "SELECT SUM(d.total_ttc) as t FROM ".$this->db->prefix()."facturedet d INNER JOIN ".$this->db->prefix()."facture f ON f.rowid = d.fk_facture";
+			$sql .= " INNER JOIN ".$this->db->prefix()."facture_extrafields fe ON fe.fk_object = f.rowid";
+			$sql .= " WHERE f.entity = ".((int) $conf->entity)." AND f.fk_statut IN (1,2) AND d.fk_product = ".((int) $b->fk_product_reserve)." AND fe.hv_unit = ".((int) $unitId)." AND fe.hv_period LIKE '".((int) $year)."-__'";
+			$res = $this->db->query($sql);
+			if ($res && ($o = $this->db->fetch_object($res))) {
+				$reserve = round((float) $o->t, 2);
+			}
+		}
+		$r = $data['units'][$unitId];
+		// Nach dem Buchen gelten die festgeschriebenen Werte (spätere Zahlungen/Rechnungen ändern die Abrechnung nicht mehr)
+		$bk = $r['booked'];
+		return array('unit' => $u, 'building' => $b, 'lines' => $lines, 'actual' => $bk ? (float) $bk->actual : $r['actual'], 'prepaid' => $bk ? (float) $bk->prepaid : $r['prepaid'], 'saldo' => $bk ? (float) $bk->saldo : $r['saldo'], 'booked' => $bk, 'reserve' => $reserve);
 	}
 
 	/** Offenes Guthaben einer Einheit */

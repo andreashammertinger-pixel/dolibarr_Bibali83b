@@ -85,9 +85,81 @@ function hvOibValid($oib)
 /** Sprachen, in denen Dokumente für Eigentümer erstellt werden (erste = Original) */
 function hvDocLangs()
 {
+	global $db, $conf;
+	static $cache = null;
+	if ($cache !== null) {
+		return $cache;
+	}
 	$orig = getDolGlobalString('HAUSVERWALTUNG_ORIGINAL_LANG', 'hr_HR');
 	$list = array_filter(array_map('trim', explode(',', getDolGlobalString('HAUSVERWALTUNG_DOC_LANGS', 'hr_HR,de_DE,en_US,sl_SI,uk_UA'))));
-	return array_values(array_unique(array_merge(array($orig), $list)));
+	// Sprachen aller Eigentümer automatisch dazunehmen (neue Eigentümer mit neuer Sprache)
+	$res = $db->query("SELECT DISTINCT s.default_lang FROM ".$db->prefix()."hv_unit u INNER JOIN ".$db->prefix()."societe s ON s.rowid = u.fk_soc WHERE u.entity = ".((int) $conf->entity)." AND s.default_lang IS NOT NULL AND s.default_lang <> ''");
+	while ($res && ($o = $db->fetch_object($res))) {
+		if (preg_match('/^[a-z]{2}_[A-Z]{2}$/', $o->default_lang)) {
+			$list[] = $o->default_lang;
+		}
+	}
+	$cache = array_values(array_unique(array_merge(array($orig), $list)));
+	return $cache;
+}
+
+/**
+ * Textschlüssel, die in Dokumenten/E-Mails an Eigentümer vorkommen (für die Seite "Sprachen").
+ *
+ * @return array<string,string> key => deutscher Text
+ */
+function hvDocKeys()
+{
+	$file = dol_buildpath('/hausverwaltung/langs/de_DE/hausverwaltung.lang', 0);
+	$out = array();
+	$extra = array('HvBuildingNo', 'HvUnit', 'HvAllBuildings', 'HvReservePlan', 'HvBuilding', 'HvReserveAccount', 'HvBalance', 'HvMovesIn', 'HvMovesOut',
+		'HvPlanAssumptions', 'HvPlanMonthly', 'HvPlanCurrentRate', 'HvPlanRequiredRate', 'HvPlanMinBalance', 'HvPlanOk', 'HvPlanShortfall', 'HvPlanRequiredHelp', 'HvPlanProjection',
+		'HvPlanEndBalance', 'HvPlanMeasures', 'HvPlanItems', 'HvPlanYear', 'HvPlanAmount', 'HvPlanBasis', 'HvPlanTodayPrices', 'HvPlanDisclaimer');
+	foreach (file($file) ?: array() as $line) {
+		if (!preg_match('/^\s*([A-Za-z0-9_]+)\s*=\s*(.*)$/', $line, $m)) {
+			continue;
+		}
+		if (preg_match('/^(HvPdf|HvMail|HvStmt|HvLine|HvInvoice|HvKey_)/', $m[1]) || in_array($m[1], $extra, true)) {
+			if (!in_array($m[1], array('HvMailFromSetting', 'HvMailBccSetting', 'HvMailTo', 'HvMailFiles', 'HvMailLastSent', 'HvMailNoAddress', 'HvMailNoPdf', 'HvMailNoInvoices', 'HvMailTestTo', 'HvMailSendTest', 'HvMailSendReal', 'HvMailConfirm', 'HvMailTestSent', 'HvMailSent', 'HvMailTestAddressInvalid', 'HvMailHelp', 'HvPdfPreview', 'HvPdfOriginal', 'HvPdfCopyShort', 'HvInvoiceNumber', 'HvStmtSection', 'HvStmtHelp', 'HvStmtGenerate', 'HvStmtGenerated', 'HvStmtSend', 'HvStmtSendConfirm'), true)) {
+				$out[$m[1]] = trim($m[2]);
+			}
+		}
+	}
+	return $out;
+}
+
+/** Übersetzungen einer Sprache: Modul-Sprachdatei + eigene Übersetzungen (Datenbank, Vorrang) */
+function hvLangValues($lang)
+{
+	global $db, $conf;
+	$vals = array();
+	$file = dol_buildpath('/hausverwaltung/langs/'.$lang.'/hausverwaltung.lang', 0);
+	if (is_readable($file)) {
+		foreach (file($file) as $line) {
+			if (preg_match('/^\s*([A-Za-z0-9_]+)\s*=\s*(.*)$/', $line, $m)) {
+				$vals[$m[1]] = array('value' => trim($m[2]), 'src' => 'file');
+			}
+		}
+	}
+	$res = $db->query("SELECT transkey, transvalue FROM ".$db->prefix()."overwrite_trans WHERE lang = '".$db->escape($lang)."' AND entity IN (0, ".((int) $conf->entity).") AND transkey LIKE 'Hv%'");
+	while ($res && ($o = $db->fetch_object($res))) {
+		$vals[$o->transkey] = array('value' => $o->transvalue, 'src' => 'db');
+	}
+	return $vals;
+}
+
+/** Eigene Übersetzung speichern (Dolibarr-Tabelle overwrite_trans, gilt nur für diese Firma) */
+function hvSaveTrans($lang, $key, $value)
+{
+	global $db, $conf;
+	$db->query("DELETE FROM ".$db->prefix()."overwrite_trans WHERE lang = '".$db->escape($lang)."' AND transkey = '".$db->escape($key)."' AND entity = ".((int) $conf->entity));
+	if (trim((string) $value) !== '') {
+		$db->query("INSERT INTO ".$db->prefix()."overwrite_trans (lang, transkey, transvalue, entity) VALUES ('".$db->escape($lang)."', '".$db->escape($key)."', '".$db->escape(trim((string) $value))."', ".((int) $conf->entity).")");
+	}
+	if (!getDolGlobalString('MAIN_ENABLE_OVERWRITE_TRANSLATION')) {
+		require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
+		dolibarr_set_const($db, 'MAIN_ENABLE_OVERWRITE_TRANSLATION', '1', 'chaine', 0, '', $conf->entity);
+	}
 }
 
 /** Übersetzter Text eines Datensatzes (Feld i18n als JSON), Rückfall auf das Originalfeld */

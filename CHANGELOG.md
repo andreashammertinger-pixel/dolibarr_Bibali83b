@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.8.0
+- **Abrechnungsblatt je Einheit** (Betriebskostenabrechnung): kroatisches Original + Kopie in der Sprache des Eigentümers; Kostenarten mit Gesamtkosten, Schlüssel, Anteil; Vorauszahlungen, Guthaben/Nachzahlung (mit Rechnungsnummer, Fälligkeit, IBAN), Rücklagen-Information. Nach dem Buchen gelten die festgeschriebenen Werte.
+- *Jahresabrechnung*: Abrechnungsblätter erzeugen, Testversand, Versand an alle Eigentümer (mit Nachzahlungsrechnung als Anhang), Versandprotokoll
+- Neue Seite **Sprachen**: Abdeckung je Sprache, Sprache hinzufügen, Texte und Kostenarten/Planpositionen übersetzen, Export/Import für Übersetzer; Sprachen der Eigentümer werden automatisch erkannt
+- Kostenarten mit Übersetzungen je Sprache; Bibali-Übersetzungen `data/bibali83b_uebersetzungen.json`
+- PDFs: gleiche Schriftgröße in allen Sprachen, alle Beschriftungen übersetzbar (keine Dolibarr-Standardtexte mehr)
+
 ## 1.7.0
 - Rücklagen-Planung **mehrsprachig**: Druckansicht je Dokumentsprache (Standard hr/de/en/sl/uk, Einstellung `HAUSVERWALTUNG_DOC_LANGS`), Kroatisch = Original, andere Sprachen mit Hinweis „Kopie – Übersetzung“
 - Planpositionen mit Übersetzungen je Sprache (Bezeichnung, Schätzgrundlage, Hinweis); Import akzeptiert Texte als `{"hr_HR": "...", "de_DE": "..."}`

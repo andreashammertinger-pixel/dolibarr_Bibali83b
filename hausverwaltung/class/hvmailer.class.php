@@ -7,6 +7,7 @@ require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 dol_include_once('/hausverwaltung/class/hvinvoicer.class.php');
+dol_include_once('/hausverwaltung/class/hvsettlement.class.php');
 
 /**
  * E-Mail-Versand von Vorschreibungen / Abrechnungen:
@@ -193,6 +194,118 @@ class HvMailer
 			$f->call_trigger('BILL_SENTBYMAIL', $user);
 		}
 		return 1;
+	}
+
+	/**
+	 * Abrechnungsblatt einer Einheit versenden: an alle Eigentümer, Anhänge = Abrechnungsblatt (Original + Kopie)
+	 * und ggf. Nachzahlungsrechnung (Original + Kopie). Text in der Sprache des Eigentümers.
+	 */
+	public function sendStatement(User $user, $year, $unitId, $testto = '')
+	{
+		global $conf, $mysoc;
+		dol_include_once('/hausverwaltung/class/hvstatementpdf.class.php');
+		$st = new HvSettlement($this->db);
+		$d = $st->detail($year, $unitId);
+		if (!$d || empty($d['unit']->fk_soc)) {
+			$this->error = 'no data';
+			return -1;
+		}
+		$files = HvStatementPdf::files($year, $d['unit']->ref);
+		if (!$files) {
+			$this->error = 'Abrechnungsblatt fehlt – bitte zuerst erzeugen';
+			return -2;
+		}
+		$fi = null;
+		if (!empty($d['booked']->fk_invoice)) {
+			$fi = new Facture($this->db);
+			if ($fi->fetch((int) $d['booked']->fk_invoice) > 0) {
+				$files = array_merge($files, $this->files($fi));
+			} else {
+				$fi = null;
+			}
+		}
+		$soc = new Societe($this->db);
+		$soc->fetch((int) $d['unit']->fk_soc);
+		$inv = new HvInvoicer($this->db);
+		$rcpt = array();
+		foreach ($inv->ownerContacts((int) $soc->id) as $cid) {
+			$c = new Contact($this->db);
+			if ($c->fetch($cid) > 0 && isValidEmail($c->email)) {
+				$rcpt[] = array('id' => (int) $c->id, 'name' => $c->getFullName($GLOBALS['langs']), 'email' => $c->email, 'company' => (trim((string) $c->firstname) === ''));
+			}
+		}
+		if (!$rcpt && $testto === '') {
+			$this->error = 'Keine E-Mail-Adresse beim Eigentümer';
+			return -3;
+		}
+		$orig = getDolGlobalString('HAUSVERWALTUNG_ORIGINAL_LANG', 'hr_HR');
+		$lang = !empty($soc->default_lang) ? $soc->default_lang : $orig;
+		$ol = new Translate('', $conf);
+		$ol->setDefaultLang($lang);
+		$ol->loadLangs(array('main', 'bills', 'hausverwaltung@hausverwaltung'));
+		$persons = array();
+		foreach ($rcpt as $r) {
+			if (empty($r['company'])) {
+				$persons[] = $r['name'];
+			}
+		}
+		$saldo = (float) $d['saldo'];
+		$subject = $ol->transnoentities('HvMailSubjectStatement', $mysoc->name, $d['unit']->ref, $year);
+		$body = ($persons ? $ol->transnoentities('HvMailHello', implode(', ', $persons)) : $ol->transnoentities('HvMailHelloCompany'))."\n\n";
+		$body .= $ol->transnoentities('HvMailStatementIntro', $d['unit']->ref, $year)."\n\n";
+		$amt = price(abs($saldo), 0, $ol, 1, 2, 2, $conf->currency);
+		if (abs($saldo) < 0.005) {
+			$body .= $ol->transnoentities('HvStmtBalanced')."\n\n";
+		} elseif ($saldo > 0) {
+			$body .= $ol->transnoentities('HvMailStatementCredit', $amt)."\n\n";
+		} else {
+			$body .= $ol->transnoentities('HvMailStatementAdditional', $amt, $fi ? $fi->ref : '-', $fi ? dol_print_date($fi->date_lim_reglement, 'day', false, $ol) : '-')."\n\n";
+		}
+		if (substr($lang, 0, 2) !== substr($orig, 0, 2)) {
+			$body .= $ol->transnoentities('HvMailCopyNote')."\n\n";
+		}
+		$mgr = null;
+		if (getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID') > 0) {
+			$mgr = new Societe($this->db);
+			if ($mgr->fetch(getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID')) <= 0) {
+				$mgr = null;
+			}
+		}
+		$body .= $ol->transnoentities('HvMailRegards')."\n".($mgr ? $mgr->name."\n".$ol->transnoentities('HvMailOnBehalf', $mysoc->name) : $mysoc->name)."\n";
+		$fromMail = getDolGlobalString('HAUSVERWALTUNG_MAIL_FROM', $mysoc->email);
+		if (!isValidEmail($fromMail)) {
+			$this->error = 'Absenderadresse fehlt';
+			return -4;
+		}
+		$from = dol_string_nospecial($mysoc->name, ' ', array(",")).' <'.$fromMail.'>';
+		$to = array();
+		if ($testto !== '') {
+			$to[] = $testto;
+			$subject = '[TEST] '.$subject;
+			$body = '[TEST – '.implode(', ', array_column($rcpt, 'email')).']'."\n\n".$body;
+		} else {
+			foreach ($rcpt as $r) {
+				$to[] = dol_string_nospecial($r['name'], ' ', array(",")).' <'.$r['email'].'>';
+			}
+		}
+		$names = array_map('basename', $files);
+		$mail = new CMailFile($subject, implode(', ', $to), $from, $body, $files, array_fill(0, count($files), 'application/pdf'), $names, '', $testto === '' ? getDolGlobalString('HAUSVERWALTUNG_MAIL_BCC') : '', 0, 0, '', '', 'hvstmt'.$unitId, '', 'standard', ($mgr && isValidEmail($mgr->email)) ? $mgr->email : '');
+		if (!empty($mail->error) || !$mail->sendfile()) {
+			$this->error = $mail->error ?: 'Versand fehlgeschlagen';
+			return -5;
+		}
+		if ($testto === '') {
+			$this->db->query("INSERT INTO ".$this->db->prefix()."hv_mail_log (entity, fk_invoice, sendto, files, status, error, datec, fk_user) VALUES (".((int) $conf->entity).", ".($fi ? (int) $fi->id : 0).", '".$this->db->escape(implode(', ', $to))."', '".$this->db->escape(implode(', ', $names))."', 'ok', '', '".$this->db->idate(dol_now())."', ".((int) $user->id).")");
+		}
+		return 1;
+	}
+
+	/** Zuletzt versendetes Abrechnungsblatt */
+	public function lastSentStatement($year, $unitRef)
+	{
+		$res = $this->db->query("SELECT MAX(datec) as d FROM ".$this->db->prefix()."hv_mail_log WHERE status = 'ok' AND files LIKE '".$this->db->escape('ABR-'.((int) $year).'-'.dol_sanitizeFileName($unitRef)).".pdf%'");
+		$o = $res ? $this->db->fetch_object($res) : null;
+		return ($o && $o->d) ? $this->db->jdate($o->d) : 0;
 	}
 
 	protected function log(User $user, Facture $f, $to, $files, $status, $error)

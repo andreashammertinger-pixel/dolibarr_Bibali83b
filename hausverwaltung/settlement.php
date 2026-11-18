@@ -37,6 +37,8 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
 dol_include_once('/hausverwaltung/lib/hausverwaltung.lib.php');
 dol_include_once('/hausverwaltung/class/hvsettlement.class.php');
+dol_include_once('/hausverwaltung/class/hvstatementpdf.class.php');
+dol_include_once('/hausverwaltung/class/hvmailer.class.php');
 
 $langs->loadLangs(array('hausverwaltung@hausverwaltung', 'bills'));
 if (!$user->hasRight('hausverwaltung', 'read')) {
@@ -50,12 +52,46 @@ $log = array();
 if ($action === 'confirm_book' && GETPOST('confirm') === 'yes' && $user->hasRight('hausverwaltung', 'invoice')) {
 	$log = $st->book($user, $year, GETPOSTINT('validate') ? true : false);
 }
+// Abrechnungsblätter erzeugen / versenden
+$canInvoice = $user->hasRight('hausverwaltung', 'invoice');
+$stmtLog = array();
+$testto = trim(GETPOST('testto', 'alphanohtml')) ?: (string) $user->email;
+if ($canInvoice && $action === 'genstatements') {
+	$gen = new HvStatementPdf($db);
+	$n = 0;
+	foreach ((new HvCalculator($db))->units as $uid => $u) {
+		if ($gen->generate($year, $uid)) {
+			$n++;
+		}
+	}
+	setEventMessages($langs->trans('HvStmtGenerated', $n), null);
+}
+if ($canInvoice && in_array($action, array('stmttest', 'confirm_stmtsend'), true) && ($action === 'stmttest' || GETPOST('confirm') === 'yes')) {
+	$mailer = new HvMailer($db);
+	$ok = 0;
+	$all = 0;
+	foreach ((new HvCalculator($db))->units as $uid => $u) {
+		if (empty($u->fk_soc)) {
+			continue;
+		}
+		$all++;
+		$r = $mailer->sendStatement($user, $year, $uid, $action === 'stmttest' ? $testto : '');
+		$stmtLog[$uid] = $r > 0 ? 'ok' : $mailer->error;
+		if ($r > 0) {
+			$ok++;
+		}
+	}
+	setEventMessages($langs->trans($action === 'stmttest' ? 'HvMailTestSent' : 'HvMailSent', $ok, $all), null, $ok == $all ? 'mesgs' : 'warnings');
+}
 $data = $st->compute($year);
 $calc = new HvCalculator($db);
 
 llxHeader('', $langs->trans('HvSettlement'), '', '', 0, 0, '', '', '', 'mod-hausverwaltung');
 print load_fiche_titre($langs->trans('HvSettlement').' '.$year, '<form method="GET"><input type="number" name="year" class="width75" value="'.$year.'"> <input type="submit" class="button small" value="OK"></form>', 'bill');
 
+if ($action === 'stmtsend') {
+	print $form->formconfirm($_SERVER['PHP_SELF'].'?year='.$year, $langs->trans('HvStmtSend'), $langs->trans('HvStmtSendConfirm', $year), 'confirm_stmtsend', '', 0, 1);
+}
 if ($action === 'book') {
 	print $form->formconfirm($_SERVER['PHP_SELF'].'?year='.$year.'&validate='.GETPOSTINT('validate'), $langs->trans('HvBookSettlement'), $langs->trans('HvBookSettlementConfirm', $year), 'confirm_book', '', 0, 1);
 }
@@ -119,6 +155,33 @@ if ($anyOpen && $user->hasRight('hausverwaltung', 'invoice')) {
 	print '<br><form method="GET" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="year" value="'.$year.'"><input type="hidden" name="action" value="book">';
 	print '<label><input type="checkbox" name="validate" value="1" checked> '.$langs->trans('HvValidateDirectly').'</label> ';
 	print '<input type="submit" class="button button-save" value="'.$langs->trans('HvBookSettlement').'"></form>';
+}
+
+// Abrechnungsblätter je Eigentümer
+print '<br>'.load_fiche_titre($langs->trans('HvStmtSection'), '', 'pdf');
+print '<div class="opacitymedium">'.$langs->trans('HvStmtHelp').'</div><br>';
+$mailer = new HvMailer($db);
+print '<div class="div-table-responsive"><table class="noborder centpercent"><tr class="liste_titre"><th>'.$langs->trans('HvUnit').'</th><th>'.$langs->trans('HvOwnersMarked').'</th><th>'.$langs->trans('Language').'</th><th>'.$langs->trans('HvMailFiles').'</th><th>'.$langs->trans('HvMailLastSent').'</th><th>'.$langs->trans('Status').'</th></tr>';
+$inv2 = new HvInvoicer($db);
+foreach ($data['units'] as $uid => $r) {
+	$u = $r['unit'];
+	$links = array();
+	foreach (HvStatementPdf::files($year, $u->ref) as $f) {
+		$rel = 'statements/'.$year.'/'.basename($f);
+		$links[] = '<a href="'.DOL_URL_ROOT.'/document.php?modulepart=hausverwaltung&file='.urlencode($rel).'" target="_blank">'.img_picto('', 'pdf').' '.dol_escape_htmltag(basename($f)).'</a>';
+	}
+	$lrow = $u->fk_soc ? $db->getRow("SELECT default_lang FROM ".$db->prefix()."societe WHERE rowid = ".((int) $u->fk_soc)) : null;
+	$last = $mailer->lastSentStatement($year, $u->ref);
+	print '<tr class="oddeven"><td>'.dol_escape_htmltag($u->ref).'</td><td>'.dol_escape_htmltag(implode(', ', $u->fk_soc ? $inv2->ownerNames((int) $u->fk_soc) : array())).'</td><td>'.dol_escape_htmltag($lrow ? (string) $lrow->default_lang : '').'</td>';
+	print '<td>'.($links ? implode('<br>', $links) : '<span class="opacitymedium">–</span>').'</td><td>'.($last ? dol_print_date($last, 'dayhour') : '').'</td>';
+	print '<td>'.(isset($stmtLog[$uid]) ? ($stmtLog[$uid] === 'ok' ? '<span class="ok">OK</span>' : '<span class="error">'.dol_escape_htmltag($stmtLog[$uid]).'</span>') : '').'</td></tr>';
+}
+print '</table></div><br>';
+if ($canInvoice) {
+	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="year" value="'.$year.'">';
+	print '<button class="button" name="action" value="genstatements">'.$langs->trans('HvStmtGenerate').'</button> &nbsp; ';
+	print $langs->trans('HvMailTestTo').': <input name="testto" class="minwidth200" value="'.dol_escape_htmltag($testto).'"> <button class="button" name="action" value="stmttest">'.$langs->trans('HvMailSendTest').'</button> ';
+	print '<button class="button button-save" name="action" value="stmtsend">'.$langs->trans('HvStmtSend').'</button></form>';
 }
 
 llxFooter();

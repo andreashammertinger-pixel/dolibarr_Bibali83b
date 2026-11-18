@@ -63,6 +63,14 @@ if ($canwrite && $action === 'save') {
 		'active' => GETPOSTINT('active') ? 1 : 0,
 		'note' => GETPOST('note', 'restricthtml'),
 	);
+	$trl = array();
+	foreach ((array) GETPOST('tr_label', 'array') as $l => $v) {
+		$v = trim(strip_tags((string) $v));
+		if ($v !== '' && preg_match('/^[a-z]{2}_[A-Z]{2}$/', $l)) {
+			$trl[$l]['label'] = $v;
+		}
+	}
+	$fields['i18n'] = $trl ? json_encode($trl, JSON_UNESCAPED_UNICODE) : null;
 	if (empty($fields['label'])) {
 		setEventMessages($langs->trans('ErrorFieldRequired', $langs->transnoentities('Label')), null, 'errors');
 		$action = $id ? 'edit' : 'create';
@@ -116,6 +124,12 @@ if ($canwrite && in_array($action, array('create', 'edit'))) {
 	print '<tr><td>'.$langs->trans('Position').'</td><td><input name="position" class="width50" value="'.((int) $c->position).'"></td></tr>';
 	print '<tr><td>'.$langs->trans('Active').'</td><td><input type="checkbox" name="active" value="1"'.($c->active ? ' checked' : '').'></td></tr>';
 	print '<tr><td>'.$langs->trans('Note').'</td><td><textarea name="note" class="quatrevingtpercent" rows="2">'.dol_escape_htmltag($c->note).'</textarea></td></tr>';
+	$tri = !empty($c->i18n) ? json_decode($c->i18n, true) : array();
+	print '<tr><td>'.$langs->trans('HvPlanTranslations').'<br><span class="opacitymedium small">'.$langs->trans('HvCostTranslationsHelp').'</span></td><td>';
+	foreach (hvDocLangs() as $l) {
+		print '<div class="paddingbottom"><span class="inline-block width75">'.$l.'</span><input name="tr_label['.$l.']" class="minwidth400" value="'.dol_escape_htmltag($tri[$l]['label'] ?? '').'"></div>';
+	}
+	print '</td></tr>';
 	print '</table><div class="center"><input type="submit" class="button button-save" value="'.$langs->trans('Save').'"> <a class="button button-cancel" href="'.$_SERVER['PHP_SELF'].'">'.$langs->trans('Cancel').'</a></div></form><br>';
 }
 
