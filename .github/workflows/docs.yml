@@ -46,3 +46,15 @@ jobs:
           # Passwort über Umgebungsvariable (sicher bei Sonderzeichen wie , @ : im Passwort)
           export LFTP_PASSWORD="$PASS"
           lftp --env-password -u "$USER" "$URL" -e "$SET set net:max-retries 3; mirror -R --delete --verbose=1 --exclude-glob .ht* --exclude-glob '*/.ht*' docs/site/ $DIR; quit"
+      - name: Website prüfen
+        if: always()
+        env:
+          SITE: ${{ vars.DOCS_SITE_URL || 'https://helpdolibarr.greenresorts.hr' }}
+        run: |
+          fail=0
+          for p in / verwaltung/ verwaltung/hr/ verwaltung/vorschreibung/ eigentuemer/ eigentuemer/de/ eigentuemer/en/ eigentuemer/sl/ eigentuemer/uk/ eigentuemer/de/zaduzenje/ eigentuemer/assets/stylesheets/extra.css verwaltung/news/2026-11-zuoz/; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "${SITE%/}/$p" || echo 000)
+            echo "$code  ${SITE%/}/$p"
+            [ "$code" = "200" ] || [ "$code" = "401" ] || fail=1
+          done
+          [ $fail -eq 0 ] || echo "::warning::Nicht alle Seiten erreichbar (401 = Verzeichnisschutz, ok)."

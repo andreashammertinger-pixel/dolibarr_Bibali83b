@@ -58,7 +58,7 @@ Texte wie „Apartment“ lassen sich je Firma über *Einstellungen → Überset
 
 ### Online-Hilfe
 * Website im Ordner `docs/` (siehe `docs/README.md`): Handbuch Verwaltung, Hilfe für Eigentümer, News und Recht.
-* In den Einstellungen die **Hilfe-Adresse** eintragen (z. B. `https://hilfe.greenresorts.hr/`) – dann führen das Fragezeichen jeder Seite und das Menü *Hilfe* der Eigentümer direkt in die passende Sprache.
+* In den Einstellungen die **Hilfe-Adresse** eintragen (z. B. `https://helpdolibarr.greenresorts.hr/`) – dann führen das Fragezeichen jeder Seite und das Menü *Hilfe* der Eigentümer direkt in die passende Sprache.
 
 ### Eigentümer-Zugang (externe Benutzer)
 * Kontakte der Eigentümer können als **externe Benutzer** (verknüpft mit dem Apartment) angelegt werden. Sie sehen nur Daten ihres Apartments.
