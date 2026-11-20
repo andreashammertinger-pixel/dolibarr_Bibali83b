@@ -1,0 +1,13 @@
+<resources>
+    <color name="bg">#FF101418</color>
+    <color name="panel">#FF1C232B</color>
+    <color name="text">#FFF5F5F5</color>
+    <color name="muted">#FFA8B3BD</color>
+    <color name="idea">#FFFFB300</color>
+    <color name="todo">#FF2EAD5B</color>
+    <color name="yes">#FF2EAD5B</color>
+    <color name="no">#FFD9443A</color>
+    <color name="neutral">#FF37474F</color>
+    <color name="accent">#FF4FA3E0</color>
+    <color name="dark_text">#FF101418</color>
+</resources>

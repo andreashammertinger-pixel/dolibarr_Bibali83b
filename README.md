@@ -1,5 +1,7 @@
 # Dolibarr-Modul „Hausverwaltung“
 
+> Außerdem im Repository: Modul **Ideenbox** (`ideenbox/`) mit Android-App (`app-ideenbox/`) – Ideen und ToDos per Sprache im Auto erfassen, im Büro zuordnen. Siehe [app-ideenbox/README.md](app-ideenbox/README.md).
+
 Externes Modul für **Dolibarr 20.0.x** (getestet mit 20.0.4, Multicompany-fähig über `entity`).
 Allgemein für Wohnungseigentumsgemeinschaften verwendbar – **je Liegenschaft eine Firma (Entität)** in Multicompany.
 Erste Anwendung: Bibali 83b (3 Gebäude, 11 Apartments); die Bibali-Daten sind nur Beispiel-Startdaten.

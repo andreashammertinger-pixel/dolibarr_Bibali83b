@@ -1,5 +1,10 @@
 # Changelog
 
+## Ideenbox 1.0.0 (neues Modul + Android-App)
+- **Android-App „Ideenbox“** (`app-ideenbox/`): zwei riesige Schaltflächen *IDEE* und *TODO* für die Bedienung im Auto, Diktat per Spracherkennung, die App fragt per Sprachausgabe nach („Möchtest du eine Erinnerung?“, „Bis wann?“, „Freitag um 9 Uhr. Passt das?“) und versteht Antworten wie „morgen um 9“, „in zwei Stunden“, „Freitag nachmittags“, „am 25. November“. Alternativ Tippen (Besprechungen), Liste, Erinnerungen mit „Erledigt“/„In 1 Stunde“, App-Verknüpfungen (Symbol lange drücken), offline-fähig mit automatischem Abgleich
+- **Dolibarr-Modul `ideenbox`**: Sammlung aller Ideen/ToDos (z. B. in der Holding), Übersicht mit Filtern (Art, offen/erledigt, fällig, nicht zugeordnet), Schnellerfassung, Zuordnung zu Firma (Multicompany), Geschäftspartner, Projekt und Zuständigem, Übernahme als **Projektaufgabe** (in der Firma des Projekts) und als **Agenda-Eintrag** (automatisch bei Termin), Startseiten-Widget, REST-API `/api/index.php/ideenbox/…`
+- Sprachen: de, hr, en
+
 ## 1.12.0
 - **Hausverwaltungs-Begriffe in Dolibarr** (Seite Sprachen, ein Klick, nur für die aktuelle Firma, alle Sprachen, update-sicher): Geschäftspartner → *Apartments & Kontakte*, Kunden → *Apartments*, Kontakte/Adressen → *Eigentümer & Kontakte*, Rechnung | Zahlung → *Vorschreibung | Zahlung*, Kundenrechnungen → *Vorschreibungen*, Kundenzahlungen → *Zahlungen der Eigentümer*, Spalten Name/Art/Apartment-Nr./Zuständig; Interessenten ausgeblendet; Zurücksetzen möglich
 - Doku mit den neuen Menünamen (Handbuch de/hr, Eigentümerhilfe 5 Sprachen)

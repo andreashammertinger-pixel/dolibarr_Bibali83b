@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Ideenbox</string>
+    <string name="sc_idea">Idee diktieren</string>
+    <string name="sc_todo">ToDo diktieren</string>
+    <string name="sc_type">Tippen</string>
+</resources>

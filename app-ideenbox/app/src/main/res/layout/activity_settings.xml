@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="14dp">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Verbindung zu Dolibarr"
+        android:textSize="22sp" android:textStyle="bold" android:paddingBottom="8dp" />
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Dolibarr-Adresse" android:textColor="@color/muted" />
+    <EditText android:id="@+id/edtUrl" android:layout_width="match_parent" android:layout_height="64dp" android:textSize="18sp"
+        android:padding="12dp" android:background="@drawable/field" android:textColor="@color/text" android:textColorHint="@color/muted"
+        android:hint="https://dolibarr.example.com" android:inputType="textUri" android:layout_marginBottom="10dp" />
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="API-Schlüssel (Benutzerkarte in Dolibarr)" android:textColor="@color/muted" />
+    <EditText android:id="@+id/edtKey" android:layout_width="match_parent" android:layout_height="64dp" android:textSize="18sp"
+        android:padding="12dp" android:background="@drawable/field" android:textColor="@color/text"
+        android:inputType="textPassword" android:layout_marginBottom="10dp" />
+    <Button android:id="@+id/btnTest" style="@style/Big" android:layout_width="match_parent" android:layout_height="76dp"
+        android:backgroundTint="@color/accent" android:text="Speichern und Verbindung testen" android:textSize="20sp" />
+    <TextView android:id="@+id/txtResult" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="17sp" android:padding="8dp" />
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Sprache"
+        android:textSize="22sp" android:textStyle="bold" android:paddingTop="16dp" android:paddingBottom="8dp" />
+    <Switch android:id="@+id/swSpeak" android:layout_width="match_parent" android:layout_height="64dp" android:textSize="18sp"
+        android:text="App spricht mit mir (Fragen vorlesen)" />
+    <Switch android:id="@+id/swAskIdea" android:layout_width="match_parent" android:layout_height="64dp" android:textSize="18sp"
+        android:text="Bei Ideen nach Erinnerung fragen" />
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Sprache der Spracherkennung (z. B. de-DE, de-AT)" android:textColor="@color/muted" />
+    <EditText android:id="@+id/edtLang" android:layout_width="match_parent" android:layout_height="64dp" android:textSize="18sp"
+        android:padding="12dp" android:background="@drawable/field" android:textColor="@color/text" android:inputType="text" />
+
+    <Button android:id="@+id/btnAlarm" style="@style/Big" android:layout_width="match_parent" android:layout_height="76dp"
+        android:backgroundTint="@color/neutral" android:text="Pünktliche Erinnerungen erlauben" android:textSize="18sp" />
+    <TextView android:id="@+id/txtVersion" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/muted" android:padding="8dp" />
+</LinearLayout>
+</ScrollView>

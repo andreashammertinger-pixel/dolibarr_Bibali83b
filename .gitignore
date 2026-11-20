@@ -1,3 +1,9 @@
 dist/
 *.xlsx
 .DS_Store
+app-ideenbox/.gradle/
+app-ideenbox/build/
+app-ideenbox/app/build/
+app-ideenbox/local.properties
+*.keystore
+*.jks

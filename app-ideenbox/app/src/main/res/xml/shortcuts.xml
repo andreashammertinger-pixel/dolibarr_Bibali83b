@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut android:shortcutId="idea" android:enabled="true" android:icon="@mipmap/ic_launcher" android:shortcutShortLabel="@string/sc_idea">
+        <intent android:action="com.smartimmo.ideenbox.IDEA" android:targetPackage="com.smartimmo.ideenbox" android:targetClass="com.smartimmo.ideenbox.MainActivity" />
+    </shortcut>
+    <shortcut android:shortcutId="todo" android:enabled="true" android:icon="@mipmap/ic_launcher" android:shortcutShortLabel="@string/sc_todo">
+        <intent android:action="com.smartimmo.ideenbox.TODO" android:targetPackage="com.smartimmo.ideenbox" android:targetClass="com.smartimmo.ideenbox.MainActivity" />
+    </shortcut>
+    <shortcut android:shortcutId="type" android:enabled="true" android:icon="@mipmap/ic_launcher" android:shortcutShortLabel="@string/sc_type">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.smartimmo.ideenbox" android:targetClass="com.smartimmo.ideenbox.EditActivity" />
+    </shortcut>
+</shortcuts>

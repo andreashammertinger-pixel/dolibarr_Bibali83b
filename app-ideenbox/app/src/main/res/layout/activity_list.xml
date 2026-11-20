@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="8dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="72dp" android:orientation="horizontal">
+        <Button android:id="@+id/btnOpen" style="@style/Big" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+            android:textSize="20sp" android:text="Offen" />
+        <Button android:id="@+id/btnAll" style="@style/Big" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+            android:textSize="20sp" android:text="Alle" />
+        <Button android:id="@+id/btnSync" style="@style/Big" android:layout_width="72dp" android:layout_height="match_parent"
+            android:backgroundTint="@color/neutral" android:textSize="24sp" android:text="⟳" android:contentDescription="Abgleichen" />
+    </LinearLayout>
+    <TextView android:id="@+id/txtEmpty" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:padding="24dp" android:textSize="20sp" android:textColor="@color/muted" android:gravity="center"
+        android:text="Nichts offen. 👍" android:visibility="gone" />
+    <ListView android:id="@+id/list" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:divider="@android:color/transparent" android:dividerHeight="6dp" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/muted"
+        android:textSize="13sp" android:padding="6dp" android:text="Antippen = bearbeiten · lange drücken = erledigt" />
+</LinearLayout>
