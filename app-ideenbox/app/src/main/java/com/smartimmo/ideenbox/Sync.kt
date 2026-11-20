@@ -20,13 +20,20 @@ object Sync {
 
     fun now(ctx: Context) {
         if (!Prefs(ctx).configured) return
-        val req = OneTimeWorkRequestBuilder<SyncWorker>().setConstraints(net).build()
-        WorkManager.getInstance(ctx).enqueueUniqueWork("sync", ExistingWorkPolicy.REPLACE, req)
+        try {
+            val req = OneTimeWorkRequestBuilder<SyncWorker>().setConstraints(net).build()
+            WorkManager.getInstance(ctx).enqueueUniqueWork("sync", ExistingWorkPolicy.REPLACE, req)
+        } catch (e: Exception) {
+            Prefs(ctx).lastSyncError = "Abgleich nicht möglich: ${e.message}"
+        }
     }
 
     fun schedulePeriodic(ctx: Context) {
-        val req = PeriodicWorkRequestBuilder<SyncWorker>(1, TimeUnit.HOURS).setConstraints(net).build()
-        WorkManager.getInstance(ctx).enqueueUniquePeriodicWork("sync-periodic", ExistingPeriodicWorkPolicy.KEEP, req)
+        try {
+            val req = PeriodicWorkRequestBuilder<SyncWorker>(1, TimeUnit.HOURS).setConstraints(net).build()
+            WorkManager.getInstance(ctx).enqueueUniquePeriodicWork("sync-periodic", ExistingPeriodicWorkPolicy.KEEP, req)
+        } catch (_: Exception) {
+        }
     }
 
     /** @return Fehlermeldung oder null */

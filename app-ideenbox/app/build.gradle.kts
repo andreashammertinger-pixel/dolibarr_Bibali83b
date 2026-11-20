@@ -11,8 +11,9 @@ android {
         applicationId = "com.smartimmo.ideenbox"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        versionCode = 2
+        versionName = "1.0.1"
     }
 
     // Signatur für Updates: Schlüssel über Umgebungsvariablen (siehe README), sonst Debug-Schlüssel
@@ -36,6 +37,11 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
     }
+    // Datums-/Antworterkennung: dieselben Tests in der JVM und auf dem Gerät (Android-Regex ≠ Java-Regex)
+    sourceSets {
+        getByName("test").java.srcDir("src/sharedTest/java")
+        getByName("androidTest").java.srcDir("src/sharedTest/java")
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -57,4 +63,7 @@ dependencies {
     testImplementation("org.robolectric:robolectric:4.14.1")
     testImplementation("androidx.test:core:1.6.1")
     testImplementation("androidx.work:work-testing:2.9.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:core:1.6.1")
 }

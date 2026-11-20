@@ -1,5 +1,11 @@
 # Changelog
 
+## Ideenbox-App 1.0.1
+- Fix: App stürzte beim Start sofort ab (Suchmuster mit „(?U)“ wird von Android nicht unterstützt) – Wortgrenzen jetzt so geschrieben, dass sie auf Android und Java gleich funktionieren
+- Absturzbericht: falls die App doch einmal abstürzt, zeigt sie den Fehler beim nächsten Start an (mit „Fehler teilen“)
+- Abgleich mit Dolibarr kann den Start nicht mehr verhindern
+- Tests für Datums- und Ja/Nein-Erkennung laufen zusätzlich auf dem Gerät/Emulator (`./gradlew connectedDebugAndroidTest`)
+
 ## Ideenbox 1.0.0 (neues Modul + Android-App)
 - **Android-App „Ideenbox“** (`app-ideenbox/`): zwei riesige Schaltflächen *IDEE* und *TODO* für die Bedienung im Auto, Diktat per Spracherkennung, die App fragt per Sprachausgabe nach („Möchtest du eine Erinnerung?“, „Bis wann?“, „Freitag um 9 Uhr. Passt das?“) und versteht Antworten wie „morgen um 9“, „in zwei Stunden“, „Freitag nachmittags“, „am 25. November“. Alternativ Tippen (Besprechungen), Liste, Erinnerungen mit „Erledigt“/„In 1 Stunde“, App-Verknüpfungen (Symbol lange drücken), offline-fähig mit automatischem Abgleich
 - **Dolibarr-Modul `ideenbox`**: Sammlung aller Ideen/ToDos (z. B. in der Holding), Übersicht mit Filtern (Art, offen/erledigt, fällig, nicht zugeordnet), Schnellerfassung, Zuordnung zu Firma (Multicompany), Geschäftspartner, Projekt und Zuständigem, Übernahme als **Projektaufgabe** (in der Firma des Projekts) und als **Agenda-Eintrag** (automatisch bei Termin), Startseiten-Widget, REST-API `/api/index.php/ideenbox/…`

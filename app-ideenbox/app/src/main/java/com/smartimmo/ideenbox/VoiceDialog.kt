@@ -334,8 +334,8 @@ class VoiceDialog(private val ctx: Context, private val ui: Ui) {
     }
 
     companion object {
-        private val yesWords = Regex("(?U)\\b(ja|jo|jep|jawohl|gerne?|bitte|ok|okay|genau|passt|richtig|stimmt|klar|sicher|freilich|eh)\\b")
-        private val noWords = Regex("(?U)\\b(nein|nee|ne|nö|nicht|keine?n?|nix|ohne|abbrechen|lass|später nicht)\\b")
+        private val yesWords = DateParser.re("\\b(ja|jo|jep|jawohl|gerne?|bitte|ok|okay|genau|passt|richtig|stimmt|klar|sicher|freilich|eh)\\b")
+        private val noWords = DateParser.re("\\b(nein|nee|ne|nö|nicht|keine?n?|nix|ohne|abbrechen|lass|später nicht)\\b")
         fun isYes(s: String) = yesWords.containsMatchIn(s.lowercase()) && !isNo(s)
         fun isNo(s: String) = noWords.containsMatchIn(s.lowercase())
         fun capitalize(s: String) = s.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.GERMAN) else it.toString() }

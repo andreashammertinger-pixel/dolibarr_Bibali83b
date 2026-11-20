@@ -69,6 +69,23 @@ class MainActivity : Activity(), VoiceDialog.Ui {
         askPermissions()
         Sync.schedulePeriodic(this)
         handleIntent(intent)
+        showLastCrash()
+    }
+
+    /** Falls die App zuvor abgestürzt ist: Fehlertext anzeigen (zum Weiterleiten an den Entwickler) */
+    private fun showLastCrash() {
+        val f = java.io.File(filesDir, App.CRASH_FILE)
+        if (!f.exists()) return
+        val txt = f.readText()
+        f.delete()
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Die App ist beim letzten Mal abgestürzt")
+            .setMessage(txt.take(1500))
+            .setPositiveButton("Fehler teilen") { _, _ ->
+                startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain")
+                    .putExtra(Intent.EXTRA_SUBJECT, "Ideenbox Fehlerbericht").putExtra(Intent.EXTRA_TEXT, txt), "Fehler teilen"))
+            }
+            .setNegativeButton("Schließen", null).show()
     }
 
     override fun onNewIntent(intent: Intent) {

@@ -9,6 +9,13 @@ import java.util.Calendar
  */
 object DateParser {
 
+    /**
+     * Wortgrenze, die auch Umlaute (ü, ä, ö, ß) als Buchstaben behandelt – gleich auf Android (ICU) und Java.
+     * Kein „(?U)“: das kennt die Regex-Bibliothek von Android nicht (Absturz).
+     */
+    private const val WB = "(?:(?<![\\p{L}\\p{N}])(?=[\\p{L}\\p{N}])|(?<=[\\p{L}\\p{N}])(?![\\p{L}\\p{N}]))"
+    fun re(p: String) = Regex(p.replace("\\b", WB))
+
     private const val DEFAULT_HOUR = 9
 
     private val numberWords = linkedMapOf(
@@ -36,11 +43,11 @@ object DateParser {
 
     /** Normalisiert: Kleinbuchstaben, Zahlwörter → Ziffern */
     fun normalize(input: String): String {
-        var s = " " + input.lowercase().replace(Regex("(?U)[,;!?]"), " ").replace(Regex("(?U)\\s+"), " ") + " "
+        var s = " " + input.lowercase().replace(re("[,;!?]"), " ").replace(re("\\s+"), " ") + " "
         for ((w, n) in numberWords) {
-            s = s.replace(Regex("(?U)(?<=[\\s.])$w(?=[\\s.])"), n.toString())
+            s = s.replace(re("(?<=[\\s.])$w(?=[\\s.])"), n.toString())
         }
-        return s.replace(Regex("(?U)\\s+"), " ").trim()
+        return s.replace(re("\\s+"), " ").trim()
     }
 
     /** @return Zeitpunkt in Millisekunden oder null, wenn keine Zeitangabe erkannt wurde */
@@ -49,12 +56,12 @@ object DateParser {
         if (s.isEmpty()) return null
 
         // 1) relativ: „in 2 stunden“, „in einer halben stunde“, „in 10 minuten“, „in 3 tagen“
-        Regex("(?U)in (?:(\\d+) )?(halbe[n]?|viertel) ?stunde").find(s)?.let { m ->
+        re("in (?:(\\d+) )?(halbe[n]?|viertel) ?stunde").find(s)?.let { m ->
             val c = now.clone() as Calendar
             c.add(Calendar.MINUTE, if (m.groupValues[2] == "viertel") 15 else 30)
             return c.timeInMillis
         }
-        Regex("(?U)in (\\d+)(?: und (?:1 )?halb(?:e[n]?)?)? ?(minute[n]?|min|stunde[n]?|std|tag(?:en)?|woche[n]?|monat(?:en)?)\\b").find(s)?.let { m ->
+        re("in (\\d+)(?: und (?:1 )?halb(?:e[n]?)?)? ?(minute[n]?|min|stunde[n]?|std|tag(?:en)?|woche[n]?|monat(?:en)?)\\b").find(s)?.let { m ->
             val n = m.groupValues[1].toInt()
             val half = m.value.contains("halb")
             val c = now.clone() as Calendar
@@ -109,12 +116,12 @@ object DateParser {
     }
 
     private fun parseDate(s: String, now: Calendar): Calendar? {
-        if (Regex("(?U)\\bübermorgen\\b|\\buebermorgen\\b").containsMatchIn(s)) return startOfDay(now, 2)
-        if (Regex("(?U)(?<!heute )\\bmorgen\\b").containsMatchIn(s)) return startOfDay(now, 1)
-        if (Regex("(?U)\\bheute\\b|\\bheut\\b").containsMatchIn(s)) return startOfDay(now, 0)
+        if (re("\\bübermorgen\\b|\\buebermorgen\\b").containsMatchIn(s)) return startOfDay(now, 2)
+        if (re("(?<!heute )\\bmorgen\\b").containsMatchIn(s)) return startOfDay(now, 1)
+        if (re("\\bheute\\b|\\bheut\\b").containsMatchIn(s)) return startOfDay(now, 0)
 
         // „am 25.11.“, „25.11.2027“
-        Regex("(?U)\\b(\\d{1,2})\\.\\s?(\\d{1,2})\\.(?:\\s?(\\d{2,4}))?").find(s)?.let { m ->
+        re("\\b(\\d{1,2})\\.\\s?(\\d{1,2})\\.(?:\\s?(\\d{2,4}))?").find(s)?.let { m ->
             val d = m.groupValues[1].toInt(); val mo = m.groupValues[2].toInt() - 1
             if (d in 1..31 && mo in 0..11) {
                 val y = m.groupValues[3].toIntOrNull()?.let { if (it < 100) 2000 + it else it }
@@ -122,21 +129,21 @@ object DateParser {
             }
         }
         // „25. november“, „am 3 dezember“
-        Regex("(?U)\\b(\\d{1,2})\\.? ?(${months.keys.joinToString("|")})\\b(?: (\\d{4}))?").find(s)?.let { m ->
+        re("\\b(\\d{1,2})\\.? ?(${months.keys.joinToString("|")})\\b(?: (\\d{4}))?").find(s)?.let { m ->
             val d = m.groupValues[1].toInt(); val mo = months.getValue(m.groupValues[2])
             return dateFor(now, d, mo, m.groupValues[3].toIntOrNull())
         }
         // Wochentag: „freitag“, „nächsten montag“
         for ((name, wd) in weekdays) {
-            if (Regex("(?U)\\b$name\\b").containsMatchIn(s)) {
+            if (re("\\b$name\\b").containsMatchIn(s)) {
                 var diff = (wd - now.get(Calendar.DAY_OF_WEEK) + 7) % 7
                 if (diff == 0) diff = 7
-                if (Regex("(?U)(übernächste|uebernächste)").containsMatchIn(s)) diff += 7
+                if (re("(übernächste|uebernächste)").containsMatchIn(s)) diff += 7
                 return startOfDay(now, diff)
             }
         }
         // „am 25.“ / „am 25“ (nächster solcher Tag)
-        Regex("(?U)\\bam (\\d{1,2})\\.?(?! ?uhr)(?:\\s|$)").find(s)?.let { m ->
+        re("\\bam (\\d{1,2})\\.?(?! ?uhr)(?:\\s|$)").find(s)?.let { m ->
             val d = m.groupValues[1].toInt()
             if (d in 1..31) {
                 val c = now.clone() as Calendar
@@ -146,21 +153,21 @@ object DateParser {
                 return c
             }
         }
-        if (Regex("(?U)ende der woche|ende dieser woche").containsMatchIn(s)) {
+        if (re("ende der woche|ende dieser woche").containsMatchIn(s)) {
             val diff = (Calendar.FRIDAY - now.get(Calendar.DAY_OF_WEEK) + 7) % 7
             return startOfDay(now, diff)
         }
-        if (Regex("(?U)\\b(wochenende)\\b").containsMatchIn(s)) {
+        if (re("\\b(wochenende)\\b").containsMatchIn(s)) {
             var diff = (Calendar.SATURDAY - now.get(Calendar.DAY_OF_WEEK) + 7) % 7
             if (diff == 0) diff = 7
             return startOfDay(now, diff)
         }
-        if (Regex("(?U)nächste[nr]? woche|naechste[nr]? woche|kommende[nr]? woche").containsMatchIn(s)) {
+        if (re("nächste[nr]? woche|naechste[nr]? woche|kommende[nr]? woche").containsMatchIn(s)) {
             var diff = (Calendar.MONDAY - now.get(Calendar.DAY_OF_WEEK) + 7) % 7
             if (diff == 0) diff = 7
             return startOfDay(now, diff)
         }
-        if (Regex("(?U)nächste[nr]? monat|naechste[nr]? monat|kommende[nr]? monat").containsMatchIn(s)) {
+        if (re("nächste[nr]? monat|naechste[nr]? monat|kommende[nr]? monat").containsMatchIn(s)) {
             val c = now.clone() as Calendar
             c.add(Calendar.MONTH, 1); c.set(Calendar.DAY_OF_MONTH, 1); setTime(c, 0, 0)
             return c
@@ -183,29 +190,29 @@ object DateParser {
     private fun parseTime(s: String): Pair<Int, Int>? {
         var h: Int? = null
         var m = 0
-        Regex("(?U)\\bhalb (\\d{1,2})\\b").find(s)?.let { h = (it.groupValues[1].toInt() + 23) % 24; m = 30 }
-        if (h == null) Regex("(?U)\\bviertel nach (\\d{1,2})\\b").find(s)?.let { h = it.groupValues[1].toInt(); m = 15 }
-        if (h == null) Regex("(?U)\\bviertel vor (\\d{1,2})\\b").find(s)?.let { h = (it.groupValues[1].toInt() + 23) % 24; m = 45 }
-        if (h == null) Regex("(?U)\\b(\\d{1,2})[:.](\\d{2})\\b(?!\\.)").find(s)?.let {
+        re("\\bhalb (\\d{1,2})\\b").find(s)?.let { h = (it.groupValues[1].toInt() + 23) % 24; m = 30 }
+        if (h == null) re("\\bviertel nach (\\d{1,2})\\b").find(s)?.let { h = it.groupValues[1].toInt(); m = 15 }
+        if (h == null) re("\\bviertel vor (\\d{1,2})\\b").find(s)?.let { h = (it.groupValues[1].toInt() + 23) % 24; m = 45 }
+        if (h == null) re("\\b(\\d{1,2})[:.](\\d{2})\\b(?!\\.)").find(s)?.let {
             // nicht verwechseln mit Datum „25.11.“
             val hh = it.groupValues[1].toInt(); val mm = it.groupValues[2].toInt()
-            if (hh in 0..23 && mm in 0..59 && !Regex("(?U)\\b${it.value.replace(".", "\\.")}\\.").containsMatchIn(s)) { h = hh; m = mm }
+            if (hh in 0..23 && mm in 0..59 && !re("\\b${it.value.replace(".", "\\.")}\\.").containsMatchIn(s)) { h = hh; m = mm }
         }
-        if (h == null) Regex("(?U)\\b(\\d{1,2}) ?uhr(?: (\\d{1,2})\\b)?").find(s)?.let {
+        if (h == null) re("\\b(\\d{1,2}) ?uhr(?: (\\d{1,2})\\b)?").find(s)?.let {
             h = it.groupValues[1].toInt(); m = it.groupValues[2].toIntOrNull() ?: 0
         }
-        if (h == null) Regex("(?U)\\bum (\\d{1,2})\\b(?!\\.)").find(s)?.let { h = it.groupValues[1].toInt() }
+        if (h == null) re("\\bum (\\d{1,2})\\b(?!\\.)").find(s)?.let { h = it.groupValues[1].toInt() }
 
-        val pm = Regex("(?U)nachmittag|abend|\\bnachts\\b|\\bpm\\b").containsMatchIn(s)
-        val am = Regex("(?U)\\bfrüh\\b|\\bfrueh\\b|morgens|vormittag|\\bam morgen\\b|heute morgen").containsMatchIn(s)
+        val pm = re("nachmittag|abend|\\bnachts\\b|\\bpm\\b").containsMatchIn(s)
+        val am = re("\\bfrüh\\b|\\bfrueh\\b|morgens|vormittag|\\bam morgen\\b|heute morgen").containsMatchIn(s)
         if (h == null) {
             return when {
-                Regex("(?U)vormittag").containsMatchIn(s) -> 10 to 0
-                Regex("(?U)\\bfrüh\\b|\\bfrueh\\b|morgens|heute morgen").containsMatchIn(s) -> 8 to 0
-                Regex("(?U)mittag").containsMatchIn(s) && !Regex("(?U)nachmittag").containsMatchIn(s) -> 12 to 0
-                Regex("(?U)nachmittag").containsMatchIn(s) -> 15 to 0
-                Regex("(?U)abend").containsMatchIn(s) -> 18 to 0
-                Regex("(?U)\\bnachts\\b").containsMatchIn(s) -> 21 to 0
+                re("vormittag").containsMatchIn(s) -> 10 to 0
+                re("\\bfrüh\\b|\\bfrueh\\b|morgens|heute morgen").containsMatchIn(s) -> 8 to 0
+                re("mittag").containsMatchIn(s) && !re("nachmittag").containsMatchIn(s) -> 12 to 0
+                re("nachmittag").containsMatchIn(s) -> 15 to 0
+                re("abend").containsMatchIn(s) -> 18 to 0
+                re("\\bnachts\\b").containsMatchIn(s) -> 21 to 0
                 else -> null
             }
         }
