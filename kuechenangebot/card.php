@@ -73,6 +73,11 @@ if (!$kalk->id) {
 	$kalk->lang2 = getDolGlobalString('KA_LANG2_DEFAULT', '');
 }
 $svc = new KaService($db);
+$locked = $kalk->id && $kalk->isLocked();
+if ($locked) {
+	$canwrite = false; // alte Version: nur ansehen
+}
+$canversion = $user->hasRight('kuechenangebot', 'write');
 
 // ------------------------------------------------------------------
 // Aktionen
@@ -136,6 +141,27 @@ if ($action === 'save' && $canwrite) {
 		}
 		$p['plan_label'] = trim(GETPOST('p_plan_label', 'alphanohtml'));
 		$p['grundlage'] = trim(GETPOST('p_grundlage', 'alphanohtml'));
+		if (GETPOSTISSET('pos_posted')) {
+			$pl = array();
+			$pt = GETPOST('pos_typ', 'array');
+			$pn = GETPOST('pos_label', 'array');
+			$pm = GETPOST('pos_modus', 'array');
+			$pb = GETPOST('pos_betrag', 'array');
+			$pd = GETPOST('pos_del', 'array');
+			foreach ((array) $pn as $pi => $plab) {
+				$plab = trim(dol_string_nohtmltag((string) $plab));
+				$raw = trim((string) ($pb[$pi] ?? ''));
+				if ($plab === '' || $raw === '' || !empty($pd[$pi])) {
+					continue;
+				}
+				$raw = str_replace(array(' ', '€', '+'), '', $raw);
+				if (preg_match('/,\d*$/', $raw)) {
+					$raw = str_replace(array('.', ','), array('', '.'), $raw);
+				}
+				$pl[] = array('typ' => (int) ($pt[$pi] ?? 0), 'label' => $plab, 'modus' => (($pm[$pi] ?? '') === 'nobilia') ? 'nobilia' : 'vk', 'betrag' => (float) $raw);
+			}
+			$p['positionen'] = $pl;
+		}
 		$p['grundlage_docs'] = GETPOST('p_grundlage_docs', 'int') ? 1 : 0;
 		$p['verbraucher'] = GETPOST('p_verbraucher', 'int') ? 1 : 0;
 		if ($isnew && $newname !== '') {
@@ -284,6 +310,16 @@ if ($action === 'save' && $canwrite) {
 	$action = 'create';
 }
 
+if ($action === 'confirm_newversion' && $canversion && !$locked && $kalk->id && GETPOST('confirm', 'alpha') === 'yes') {
+	$nid = $svc->createVersion($user, $kalk);
+	if ($nid > 0) {
+		setEventMessages($langs->trans('KaVersionCreated', $kalk->version() + 1), null);
+		header('Location: '.$_SERVER['PHP_SELF'].'?id='.$nid);
+		exit;
+	}
+	setEventMessages($svc->error, null, 'errors');
+}
+
 if ($action === 'deldoc' && $canwrite && $kalk->id) {
 	$f = $kalk->getDir().'/unterlagen/'.basename(GETPOST('file', 'alphanohtml'));
 	if (is_file($f)) {
@@ -340,6 +376,20 @@ if ($kalk->fk_propal) {
 	print load_fiche_titre($title.($kalk->label ? ' – '.dol_escape_htmltag($kalk->label) : ''), '', 'propal');
 }
 
+if ($kalk->id && ($kalk->version() > 1 || $locked)) {
+	$vtxt = $langs->trans('KaVersionN', $kalk->version());
+	if (!empty($kalk->params['vorgaenger'])) {
+		$vtxt .= ' · <a href="'.$_SERVER['PHP_SELF'].'?id='.((int) $kalk->params['vorgaenger']).'">'.$langs->trans('KaVersionPrev').'</a>';
+	}
+	if ($locked && !empty($kalk->params['nachfolger'])) {
+		print '<div class="warning">'.$vtxt.' – '.$langs->trans('KaVersionIsOld').' <a href="'.$_SERVER['PHP_SELF'].'?id='.((int) $kalk->params['nachfolger']).'">'.$langs->trans('KaVersionNext').'</a></div>';
+	} else {
+		print '<div class="info">'.$vtxt.'</div>';
+	}
+}
+if ($action === 'newversion') {
+	print $form->formconfirm($_SERVER['PHP_SELF'].'?id='.$kalk->id, $langs->trans('KaVersionNew'), $langs->trans('KaVersionConfirm', $kalk->version() + 1), 'confirm_newversion', '', 0, 1);
+}
 if ($action === 'delete') {
 	print $form->formconfirm($_SERVER['PHP_SELF'].'?id='.$kalk->id, $langs->trans('KaDeleteKalk'), $langs->trans('KaConfirmDelete'), 'confirm_delete', '', 0, 1);
 }
@@ -536,6 +586,36 @@ print $sel('muell_basis', array('projekt' => 'KaWasteBasisProject', 'kueche' => 
 print '<div class="ka-sub" data-group="muell_modus" data-show="pauschal">€ '.$inp('muell_pauschal', $p['muell_pauschal']).'</div>';
 print '<div class="ka-sub" data-group="muell_modus" data-show="stunden">'.$langs->trans('Hours').' '.$inp('muell_std', $p['muell_std'], 1, 'width50').' × '.$langs->trans('KaRate').' '.$inp('muell_satz', $p['muell_satz']).' × '.$langs->trans('KaCostFactor').' '.$inp('muell_faktor', $p['muell_faktor'], 2, 'width50').'</div>';
 print '</td></tr>';
+print '<tr class="oddeven"><td class="tdtop">'.$form->textwithpicto($langs->trans('KaPositions'), $langs->trans('KaPositionsHint')).'</td><td><input type="hidden" name="pos_posted" value="1">';
+print '<table class="noborder"><tr class="liste_titre"><td>'.$langs->trans('KaPdfType').'</td><td>'.$langs->trans('KaPosLabel').'</td><td>'.$langs->trans('KaPriceBase').'</td><td class="right">'.$langs->trans('KaPosAmount').'</td><td class="right">'.$langs->trans('KaPosVk').'</td><td></td></tr>';
+$plist = array_values((array) ($p['positionen'] ?? array()));
+$rows = $canwrite ? array_merge($plist, array(array(), array())) : $plist;
+foreach ($rows as $pi => $pos) {
+	print '<tr class="oddeven"><td><select name="pos_typ['.$pi.']"'.$disabled.'>';
+	foreach ($kalk->typen as $ti => $t) {
+		print '<option value="'.$ti.'"'.((int) ($pos['typ'] ?? 0) === $ti ? ' selected' : '').'>'.dol_escape_htmltag($t->label ?: '#'.($ti + 1)).'</option>';
+	}
+	if (!$kalk->typen) {
+		print '<option value="0">-</option>';
+	}
+	print '</select></td>';
+	print '<td><input name="pos_label['.$pi.']" class="minwidth300" value="'.dol_escape_htmltag($pos['label'] ?? '').'" placeholder="'.($pos ? '' : dol_escape_htmltag($langs->trans('KaPosPlaceholder'))).'"'.$disabled.'></td>';
+	print '<td><select name="pos_modus['.$pi.']"'.$disabled.'><option value="nobilia"'.(($pos['modus'] ?? '') === 'nobilia' ? ' selected' : '').'>'.$langs->trans('KaPosNobilia').'</option><option value="vk"'.(($pos['modus'] ?? 'vk') === 'vk' ? ' selected' : '').'>'.$langs->trans('KaPosDirect').'</option></select></td>';
+	print '<td class="right"><input name="pos_betrag['.$pi.']" class="width75 right" value="'.(isset($pos['betrag']) ? kaFmt($pos['betrag']) : '').'" placeholder="+/−"'.$disabled.'></td>';
+	$vkd = '';
+	if ($pos && isset($kalk->typen[(int) $pos['typ']])) {
+		$tmp = clone $kalk;
+		$tmp->params['positionen'] = array($pos);
+		list(, $one) = $tmp->positionDelta((int) $pos['typ'], $kalk->typen[(int) $pos['typ']]);
+		$vkd = ($one >= 0 ? '+ ' : '− ').kaMoney(abs($one));
+	}
+	print '<td class="right nowraponall">'.$vkd.'</td>';
+	print '<td>'.($pos && $canwrite ? '<label><input type="checkbox" name="pos_del['.$pi.']" value="1"> '.img_delete().'</label>' : '').'</td></tr>';
+}
+if (!$rows) {
+	print '<tr class="oddeven"><td colspan="6"><span class="opacitymedium">-</span></td></tr>';
+}
+print '</table></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('KaVatRate').' / '.$langs->trans('KaValidDays').'</td><td>'.$inp('tva', $p['tva'], 1, 'width50').' % &nbsp; '.$inp('gueltig_tage', $p['gueltig_tage'], 0, 'width50').' '.$langs->trans('Days').'</td></tr>';
 print '</table></div>';
 
@@ -543,15 +623,15 @@ print '</table></div>';
 if ($kalk->typen) {
 	print '<div class="div-table-responsive-no-min"><table class="noborder centpercent">';
 	print '<tr class="liste_titre"><td>'.$langs->trans('KaResult').'</td><td class="right">'.$langs->trans('KaQty').'</td><td class="right">'.$langs->trans('KaLfm').'</td><td class="right">'.$langs->trans('KaEkPiece').'</td>';
-	print '<td class="right">'.$langs->trans('KaFurniture').'</td><td class="right">'.$langs->trans('KaAssembly').'</td><td class="right">'.$langs->trans('KaHours').'</td><td class="right">'.$langs->trans('KaTransport').'</td><td class="right">'.$langs->trans('KaWaste').'</td>';
+	print '<td class="right">'.$langs->trans('KaFurniture').'</td><td class="right">'.$langs->trans('KaAssembly').'</td><td class="right">'.$langs->trans('KaHours').'</td><td class="right">'.$langs->trans('KaTransport').'</td><td class="right">'.$langs->trans('KaWaste').'</td><td class="right">'.$langs->trans('KaPosShort').'</td>';
 	print '<td class="right">'.$langs->trans('KaPerKitchen').' ('.$langs->trans('KaNet').')</td><td class="right">'.$langs->trans('KaTotal').'</td></tr>';
 	foreach ($calc['typen'] as $r) {
 		print '<tr class="oddeven"><td>'.dol_escape_htmltag($r['label']).'</td><td class="right">'.kaFmt($r['qty'], 0).'</td><td class="right">'.kaFmt($r['lfm']).'</td><td class="right">'.kaMoney($r['ek']).'</td>';
-		print '<td class="right">'.kaMoney($r['moebel']).'</td><td class="right">'.kaMoney($r['montage']).'</td><td class="right">'.kaFmt($r['montage_std'], 1).'</td><td class="right">'.kaMoney($r['transport']).'</td><td class="right">'.kaMoney($r['muell']).'</td>';
+		print '<td class="right">'.kaMoney($r['moebel']).'</td><td class="right">'.kaMoney($r['montage']).'</td><td class="right">'.kaFmt($r['montage_std'], 1).'</td><td class="right">'.kaMoney($r['transport']).'</td><td class="right">'.kaMoney($r['muell']).'</td><td class="right">'.kaMoney($r['pos_vk']).'</td>';
 		print '<td class="right"><b>'.kaMoney($r['vk']).'</b>'.(abs($r['vk'] - $r['vk_calc']) > 0.01 ? '<br><span class="opacitymedium small">'.kaMoney($r['vk_calc']).'</span>' : '').'</td><td class="right">'.kaMoney($r['vk'] * $r['qty']).'</td></tr>';
 	}
 	print '<tr class="liste_total"><td>'.$langs->trans('KaTotal').'</td><td class="right">'.kaFmt($calc['stueck'], 0).'</td><td class="right">'.kaFmt($calc['lfm']).'</td><td class="right">'.kaMoney($calc['ek']).'</td>';
-	print '<td class="right">'.kaMoney($calc['moebel_vk']).'</td><td class="right">'.kaMoney($calc['montage_vk']).'</td><td class="right">'.kaFmt($calc['montage_std'], 1).'</td><td class="right">'.kaMoney($calc['transport_vk']).'</td><td class="right">'.kaMoney($calc['muell_vk']).'</td>';
+	print '<td class="right">'.kaMoney($calc['moebel_vk']).'</td><td class="right">'.kaMoney($calc['montage_vk']).'</td><td class="right">'.kaFmt($calc['montage_std'], 1).'</td><td class="right">'.kaMoney($calc['transport_vk']).'</td><td class="right">'.kaMoney($calc['muell_vk']).'</td><td></td>';
 	print '<td></td><td class="right"><b>'.kaMoney($calc['vk_netto']).'</b><br>'.$langs->trans('KaGross').' '.kaMoney($calc['vk_brutto']).'</td></tr>';
 	print '</table></div>';
 
@@ -656,6 +736,9 @@ if ($kalk->fk_propal && !empty($propal->id)) {
 	}
 	print '</table>';
 	print '<div class="tabsAction"><a class="butAction" href="'.DOL_URL_ROOT.'/comm/propal/card.php?id='.$propal->id.'">'.$langs->trans('KaOpenProposal').' '.dol_escape_htmltag($propal->ref).'</a></div>';
+}
+if ($kalk->id && $canversion && !$locked && $kalk->fk_propal && !empty($propal->id) && (int) $propal->statut >= 1) {
+	print '<div class="tabsAction"><a class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$kalk->id.'&action=newversion&token='.newToken().'">'.$langs->trans('KaVersionNew').'</a></div>';
 }
 if ($kalk->id && $canwrite) {
 	print '<div class="tabsAction"><a class="butActionDelete" href="'.$_SERVER['PHP_SELF'].'?id='.$kalk->id.'&action=delete&token='.newToken().'">'.$langs->trans('KaDeleteKalk').'</a></div>';

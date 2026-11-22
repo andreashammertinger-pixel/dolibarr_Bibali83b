@@ -33,6 +33,12 @@ class KaPdf
 	/** @var KaKalk */
 	protected $kalk;
 	protected $calc = array();
+	/** @var KaKalk|null Vorversion */
+	protected $prev = null;
+	/** @var Propal|null Angebot der Vorversion */
+	protected $prevPropal = null;
+	/** @var array{0:float,1:float} Schriftgröße/Zeilenhöhe der Highlights */
+	protected $hlFont = array(7.9, 3.7);
 
 	public function __construct($db)
 	{
@@ -72,6 +78,20 @@ class KaPdf
 		$this->kalk = $kalk;
 		$this->lang = $lang;
 		$this->calc = $kalk->compute();
+		$this->prev = null;
+		$this->prevPropal = null;
+		if (!empty($kalk->params['vorgaenger'])) {
+			$pk = new KaKalk($this->db);
+			if ($pk->fetch((int) $kalk->params['vorgaenger']) > 0) {
+				$this->prev = $pk;
+				if ($pk->fk_propal) {
+					$pp = new Propal($this->db);
+					if ($pp->fetch($pk->fk_propal) > 0) {
+						$this->prevPropal = $pp;
+					}
+				}
+			}
+		}
 
 		$this->l = new Translate('', $conf);
 		$this->l->setDefaultLang($lang);
@@ -245,6 +265,13 @@ class KaPdf
 		if (!empty($soc->code_client)) {
 			$info[] = array($this->t('KaPdfCustomerNo'), $soc->code_client);
 		}
+		if ($this->kalk->version() > 1) {
+			$vt = (string) $this->kalk->version();
+			if ($this->prevPropal) {
+				$vt .= ' ('.$this->t('KaPdfVersionReplaces', $this->prevPropal->ref).')';
+			}
+			$info[] = array($this->t('KaPdfVersion'), $vt);
+		}
 		if ($this->kalk->label) {
 			$info[] = array($this->t('KaPdfProject'), $this->kalk->label);
 		}
@@ -286,19 +313,32 @@ class KaPdf
 		$typ = $this->kalk->typen ? $this->kalk->typen[0] : null;
 		$img = $typ ? $this->imageFile($typ) : '';
 		$hls = $this->highlights($typ);
-		$need = 8;
-		$pdf->SetFont($this->font, '', 7.9);
-		foreach ($hls as $hl) {
-			$need += max(1, $pdf->getNumLines($hl[1], 135 - $this->ml - 5 - 37)) * 3.7 + 0.8;
+		// Schriftgröße und Bildhöhe so wählen, dass Highlights und Preis auf Seite 1 passen
+		$avail = $this->ph - 22 - $y - 6;
+		$hfs = 7.9;
+		$lh = 3.7;
+		$minImg = $img ? 40 : 0;
+		for ($try = 0; $try < 8; $try++) {
+			$pdf->SetFont($this->font, '', $hfs);
+			$need = 8;
+			foreach ($hls as $hl) {
+				$need += max(1, $pdf->getNumLines($hl[1], 135 - $this->ml - 5 - 37)) * $lh + 0.8;
+			}
+			$need = max($need, 52);
+			if ($need + $minImg <= $avail || $hfs <= 6.6) {
+				break;
+			}
+			$hfs -= 0.2;
+			$lh = $hfs * 0.47;
 		}
-		$need = max($need, 52);
+		$this->hlFont = array($hfs, $lh);
 		if ($img) {
 			$size = @getimagesize($img);
 			$iw = $w;
 			$ih = ($size && $size[0]) ? $iw * $size[1] / $size[0] : 100;
-			$maxh = min(100, $this->ph - 22 - $y - 5 - $need);
-			if ($maxh < 45) {
-				$maxh = 45;
+			$maxh = min(100, $avail - $need);
+			if ($maxh < $minImg) {
+				$maxh = $minImg;
 			}
 			if ($ih > $maxh) {
 				$ih = $maxh;
@@ -357,7 +397,7 @@ class KaPdf
 		$pdf->Cell($hw, 6, $this->t('KaPdfHighlights'), 0, 1, 'L');
 		$pdf->SetTextColor($this->dark[0], $this->dark[1], $this->dark[2]);
 		foreach ($hls as $hl) {
-			$this->bulletRow($hx, $hw, $hl[0], $hl[1], 7.9);
+			$this->bulletRow($hx, $hw, $hl[0], $hl[1], $this->hlFont[0], $this->hlFont[1]);
 		}
 	}
 
@@ -445,7 +485,7 @@ class KaPdf
 		return false;
 	}
 
-	protected function bulletRow($x, $w, $label, $text, $fs = 8.3)
+	protected function bulletRow($x, $w, $label, $text, $fs = 8.3, $lh = 3.7)
 	{
 		$pdf = $this->pdf;
 		$y = $pdf->GetY();
@@ -453,10 +493,10 @@ class KaPdf
 		$pdf->Rect($x, $y + 1.4, 1.6, 1.6, 'F');
 		$pdf->SetXY($x + 3.5, $y);
 		$pdf->SetFont($this->font, 'B', $fs);
-		$pdf->Cell(33, 3.7, $label, 0, 0, 'L');
+		$pdf->Cell(33, $lh, $label, 0, 0, 'L');
 		$pdf->SetFont($this->font, '', $fs);
 		$pdf->SetXY($x + 37, $y);
-		$pdf->MultiCell($w - 37, 3.7, $text, 0, 'L');
+		$pdf->MultiCell($w - 37, $lh, $text, 0, 'L');
 		$pdf->SetY($pdf->GetY() + 0.8);
 	}
 
@@ -529,7 +569,15 @@ class KaPdf
 			$pdf->SetFont($this->font, '', 7.8);
 			$pdf->SetTextColor(100, 100, 100);
 			$pdf->SetXY($this->ml + 12, $y2);
-			$pdf->MultiCell(98, 3.8, $this->t('KaPdfKitchenSub', $prog ?: '-'), 0, 'L');
+			$sub = $this->t('KaPdfKitchenSub', $prog ?: '-');
+			$posl = array();
+			foreach ($this->kalk->positionsFor($k) as $pos) {
+				$posl[] = $pos['label'];
+			}
+			if ($posl) {
+				$sub .= "\n".$this->t('KaPdfInclChanges', implode('; ', $posl));
+			}
+			$pdf->MultiCell(98, 3.8, $sub, 0, 'L');
 			$y3 = $pdf->GetY();
 			$pdf->SetTextColor($this->dark[0], $this->dark[1], $this->dark[2]);
 			$pdf->SetFont($this->font, '', 8.8);
@@ -559,6 +607,15 @@ class KaPdf
 			$pdf->setCellPaddings(0, 0, 0, 0);
 			$pdf->SetFont($this->font, '', 8.5);
 			$pdf->writeHTMLCell($w, 4.2, $this->ml, $pdf->GetY(), '<b>'.dol_escape_htmltag($this->t('KaPdfBasis')).':</b> '.dol_escape_htmltag($basis), 0, 1, false, true, 'L');
+		}
+
+		// Änderungen gegenüber der Vorversion
+		$changes = $this->changes();
+		if ($changes) {
+			$this->heading($this->t('KaPdfChanges', $this->prev->version()).($this->prevPropal ? ' ('.$this->prevPropal->ref.')' : ''));
+			foreach ($changes as $ch) {
+				$this->para($ch, 8.3, true);
+			}
 		}
 
 		// Ausstattung je Küchentyp
@@ -616,6 +673,81 @@ class KaPdf
 		$pdf->Cell(54, $bold ? 7 : 5, $label, 0, 0, 'L', $bold);
 		$pdf->Cell(26, $bold ? 7 : 5, $value, 0, 1, 'R', $bold);
 		$pdf->SetTextColor($this->dark[0], $this->dark[1], $this->dark[2]);
+	}
+
+	/**
+	 * Änderungen gegenüber der Vorversion als kurze Sätze
+	 * @return string[]
+	 */
+	protected function changes()
+	{
+		if (!$this->prev) {
+			return array();
+		}
+		$out = array();
+		$prevCalc = $this->prev->compute();
+		foreach ($this->kalk->typen as $k => $t) {
+			$name = $t->label ?: '#'.($k + 1);
+			$o = isset($this->prev->typen[$k]) ? $this->prev->typen[$k] : null;
+			if (!$o) {
+				$out[] = $this->t('KaPdfChgNewType', $name);
+				continue;
+			}
+			$pre = count($this->kalk->typen) > 1 ? $name.': ' : '';
+			if ((float) $o->qty != (float) $t->qty) {
+				$out[] = $pre.$this->t('KaPdfChgQty', $this->num($o->qty), $this->num($t->qty));
+			}
+			$h = function ($kalk, $typ, $f) {
+				$file = $kalk->getDir().'/'.$typ->$f;
+				return ($typ->$f && is_readable($file)) ? md5_file($file) : '';
+			};
+			if ($h($this->prev, $o, 'file_an') !== $h($this->kalk, $t, 'file_an') || $h($this->prev, $o, 'file_bd') !== $h($this->kalk, $t, 'file_bd') || abs((float) $o->katalog - (float) $t->katalog) > 0.01) {
+				$out[] = $pre.$this->t('KaPdfChgPlanning');
+			}
+			// Ausstattung
+			$om = array();
+			foreach ((array) ($o->data['merkmale'] ?? array()) as $m) {
+				$om[$m['label']] = $m['value'];
+			}
+			$n = 0;
+			foreach ((array) ($t->data['merkmale'] ?? array()) as $m) {
+				if (isset($om[$m['label']]) && $om[$m['label']] !== $m['value'] && $n < 10) {
+					$out[] = $pre.$this->tr($m['label']).': '.$this->tr($om[$m['label']]).' → '.$this->tr($m['value']);
+					$n++;
+				}
+			}
+			// Geräte
+			$od = array_map(function ($d) {
+				return $d['name'];
+			}, (array) ($o->data['geraete'] ?? array()));
+			$nd = array_map(function ($d) {
+				return $d['name'];
+			}, (array) ($t->data['geraete'] ?? array()));
+			foreach (array_diff($nd, $od) as $d) {
+				$out[] = $pre.$this->t('KaPdfChgAdded', $this->tr($d));
+			}
+			foreach (array_diff($od, $nd) as $d) {
+				$out[] = $pre.$this->t('KaPdfChgRemoved', $this->tr($d));
+			}
+			// Zusatz-/Minderpositionen
+			$ok = array();
+			foreach ($this->prev->positionsFor($k) as $pos) {
+				$ok[] = $pos['label'].'|'.(float) $pos['betrag'];
+			}
+			foreach ($this->kalk->positionsFor($k) as $pos) {
+				if (!in_array($pos['label'].'|'.(float) $pos['betrag'], $ok, true)) {
+					$out[] = $pre.$pos['label'];
+				}
+			}
+		}
+		foreach ($this->prev->typen as $k => $o) {
+			if (!isset($this->kalk->typen[$k])) {
+				$out[] = $this->t('KaPdfChgRemovedType', $o->label ?: '#'.($k + 1));
+			}
+		}
+		$diff = $this->calc['vk_brutto'] - $prevCalc['vk_brutto'];
+		$out[] = $this->t('KaPdfChgPrice', kaMoney($prevCalc['vk_brutto']), kaMoney($this->calc['vk_brutto']), ($diff >= 0 ? '+' : '−').' '.kaMoney(abs($diff)));
+		return $out;
 	}
 
 	/** „Grundlage dieses Angebots: Gespräch … sowie folgende Unterlagen: …“ */

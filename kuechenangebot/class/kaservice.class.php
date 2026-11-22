@@ -267,6 +267,13 @@ class KaService
 				$label = ($multi || $typ->label) ? $de->transnoentities('KaPdfKitchenLine', $typ->label ?: '#'.($k + 1)) : $de->transnoentities('KaPdfKitchenLineShort');
 				$prog = trim($typ->merkmal('Programm').' '.$typ->merkmal('Front-Kombination'));
 				$desc = $de->transnoentities('KaPdfKitchenSub', $prog ?: '-');
+				$posl = array();
+				foreach ($kalk->positionsFor($k) as $pos) {
+					$posl[] = $pos['label'];
+				}
+				if ($posl) {
+					$desc .= "\n".$de->transnoentities('KaPdfInclChanges', implode('; ', $posl));
+				}
 				if (!empty($kalk->params['verbraucher'])) {
 					$desc .= "\n".$de->transnoentities('KaPdfIndividual');
 				}
@@ -285,6 +292,11 @@ class KaService
 		$kalk->save($user);
 		$this->db->commit();
 
+		// Neue Version: Vorgänger-Angebot verknüpfen und schließen
+		if ($isnew && !empty($kalk->params['vorgaenger'])) {
+			$this->closePredecessor($user, $kalk, $p);
+		}
+
 		$p->fetch($p->id);
 		$outputlangs = new Translate('', $conf);
 		$outputlangs->setDefaultLang('de_DE');
@@ -297,6 +309,86 @@ class KaService
 		// Pläne mit migora-Plankopf: erst ab „Unterschrieben“ beim Angebot, vorher entfernen
 		$this->syncPlans($kalk, $p);
 		return $p->id;
+	}
+
+	/**
+	 * Neue Version einer Kalkulation anlegen: alles kopieren, alte Version sperren
+	 * @return int id der neuen Kalkulation oder <0
+	 */
+	public function createVersion($user, $kalk)
+	{
+		global $langs;
+		if ($kalk->isLocked()) {
+			$this->error = $langs->trans('KaVersionLocked');
+			return -1;
+		}
+		$new = new KaKalk($this->db);
+		foreach (array('fk_soc', 'art', 'lang2', 'label', 'objekt', 'note_de', 'note_lang2') as $f) {
+			$new->$f = $kalk->$f;
+		}
+		$new->params = $kalk->params;
+		$new->params['version'] = $kalk->version() + 1;
+		$new->params['vorgaenger'] = $kalk->id;
+		$new->params['nachfolger'] = 0;
+		$new->params['gesperrt'] = 0;
+		$new->hinweise = $kalk->hinweise;
+		$new->fk_propal = 0;
+		if ($new->save($user) <= 0) {
+			$this->error = $new->error;
+			return -1;
+		}
+		$src = $kalk->getDir();
+		$dst = $new->getDir();
+		dol_mkdir($dst);
+		if (is_dir($src.'/unterlagen')) {
+			dolCopyDir($src.'/unterlagen', $dst.'/unterlagen', '0', 0);
+		}
+		foreach ($kalk->typen as $t) {
+			$nt = new KaTyp($this->db);
+			foreach (array('rang', 'label', 'qty', 'preis_modus', 'katalog', 'faktor', 'lfm', 'vk_override', 'data') as $f) {
+				$nt->$f = $t->$f;
+			}
+			$nt->fk_kalk = $new->id;
+			$nt->save();
+			$old = array('file_an' => $t->file_an, 'file_bd' => $t->file_bd, 'image' => $t->image);
+			foreach ($old as $f => $name) {
+				if ($name && is_readable($src.'/'.$name)) {
+					$nn = preg_replace('/^typ'.$t->id.'_/', 'typ'.$nt->id.'_', $name);
+					@copy($src.'/'.$name, $dst.'/'.$nn);
+					$nt->$f = $nn;
+				}
+			}
+			if (is_readable($src.'/'.self::planFile($t))) {
+				@copy($src.'/'.self::planFile($t), $dst.'/'.self::planFile($nt));
+			}
+			$nt->save();
+		}
+		$kalk->params['gesperrt'] = 1;
+		$kalk->params['nachfolger'] = $new->id;
+		$kalk->save($user);
+		return $new->id;
+	}
+
+	/** Vorgänger-Angebot verknüpfen und auf „Nicht unterschrieben“ setzen */
+	protected function closePredecessor($user, $kalk, $p)
+	{
+		global $langs;
+		$prev = new KaKalk($this->db);
+		if ($prev->fetch((int) $kalk->params['vorgaenger']) <= 0 || !$prev->fk_propal) {
+			return;
+		}
+		$old = new Propal($this->db);
+		if ($old->fetch($prev->fk_propal) <= 0) {
+			return;
+		}
+		$p->add_object_linked('propal', $old->id);
+		$note = $langs->transnoentities('KaVersionReplaced', $kalk->version());
+		if ((int) $old->statut === Propal::STATUS_VALIDATED) {
+			$old->closeProposal($user, Propal::STATUS_NOTSIGNED, $note);
+			$this->messages[] = $langs->trans('KaVersionClosedOld', $old->ref);
+		} else {
+			$old->update_note(trim($old->note_private."\n".$note), '_private');
+		}
 	}
 
 	/** Zeilen für den Plankopf links: Einstellung KA_PLAN_KONTAKT oder Ansprechpartner + Firmen-E-Mail */

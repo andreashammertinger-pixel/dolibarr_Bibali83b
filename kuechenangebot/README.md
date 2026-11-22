@@ -38,6 +38,16 @@ Danach geht es wie gewohnt in Dolibarr weiter: freigeben, per E-Mail senden (bei
 Deckblatttexte lassen sich über *Einstellungen → Übersetzung* anpassen (Schlüssel `KaPdfManufacturerText`, `KaPdfDurableText`, `KaPdfWarrantyText` …).
 Nobilia-Begriffe übersetzt ein eingebautes Wörterbuch. Fehlende Begriffe ergänzen Sie in den Einstellungen (`deutsch = übersetzung`). Unbekannte Begriffe bleiben deutsch.
 
+## Änderungen nach dem Versand: Versionen
+Möchte der Kunde nach dem Versand etwas ändern (z. B. andere Fronten), wird eine **neue Version** angelegt:
+1. In der Küchenkalkulation **Neue Version erstellen** klicken. Der Knopf erscheint, sobald das Angebot freigegeben ist. Kunde, Bauvorhaben, Sätze, Hinweise, Unterlagen und Nobilia-Dateien werden übernommen. Die bisherige Version wird gesperrt und bleibt zum Nachschauen erhalten.
+2. Änderungen eintragen:
+   * neue Zeichnung oder Produktliste von Nobilia → beim Küchentyp **Dateien ersetzen**
+   * oder nur **Zusatz- und Minderpositionen** (Schritt 3): Küchentyp, Bezeichnung, Preisbasis *Nobilia-Wert* (× Faktor + Aufschlag) oder *Verkaufspreis netto*, Betrag je Küche mit + oder −. Die Positionen stecken im Küchenpreis und werden im Angebot unter „inkl. Änderungen: …“ genannt. Ein fester *Endpreis je Küche* gilt ohne diese Positionen, sie kommen dazu.
+3. **Angebot erstellen** → neues Dolibarr-Angebot. Das alte wird verknüpft, auf **Nicht unterschrieben** gesetzt und bekommt die Notiz „Ersetzt durch Version 2“. Die Pläne gehen auch hier erst bei „Unterschrieben“ an den Kunden.
+
+Im PDF stehen dann *Version 2 (ersetzt PR…)* und der Block **Änderungen gegenüber Version 1**: geänderte Ausstattungsmerkmale (z. B. Front-Kombination: Weiß → Kaschmir), neue oder entfallene Geräte, „Planung überarbeitet“, Stückzahl, die Positionen und die Preisdifferenz. In den Kennzahlen zählen alte Versionen nicht mit, weil sie nicht unterschrieben sind.
+
 ## Unterlagen (Grundlage des Angebots)
 Unter den Küchentypen gibt es den Bereich **Unterlagen**. Dort lassen sich beliebig viele Dateien sammeln, z. B. Einreichplan, Skizze, Fotos vom Raum oder Mails als PDF. Der Bereich darf auch leer bleiben. Die Dateien liegen nur intern bei der Kalkulation (`kalk/<id>/unterlagen/`), werden nicht zum Dolibarr-Angebot gelegt und gehen nicht an den Kunden. Wird die Kalkulation gelöscht, werden sie mitgelöscht.
 

@@ -55,6 +55,11 @@ class KaKalk
 			'gueltig_tage' => (int) getDolGlobalString('KA_GUELTIG_TAGE', '30'),
 			'grundlage' => '', // Gespräch, z. B. „Beratungsgespräch beim Hausbesuch am 20.11.2026“ (leer = Standardtext)
 			'grundlage_docs' => 1, // Namen der Unterlagen im Angebot nennen
+			'positionen' => array(), // Zusatz-/Minderpositionen [typ, label, modus nobilia|vk, betrag]
+			'version' => 1,
+			'vorgaenger' => 0, // Kalkulation der Vorversion
+			'nachfolger' => 0,
+			'gesperrt' => 0,
 			'plan_label' => '', // Bezeichnung rechts im Plankopf (leer = „BVH “ + Bauvorhaben)
 			'verbraucher' => $mfh ? 0 : 1, // Privatkunde: Bestätigungen zum Rücktrittsrecht im PDF
 			'zeige_geraetepreise' => 0,
@@ -201,14 +206,18 @@ class KaKalk
 		$muellKueche = ($p['muell_basis'] === 'kueche') ? $muellJe : 0;
 		$muellStdJe = ($p['muell_modus'] === 'stunden') ? (float) $p['muell_std'] * ((float) $p['muell_faktor'] ?: 1) : 0;
 
-		foreach ($this->typen as $t) {
+		foreach ($this->typen as $ti => $t) {
 			$n = max(0, (float) $t->qty);
 			$ek = $t->getEk();
 			$lfm = (float) $t->lfm;
+			list($posEk, $posVk) = $this->positionDelta($ti, $t);
 			$share = $ekSum > 0 ? ($ek * $n) / $ekSum : ($stueck > 0 ? $n / $stueck : 0);
 			$perPiece = $n > 0 ? 1 / $n : 0;
 
 			$moebel = ($p['aufschlag_modus'] === 'pauschal') ? $ek + (float) $p['aufschlag_wert'] : $ek * (1 + (float) $p['aufschlag_wert'] / 100);
+			// Zusatz-/Minderpositionen sind im Küchenpreis enthalten
+			$moebel += $posVk;
+			$ek += $posEk;
 
 			if ($p['montage_modus'] === 'pauschal') {
 				$montage = (float) $p['montage_pauschal'];
@@ -228,11 +237,12 @@ class KaKalk
 				: $muell;
 
 			$vkCalc = $moebel + $montage + $transport + $muell;
-			$vk = ($t->vk_override !== null && $t->vk_override > 0) ? (float) $t->vk_override : round($vkCalc, 2);
+			// Endpreis je Küche gilt ohne Zusatzpositionen; diese kommen dazu
+			$vk = ($t->vk_override !== null && $t->vk_override > 0) ? round((float) $t->vk_override + $posVk, 2) : round($vkCalc, 2);
 			$kosten = $ek + $transport + $muellKosten + $std * $kStd;
 
 			$row = array(
-				'id' => $t->id, 'label' => $t->label, 'qty' => $n, 'lfm' => $lfm, 'ek' => $ek,
+				'id' => $t->id, 'label' => $t->label, 'qty' => $n, 'lfm' => $lfm, 'ek' => $ek, 'pos_vk' => $posVk, 'pos_ek' => $posEk,
 				'moebel' => $moebel, 'montage' => $montage, 'montage_std' => $std, 'transport' => $transport, 'muell' => $muell,
 				'vk_calc' => $vkCalc, 'vk' => $vk, 'kosten' => $kosten, 'kosten_gk' => $kosten * (1 + $gk / 100),
 			);
@@ -264,6 +274,53 @@ class KaKalk
 		$out['db_pct'] = $out['vk_netto'] > 0 ? $out['db'] / $out['vk_netto'] * 100 : 0;
 		$out['faktor'] = $out['ek'] > 0 ? $out['vk_netto'] / $out['ek'] : 0;
 		return $out;
+	}
+
+	/**
+	 * Zusatz-/Minderpositionen eines Küchentyps (je Küche)
+	 * @return array{0:float,1:float} [Einkauf, Verkauf netto]
+	 */
+	public function positionDelta($typIndex, $t)
+	{
+		$p = $this->params;
+		$ek = 0.0;
+		$vk = 0.0;
+		foreach ((array) ($p['positionen'] ?? array()) as $pos) {
+			if ((int) ($pos['typ'] ?? 0) !== (int) $typIndex) {
+				continue;
+			}
+			$b = (float) ($pos['betrag'] ?? 0);
+			if (($pos['modus'] ?? 'vk') === 'nobilia') {
+				$e = $b * ((float) $t->faktor ?: 1);
+				$ek += $e;
+				$vk += ($p['aufschlag_modus'] === 'pauschal') ? $e : $e * (1 + (float) $p['aufschlag_wert'] / 100);
+			} else {
+				$vk += $b;
+			}
+		}
+		return array(round($ek, 2), round($vk, 2));
+	}
+
+	/** Positionen eines Küchentyps */
+	public function positionsFor($typIndex)
+	{
+		$out = array();
+		foreach ((array) ($this->params['positionen'] ?? array()) as $pos) {
+			if ((int) ($pos['typ'] ?? 0) === (int) $typIndex && trim((string) ($pos['label'] ?? '')) !== '') {
+				$out[] = $pos;
+			}
+		}
+		return $out;
+	}
+
+	public function version()
+	{
+		return max(1, (int) ($this->params['version'] ?? 1));
+	}
+
+	public function isLocked()
+	{
+		return !empty($this->params['gesperrt']);
 	}
 
 	/**
@@ -312,7 +369,7 @@ class KaKalk
 	public static function fetchList($db, $limit = 200)
 	{
 		global $conf;
-		$sql = 'SELECT k.rowid, k.label, k.art, k.total_ht, k.total_stueck, k.datec, k.fk_propal, k.fk_soc, s.nom as socname, p.ref as propref, p.fk_statut as propstatus';
+		$sql = 'SELECT k.rowid, k.label, k.art, k.params, k.total_ht, k.total_stueck, k.datec, k.fk_propal, k.fk_soc, s.nom as socname, p.ref as propref, p.fk_statut as propstatus';
 		$sql .= ' FROM '.MAIN_DB_PREFIX.'ka_kalk as k';
 		$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'societe as s ON s.rowid = k.fk_soc';
 		$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'propal as p ON p.rowid = k.fk_propal';

@@ -1,5 +1,11 @@
 # Changelog Küchenangebot
 
+## 1.6.0
+- **Versionen**: „Neue Version erstellen“ (wenn das Angebot freigegeben ist) kopiert die Kalkulation samt Kunde, Sätzen, Hinweisen, Unterlagen und Nobilia-Dateien; die alte Version wird gesperrt. Beim Erstellen des neuen Angebots wird das alte verknüpft und auf „Nicht unterschrieben“ gesetzt
+- **Zusatz- und Minderpositionen** je Küchentyp (+/−), Preisbasis Nobilia-Wert (× Faktor + Aufschlag) oder Verkaufspreis netto; im Küchenpreis enthalten, im Angebot unter „inkl. Änderungen“ genannt
+- PDF: Versionsangabe im Kopf, Block „Änderungen gegenüber Version …“ (geänderte Ausstattung, Geräte neu/entfallen, neue Planung, Stückzahl, Positionen, Preisdifferenz)
+- Deckblatt passt Bild und Schriftgröße automatisch an, damit alles auf Seite 1 bleibt
+
 ## 1.5.0
 - Angebot nennt die **Grundlage**: „Grundlage dieses Angebots: Beratungsgespräch … sowie folgende Unterlagen: …“ (Seite 2 unter dem Preis). Text zum Gespräch je Kalkulation eintragbar, Unterlagen werden aus dem Bereich „Unterlagen“ genannt (abschaltbar); de/hr/en
 

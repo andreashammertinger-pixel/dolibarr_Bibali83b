@@ -53,7 +53,9 @@ $rows = KaKalk::fetchList($db);
 foreach ($rows as $o) {
 	$url = dol_buildpath('/kuechenangebot/card.php', 1).'?id='.$o->rowid;
 	print '<tr class="oddeven"><td><a href="'.$url.'">'.img_picto('', 'propal', 'class="pictofixedwidth"').$o->rowid.'</a></td>';
-	print '<td><a href="'.$url.'">'.dol_escape_htmltag($o->label ?: '-').'</a></td>';
+	$pp = (array) json_decode((string) $o->params, true);
+	$ver = max(1, (int) ($pp['version'] ?? 1));
+	print '<td><a href="'.$url.'">'.dol_escape_htmltag($o->label ?: '-').'</a>'.($ver > 1 || !empty($pp['gesperrt']) ? ' <span class="badge badge-'.(!empty($pp['gesperrt']) ? 'secondary' : 'info').'">V'.$ver.'</span>' : '').'</td>';
 	print '<td>'.($o->fk_soc ? '<a href="'.DOL_URL_ROOT.'/societe/card.php?socid='.$o->fk_soc.'">'.dol_escape_htmltag($o->socname).'</a>' : '').'</td>';
 	print '<td>'.$langs->trans($o->art === 'mfh' ? 'KaArtMfh' : 'KaArtPrivat').'</td>';
 	print '<td class="right">'.kaFmt($o->total_stueck, 0).'</td><td class="right nowraponall">'.kaMoney($o->total_ht).'</td>';
