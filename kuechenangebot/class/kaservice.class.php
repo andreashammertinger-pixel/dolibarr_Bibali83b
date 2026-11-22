@@ -262,9 +262,12 @@ class KaService
 			$multi = count($kalk->typen) > 1;
 			foreach ($kalk->typen as $k => $typ) {
 				$row = $calc['typen'][$k];
-				$label = ($multi || $typ->label) ? sprintf($de->transnoentities('KaPdfKitchenLine'), $typ->label ?: '#'.($k + 1)) : $de->transnoentities('KaPdfKitchenLineShort');
+				$label = ($multi || $typ->label) ? $de->transnoentities('KaPdfKitchenLine', $typ->label ?: '#'.($k + 1)) : $de->transnoentities('KaPdfKitchenLineShort');
 				$prog = trim($typ->merkmal('Programm').' '.$typ->merkmal('Front-Kombination'));
-				$desc = sprintf($de->transnoentities('KaPdfKitchenSub'), $prog ?: '-');
+				$desc = $de->transnoentities('KaPdfKitchenSub', $prog ?: '-');
+				if (!empty($kalk->params['verbraucher'])) {
+					$desc .= "\n".$de->transnoentities('KaPdfIndividual');
+				}
 				$r = $p->addline($desc, $row['vk'], $row['qty'], $calc['tva'], 0, 0, 0, 0, 'HT', 0, 0, 0, -1, 0, 0, 0, round($row['kosten'], 2), $label);
 				if ($r <= 0) {
 					$this->db->rollback();

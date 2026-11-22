@@ -1,5 +1,9 @@
 # Changelog Küchenangebot
 
+## 1.2.0
+- Privatkunden: Satz „Dieses Angebot wurde nach Ihren individuellen Angaben erstellt …“ auf dem Deckblatt, unter dem Gesamtbetrag und in der Angebotszeile in Dolibarr (de/hr/en)
+- Fix: Angebotszeile in Dolibarr zeigte Programm/Front und Küchentyp nicht an
+
 ## 1.1.0
 - **Privatkunde (Verbraucher)** in der Kalkulation: Das Angebot enthält zwei Bestätigungen zum Ankreuzen – individuelle Anfertigung, daher kein Rücktrittsrecht (§ 18 Abs 1 Z 3 FAGG), und ausdrücklicher Beginn vor Fristende (§§ 10, 18 Abs 1 Z 1 FAGG); in de/hr/en
 - Angebotsbestimmungen: neuer Punkt Rücktrittsrecht; Storno für Verbraucher nach tatsächlichen Kosten (keine Pauschale, OGH 4 Ob 236/22t), für Unternehmer 30 % bzw. bis 100 % bei Maßware

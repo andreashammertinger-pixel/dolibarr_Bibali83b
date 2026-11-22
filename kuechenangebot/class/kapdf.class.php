@@ -275,6 +275,11 @@ class KaPdf
 		$pdf->SetTextColor($this->dark[0], $this->dark[1], $this->dark[2]);
 		$pdf->SetX($this->ml);
 		$pdf->MultiCell($w, 4.5, $this->t('KaPdfIntro'), 0, 'L');
+		if (!empty($this->kalk->params['verbraucher'])) {
+			$pdf->SetX($this->ml);
+			$pdf->SetFont($this->font, 'B', 8.8);
+			$pdf->MultiCell($w, 4.3, $this->t('KaPdfIndividual'), 0, 'L');
+		}
 		$y = $pdf->GetY() + 2;
 
 		// 3D-Bild: so groß, dass Highlights und Preis noch auf die Seite passen
@@ -541,6 +546,12 @@ class KaPdf
 		$this->sumRow($this->t('KaPdfSubtotal'), kaMoney($c['vk_netto']));
 		$this->sumRow($this->t('KaPdfVat', $this->num($c['tva'])), kaMoney($c['mwst']));
 		$this->sumRow($this->t('KaPdfGrandTotal'), kaMoney($c['vk_brutto']), true);
+		if (!empty($this->kalk->params['verbraucher'])) {
+			$pdf->Ln(2);
+			$pdf->SetX($this->ml);
+			$pdf->SetFont($this->font, 'B', 8.5);
+			$pdf->MultiCell($w, 4.2, $this->t('KaPdfIndividual'), 0, 'L');
+		}
 
 		// Ausstattung je Küchentyp
 		foreach ($this->kalk->typen as $k => $typ) {
