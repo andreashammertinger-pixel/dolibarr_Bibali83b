@@ -250,8 +250,10 @@ class KaKalk
 				$vk = round((float) $t->vk_override + $posVk, 2);
 			} else {
 				$vk = round($vkCalc, 2);
-				if ($runden > 0) { // Bruttopreis je Küche aufrunden, netto daraus
+				if ($runden > 0 && !empty($p['verbraucher'])) { // Privat: Bruttopreis je Küche aufrunden, netto daraus
 					$vk = round(ceil(round($vk * (1 + $tvaRate / 100), 2) / $runden) * $runden / (1 + $tvaRate / 100), 2);
+				} elseif ($runden > 0) { // Firma: Nettopreis je Küche aufrunden
+					$vk = ceil($vk / $runden) * $runden;
 				}
 			}
 			$kosten = $ek + $transport + $muellKosten + $std * $kStd;

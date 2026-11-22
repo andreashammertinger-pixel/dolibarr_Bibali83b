@@ -41,6 +41,12 @@ class KaDict
 			'Lack' => 'lak', 'Glas' => 'staklo', 'Holz' => 'drvo', 'Edelstahl' => 'nehrđajući čelik', 'Keramik' => 'keramika', 'Quarzstein' => 'kvarcni kamen',
 			'Standard' => 'standard', 'Kühlautomat' => 'hladnjak', 'Geschirrspüler' => 'perilica posuđa', 'Kochfeld' => 'ploča za kuhanje', 'Backofen' => 'pećnica',
 			'Dunsthaube' => 'napa', 'Spüle' => 'sudoper', 'Schrank' => 'element', 'Leuchte' => 'svjetiljka', 'reversibel' => 'reverzibilno',
+			'Küchenarmatur' => 'kuhinjska slavina', 'Hochdruck' => 'visokotlačna', 'Niederdruck' => 'niskotlačna', 'mit Rohrauslauf' => 's cijevnim izljevom',
+			'mit Brause' => 's tušem', 'ausziehbar' => 'izvlačna', 'chrom' => 'krom', 'Chrom' => 'krom', 'Edelstahl-Optik' => 'izgled nehrđajućeg čelika',
+			'Typ' => 'Tip', 'Beton' => 'beton', 'Marmor' => 'mramor', 'Stein' => 'kamen', 'Schiefer' => 'škriljevac', 'Terrazzo' => 'terrazzo',
+			'Sand' => 'pijesak', 'Nischenleuchte' => 'svjetiljka za nišu', 'Unterbauleuchte' => 'podgradna svjetiljka', 'strukturiert' => 'strukturirano',
+			'Supermatt' => 'supermat', 'Ultramatt' => 'ultramat', 'Seidenmatt' => 'svilenkasto mat', 'Samtmatt' => 'baršunasto mat', 'Furnier' => 'furnir',
+			'Massivholz' => 'masivno drvo', 'Keramik' => 'keramika', 'Quarzkomposit' => 'kvarcni kompozit', 'Kompaktplatte' => 'kompaktna ploča',
 		),
 		'en' => array(
 			'Serie' => 'Series', 'Programm' => 'Range', 'Front-Kombination' => 'Front combination',
@@ -69,6 +75,12 @@ class KaDict
 			'Lack' => 'lacquer', 'Glas' => 'glass', 'Holz' => 'wood', 'Edelstahl' => 'stainless steel', 'Keramik' => 'ceramic', 'Quarzstein' => 'quartz',
 			'Standard' => 'standard', 'Kühlautomat' => 'refrigerator', 'Geschirrspüler' => 'dishwasher', 'Kochfeld' => 'hob', 'Backofen' => 'oven',
 			'Dunsthaube' => 'extractor hood', 'Spüle' => 'sink', 'Schrank' => 'unit', 'Leuchte' => 'light', 'reversibel' => 'reversible',
+			'Küchenarmatur' => 'kitchen tap', 'Hochdruck' => 'high-pressure', 'Niederdruck' => 'low-pressure', 'mit Rohrauslauf' => 'with tubular spout',
+			'mit Brause' => 'with spray', 'ausziehbar' => 'pull-out', 'chrom' => 'chrome', 'Chrom' => 'chrome', 'Edelstahl-Optik' => 'stainless steel look',
+			'Typ' => 'Type', 'Beton' => 'concrete', 'Marmor' => 'marble', 'Stein' => 'stone', 'Schiefer' => 'slate', 'Terrazzo' => 'terrazzo',
+			'Sand' => 'sand', 'Nischenleuchte' => 'niche light', 'Unterbauleuchte' => 'under-cabinet light', 'strukturiert' => 'textured',
+			'Supermatt' => 'super matt', 'Ultramatt' => 'ultra matt', 'Seidenmatt' => 'silk matt', 'Samtmatt' => 'velvet matt', 'Furnier' => 'veneer',
+			'Massivholz' => 'solid wood', 'Keramik' => 'ceramic', 'Quarzkomposit' => 'quartz composite', 'Kompaktplatte' => 'compact panel',
 		),
 	);
 
@@ -79,6 +91,48 @@ class KaDict
 			'en' => 'We do not guarantee a true-to-original representation of all articles. Deviations in colour and construction are possible.',
 		),
 	);
+
+	/** Farbwörter (Endung) und Vorsilben für zusammengesetzte nobilia-Farben wie „Taupegrau“, „Seidengrau“, „Alpinweiß“ */
+	protected static $colorEnd = array(
+		'hr' => array('grau' => 'siva', 'weiß' => 'bijela', 'weiss' => 'bijela', 'schwarz' => 'crna', 'blau' => 'plava', 'grün' => 'zelena', 'beige' => 'bež',
+			'braun' => 'smeđa', 'rot' => 'crvena', 'gelb' => 'žuta', 'rosé' => 'roza', 'creme' => 'krem'),
+		'en' => array('grau' => 'grey', 'weiß' => 'white', 'weiss' => 'white', 'schwarz' => 'black', 'blau' => 'blue', 'grün' => 'green', 'beige' => 'beige',
+			'braun' => 'brown', 'rot' => 'red', 'gelb' => 'yellow', 'rosé' => 'rose', 'creme' => 'cream'),
+	);
+	protected static $colorPre = array(
+		'hr' => array('taupe' => 'taupe', 'seiden' => 'svilenkasto', 'stein' => 'kameno', 'achat' => 'ahat', 'lava' => 'lava', 'alpin' => 'alpsko', 'polar' => 'polarno',
+			'fjord' => 'fjord', 'mineral' => 'mineralno', 'salbei' => 'kadulja', 'schiefer' => 'škriljevac', 'basalt' => 'bazalt', 'platin' => 'platinasto', 'platina' => 'platinasto',
+			'arktis' => 'arktičko', 'perl' => 'biserno', 'sand' => 'pješčano', 'kristall' => 'kristalno', 'schilf' => 'trska', 'oliv' => 'maslinasto', 'nougat' => 'nugat',
+			'quarz' => 'kvarc', 'kiesel' => 'šljunak', 'beton' => 'betonsko', 'terra' => 'terra', 'eisen' => 'željezno', 'graphit' => 'grafitno', 'carbon' => 'karbonsko',
+			'onyx' => 'oniks', 'magnolia' => 'magnolija', 'kaschmir' => 'kašmir', 'anthrazit' => 'antracit', 'hell' => 'svijetlo', 'dunkel' => 'tamno', 'blau' => 'plavo'),
+		'en' => array('taupe' => 'taupe', 'seiden' => 'silk', 'stein' => 'stone', 'achat' => 'agate', 'lava' => 'lava', 'alpin' => 'alpine', 'polar' => 'polar',
+			'fjord' => 'fjord', 'mineral' => 'mineral', 'salbei' => 'sage', 'schiefer' => 'slate', 'basalt' => 'basalt', 'platin' => 'platinum', 'platina' => 'platinum',
+			'arktis' => 'arctic', 'perl' => 'pearl', 'sand' => 'sand', 'kristall' => 'crystal', 'schilf' => 'reed', 'oliv' => 'olive', 'nougat' => 'nougat',
+			'quarz' => 'quartz', 'kiesel' => 'pebble', 'beton' => 'concrete', 'terra' => 'terra', 'eisen' => 'iron', 'graphit' => 'graphite', 'carbon' => 'carbon',
+			'onyx' => 'onyx', 'magnolia' => 'magnolia', 'kaschmir' => 'cashmere', 'anthrazit' => 'anthracite', 'hell' => 'light', 'dunkel' => 'dark', 'blau' => 'blue'),
+	);
+	/** Genitiv für „imitacija …“ */
+	protected static $genHr = array('Eiche' => 'hrasta', 'Beton' => 'betona', 'Marmor' => 'mramora', 'Nussbaum' => 'oraha', 'Stein' => 'kamena', 'Holz' => 'drva',
+		'Schiefer' => 'škriljevca', 'Ulme' => 'brijesta', 'Kiefer' => 'bora', 'Esche' => 'jasena', 'Buche' => 'bukve', 'Ahorn' => 'javora', 'Kirsche' => 'trešnje',
+		'Lärche' => 'ariša', 'Fichte' => 'smreke', 'Walnuss' => 'oraha', 'Keramik' => 'keramike', 'Granit' => 'granita', 'Terrazzo' => 'terrazza', 'Metall' => 'metala',
+		'Rost' => 'hrđe', 'Kupfer' => 'bakra', 'Stahl' => 'čelika');
+
+	/** Zusammengesetztes Farbwort übersetzen, z. B. Taupegrau → taupe siva */
+	protected static function color($word, $l)
+	{
+		if (!isset(self::$colorEnd[$l])) {
+			return null;
+		}
+		$lw = mb_strtolower($word);
+		foreach (self::$colorEnd[$l] as $end => $tr) {
+			if (mb_strlen($lw) > mb_strlen($end) + 2 && mb_substr($lw, -mb_strlen($end)) === $end) {
+				$pre = rtrim(mb_substr($lw, 0, -mb_strlen($end)), '-');
+				$pt = isset(self::$colorPre[$l][$pre]) ? self::$colorPre[$l][$pre] : $pre;
+				return $pt.' '.$tr;
+			}
+		}
+		return null;
+	}
 
 	/** Sprachkürzel aus Dolibarr-Sprachcode (hr_HR → hr) */
 	public static function short($lang)
@@ -126,6 +180,16 @@ class KaDict
 		if (isset($t[$text])) {
 			return $t[$text];
 		}
+		// „X Nachbildung“ → „imitacija X“ (hr, mit Genitiv) bzw. „X effect“ (en)
+		if (preg_match('/^(.+?)\s+(Nachbildung|NB)$/u', $text, $m) && !isset($t[$text])) {
+			$rest = $m[1];
+			if ($l === 'hr') {
+				$words = explode(' ', $rest, 2);
+				$first = isset(self::$genHr[$words[0]]) ? self::$genHr[$words[0]] : self::tr($words[0], $lang);
+				return 'imitacija '.$first.(isset($words[1]) ? ' '.self::tr($words[1], $lang) : '');
+			}
+			return self::tr($rest, $lang).' effect';
+		}
 		// Ausdrücke/Wörter ersetzen (nur ganze Wörter), Platzhalter verhindern Doppelersetzung
 		$map = array();
 		$i = 0;
@@ -137,6 +201,11 @@ class KaDict
 				$text = preg_replace($re, $ph, $text);
 			}
 		}
-		return strtr($text, $map);
+		$text = strtr($text, $map);
+		// verbliebene zusammengesetzte Farbwörter (z. B. Taupegrau, Seidengrau)
+		return preg_replace_callback('/(?<![\p{L}])(\p{Lu}\p{Ll}+(?:grau|weiß|weiss|schwarz|blau|grün|beige|braun|rot|gelb|rosé|creme))(?![\p{L}])/u', function ($mm) use ($l) {
+			$c = self::color($mm[1], $l);
+			return $c === null ? $mm[1] : $c;
+		}, $text);
 	}
 }

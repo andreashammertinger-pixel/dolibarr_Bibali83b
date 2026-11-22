@@ -39,6 +39,8 @@ class KaPdf
 	protected $prevPropal = null;
 	/** @var array{0:float,1:float} Schriftgröße/Zeilenhöhe der Highlights */
 	protected $hlFont = array(7.9, 3.7);
+	/** @var bool Firmenkunde: nur Nettopreise */
+	protected $net = false;
 
 	public function __construct($db)
 	{
@@ -78,6 +80,7 @@ class KaPdf
 		$this->kalk = $kalk;
 		$this->lang = $lang;
 		$this->calc = $kalk->compute();
+		$this->net = empty($kalk->params['verbraucher']);
 		$this->prev = null;
 		$this->prevPropal = null;
 		if (!empty($kalk->params['vorgaenger'])) {
@@ -318,7 +321,7 @@ class KaPdf
 			$pdf->SetFont($this->font, 'I', 6.3);
 			$pdf->SetTextColor(130, 130, 130);
 			$pdf->SetXY($rx, $ry);
-			$pdf->MultiCell($cw, 2.8, $this->t('KaPdfPicture').($multi ? ' · '.($typ->label ?: '#1') : ''), 0, 'R');
+			$pdf->MultiCell($cw, 2.8, $this->t('KaPdfPicture').($multi ? ' · '.$this->lbl($typ, 0) : ''), 0, 'R');
 			$ry = $pdf->GetY() + 3;
 		}
 
@@ -329,14 +332,17 @@ class KaPdf
 		$pdf->SetTextColor(255, 255, 255);
 		$pdf->SetXY($rx + 4, $ry + 3);
 		$pdf->SetFont($this->font, '', 10);
-		$pdf->Cell($cw - 8, 5, $this->t('KaPdfTotalPrice'), 0, 2, 'L');
+		$pdf->Cell($cw - 8, 5, $this->t($this->net ? 'KaPdfTotalPriceNet' : 'KaPdfTotalPrice'), 0, 2, 'L');
 		$pdf->SetFont($this->font, 'B', 20);
-		$pdf->Cell($cw - 8, 10, kaMoney($c['vk_brutto']), 0, 2, 'L');
+		$pdf->Cell($cw - 8, 10, kaMoney($this->net ? $c['vk_netto'] : $c['vk_brutto']), 0, 2, 'L');
 		$pdf->SetFont($this->font, '', 8.5);
-		$pdf->MultiCell($cw - 8, 4, $this->t('KaPdfInclDelivery').', '.$this->t('KaPdfInclVat', $this->num($c['tva'])), 0, 'L');
-		$pdf->SetX($rx + 4);
+		$pdf->MultiCell($cw - 8, 4, $this->t('KaPdfInclDelivery').', '.($this->net ? $this->t('KaPdfNetHint') : $this->t('KaPdfInclVat', $this->num($c['tva']))), 0, 'L');
+		if (!$this->net) {
+			$pdf->SetX($rx + 4);
+			$pdf->SetFont($this->font, '', 8);
+			$pdf->Cell($cw - 8, 4.5, $this->t('KaPdfNetPrice', kaMoney($c['vk_netto'])), 0, 2, 'L');
+		}
 		$pdf->SetFont($this->font, '', 8);
-		$pdf->Cell($cw - 8, 4.5, $this->t('KaPdfNetPrice', kaMoney($c['vk_netto'])), 0, 2, 'L');
 		if ($multi || $c['stueck'] > 1) {
 			$pdf->SetX($rx + 4);
 			$pdf->Cell($cw - 8, 4.5, $this->t('KaPdfTypes', $this->num($c['stueck'], 0), count($this->kalk->typen)), 0, 2, 'L');
@@ -359,16 +365,16 @@ class KaPdf
 			$pdf->SetX($rx);
 			$pdf->Cell($cw - 46, 4.5, $this->t('KaPdfType'), 0, 0, 'L', true);
 			$pdf->Cell(14, 4.5, $this->t('KaPdfPieces'), 0, 0, 'R', true);
-			$pdf->Cell(32, 4.5, $this->t('KaPdfPerKitchenGross'), 0, 1, 'R', true);
+			$pdf->Cell(32, 4.5, $this->t($this->net ? 'KaPdfPerKitchenNet' : 'KaPdfPerKitchenGross'), 0, 1, 'R', true);
 			foreach ($this->kalk->typen as $k => $t) {
 				if ($pdf->GetY() > $this->ph - 26) {
 					break;
 				}
 				$row = $c['typen'][$k];
 				$pdf->SetX($rx);
-				$pdf->Cell($cw - 46, 4.2, dol_trunc($t->label ?: '#'.($k + 1), 40), 0, 0, 'L');
+				$pdf->Cell($cw - 46, 4.2, dol_trunc($this->lbl($t, $k), 40), 0, 0, 'L');
 				$pdf->Cell(14, 4.2, $this->num($row['qty']), 0, 0, 'R');
-				$pdf->Cell(32, 4.2, kaMoney($row['vk'] * (1 + $c['tva'] / 100)), 0, 1, 'R');
+				$pdf->Cell(32, 4.2, kaMoney($this->net ? $row['vk'] : $row['vk'] * (1 + $c['tva'] / 100)), 0, 1, 'R');
 			}
 		}
 
@@ -424,6 +430,12 @@ class KaPdf
 		}
 	}
 
+	/** Bezeichnung eines Küchentyps in Ausgabesprache */
+	protected function lbl($typ, $k)
+	{
+		return $typ && $typ->label !== '' ? $this->tr($typ->label) : '#'.($k + 1);
+	}
+
 	/** Bild der Küche */
 	protected function imageFile($typ)
 	{
@@ -474,7 +486,7 @@ class KaPdf
 			} else {
 				$lines = array();
 				foreach ($vals as $k => $v) {
-					$lines[] = $v.' ('.($typen[$k]->label ?: '#'.($k + 1)).')';
+					$lines[] = $v.' ('.$this->lbl($typen[$k], $k).')';
 				}
 				$out[] = array($lab, implode("\n", $lines));
 			}
@@ -487,7 +499,7 @@ class KaPdf
 			foreach ($grp[1] as $name => $ks) {
 				$ks = array_unique($ks);
 				$lines[] = $name.(($n > 1 && count($ks) < $n) ? ' ('.implode(', ', array_map(function ($k) use ($typen) {
-					return $typen[$k]->label ?: '#'.($k + 1);
+					return $this->lbl($typen[$k], $k);
 				}, $ks)).')' : '');
 			}
 			$out[] = array($this->t($grp[0]), implode("\n", $lines));
@@ -622,7 +634,7 @@ class KaPdf
 				$pdf->AddPage();
 				$y = 36;
 			}
-			$title = (count($this->kalk->typen) > 1 || $typ->label) ? $this->t('KaPdfKitchenLine', $typ->label ?: ('#'.$i)) : $this->t('KaPdfKitchenLineShort');
+			$title = (count($this->kalk->typen) > 1 || $typ->label) ? $this->t('KaPdfKitchenLine', $this->lbl($typ, $i - 1)) : $this->t('KaPdfKitchenLineShort');
 			$prog = trim($typ->merkmal('Programm').' '.$this->tr($typ->merkmal('Front-Kombination')));
 			$pdf->SetFont($this->font, '', 8.8);
 			$pdf->SetXY($this->ml, $y);
@@ -655,9 +667,16 @@ class KaPdf
 			$i++;
 		}
 		$pdf->Ln(2);
-		$this->sumRow($this->t('KaPdfSubtotal'), kaMoney($c['vk_netto']));
-		$this->sumRow($this->t('KaPdfVat', $this->num($c['tva'])), kaMoney($c['mwst']));
-		$this->sumRow($this->t('KaPdfGrandTotal'), kaMoney($c['vk_brutto']), true);
+		if ($this->net) {
+			$this->sumRow($this->t('KaPdfGrandTotalNet'), kaMoney($c['vk_netto']), true);
+			$pdf->SetX($this->ml + 100);
+			$pdf->SetFont($this->font, 'I', 7.8);
+			$pdf->Cell(80, 4.5, $this->t('KaPdfNetHint'), 0, 1, 'R');
+		} else {
+			$this->sumRow($this->t('KaPdfSubtotal'), kaMoney($c['vk_netto']));
+			$this->sumRow($this->t('KaPdfVat', $this->num($c['tva'])), kaMoney($c['mwst']));
+			$this->sumRow($this->t('KaPdfGrandTotal'), kaMoney($c['vk_brutto']), true);
+		}
 		if (!empty($this->kalk->params['verbraucher'])) {
 			$pdf->Ln(2);
 			$pdf->setCellPaddings(0, 0, 0, 0);
@@ -751,7 +770,7 @@ class KaPdf
 		$out = array();
 		$prevCalc = $this->prev->compute();
 		foreach ($this->kalk->typen as $k => $t) {
-			$name = $t->label ?: '#'.($k + 1);
+			$name = $this->lbl($t, $k);
 			$o = isset($this->prev->typen[$k]) ? $this->prev->typen[$k] : null;
 			if (!$o) {
 				$out[] = $this->t('KaPdfChgNewType', $name);
@@ -806,11 +825,12 @@ class KaPdf
 		}
 		foreach ($this->prev->typen as $k => $o) {
 			if (!isset($this->kalk->typen[$k])) {
-				$out[] = $this->t('KaPdfChgRemovedType', $o->label ?: '#'.($k + 1));
+				$out[] = $this->t('KaPdfChgRemovedType', $this->lbl($o, $k));
 			}
 		}
-		$diff = $this->calc['vk_brutto'] - $prevCalc['vk_brutto'];
-		$out[] = $this->t('KaPdfChgPrice', kaMoney($prevCalc['vk_brutto']), kaMoney($this->calc['vk_brutto']), ($diff >= 0 ? '+' : '−').' '.kaMoney(abs($diff)));
+		$key = $this->net ? 'vk_netto' : 'vk_brutto';
+		$diff = $this->calc[$key] - $prevCalc[$key];
+		$out[] = $this->t('KaPdfChgPrice', kaMoney($prevCalc[$key]), kaMoney($this->calc[$key]), ($diff >= 0 ? '+' : '−').' '.kaMoney(abs($diff))).($this->net ? ' ('.$this->t('KaPdfNetShort').')' : '');
 		return $out;
 	}
 
@@ -844,7 +864,7 @@ class KaPdf
 			$pdf->AddPage();
 			$pdf->SetY(36);
 		}
-		$this->heading($this->t('KaPdfDetails').($multi || $typ->label ? ' – '.($typ->label ?: '#'.($k + 1)) : ''));
+		$this->heading($this->t('KaPdfDetails').($multi || $typ->label ? ' – '.$this->lbl($typ, $k) : ''));
 
 		// weiteres 3D-Bild bei mehreren Typen
 		if ($k > 0) {
@@ -1029,11 +1049,15 @@ class KaPdf
 		$pdf->Cell($w - 8, 6, $this->t('KaPdfAcceptance'), 0, 2, 'L');
 		$pdf->SetTextColor($this->dark[0], $this->dark[1], $this->dark[2]);
 		$pdf->SetFont($this->font, '', 8.8);
-		$txt = $this->t('KaPdfAcceptanceText', $this->object->ref, $this->date($this->object->date), kaMoney($this->calc['vk_brutto']));
+		$txt = $this->t($this->net ? 'KaPdfAcceptanceTextNet' : 'KaPdfAcceptanceText', $this->object->ref, $this->date($this->object->date), kaMoney($this->net ? $this->calc['vk_netto'] : $this->calc['vk_brutto']));
 		$pdf->MultiCell($w - 8, 4.4, $txt, 0, 'L');
 		$pdf->SetX($this->ml + 4);
 		$pdf->SetFont($this->font, 'B', 12);
-		$pdf->Cell($w - 8, 7, $this->t('KaPdfTotalPrice').': '.kaMoney($this->calc['vk_brutto']).'  ('.$this->t('KaPdfInclVat', $this->num($this->calc['tva'])).')', 0, 2, 'L');
+		if ($this->net) {
+			$pdf->Cell($w - 8, 7, $this->t('KaPdfTotalPriceNet').': '.kaMoney($this->calc['vk_netto']), 0, 2, 'L');
+		} else {
+			$pdf->Cell($w - 8, 7, $this->t('KaPdfTotalPrice').': '.kaMoney($this->calc['vk_brutto']).'  ('.$this->t('KaPdfInclVat', $this->num($this->calc['tva'])).')', 0, 2, 'L');
+		}
 		if ($confirm) {
 			$cy = $pdf->GetY() + 2;
 			$pdf->SetDrawColor($this->dark[0], $this->dark[1], $this->dark[2]);

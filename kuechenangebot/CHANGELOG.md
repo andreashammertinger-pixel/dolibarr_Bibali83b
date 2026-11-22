@@ -1,5 +1,9 @@
 # Changelog Küchenangebot
 
+## 1.10.0
+- **Firmenkunden** („Privatkunde“ nicht angehakt): Angebot zeigt nur **Nettopreise** mit Hinweis „Nettopreis, zuzüglich der gesetzlichen Umsatzsteuer“ – keine USt-Zeile, kein Bruttobetrag (Deckblatt, Typenübersicht, Summen, Änderungsblock, Annahme). Das Dolibarr-Angebot rechnet weiter mit USt für die spätere Rechnung. Runden bei Firmen auf den Nettopreis
+- **Übersetzung hr/en** verbessert: zusammengesetzte nobilia-Farben (z. B. Taupegrau → taupe siva, Seidengrau, Alpinweiß), Dekore „… Nachbildung“ → „imitacija …“ (mit Genitiv, z. B. imitacija betona), Armaturen-Begriffe (Küchenarmatur, Hochdruck, Rohrauslauf, chrom), „Typ“ in Typbezeichnungen → „Tip“
+
 ## 1.9.0
 - Kalkulation je Angebot vollständig anpassbar: zusätzlich **interne Kosten je Monteurstunde, Richtwert Stunden je Laufmeter und Gemeinkosten %** (bisher nur in den Einstellungen); alle Werte vorbelegt aus den Einstellungen passend zur Art
 - **„Standardwerte laden“** setzt die Kalkulation eines Angebots auf die Einstellungen zurück (z. B. nach Wechsel privat ↔ Mehrfamilienhaus); Positionen und Texte bleiben
