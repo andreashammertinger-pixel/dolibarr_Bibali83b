@@ -1,5 +1,10 @@
 # Changelog Küchenangebot
 
+## 1.9.0
+- Kalkulation je Angebot vollständig anpassbar: zusätzlich **interne Kosten je Monteurstunde, Richtwert Stunden je Laufmeter und Gemeinkosten %** (bisher nur in den Einstellungen); alle Werte vorbelegt aus den Einstellungen passend zur Art
+- **„Standardwerte laden“** setzt die Kalkulation eines Angebots auf die Einstellungen zurück (z. B. nach Wechsel privat ↔ Mehrfamilienhaus); Positionen und Texte bleiben
+- **Endpreis je Küche runden** (brutto auf 1, 10, 50 oder 100 €)
+
 ## 1.8.0
 - **nobilia-Auftragsbestätigung (AB) importieren** je Küchentyp: AB-Nr., AB-Datum, Kommission, KV-Zeichen, Liefertermin, Ausführung und alle Positionen mit Brutto/Netto werden gelesen; die Liefer-/Rechnungsadresse wird ignoriert
 - Gültige AB (kein Storno, Gesamtpreis > 0, passt zum Nobilia-Angebot): **Einkauf je Küche = AB-Gesamtpreis**, der Faktor des Typs wird daraus berechnet (Einkauf / Katalogwert). Storno-ABs und ABs ohne Preis werden erkannt und nicht übernommen

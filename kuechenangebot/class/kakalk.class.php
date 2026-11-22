@@ -53,6 +53,11 @@ class KaKalk
 			'muell_faktor' => 1,
 			'tva' => (float) getDolGlobalString('KA_TVA', '20'),
 			'gueltig_tage' => (int) getDolGlobalString('KA_GUELTIG_TAGE', '30'),
+			// interne Werte für Selbstkosten / Preis-Check (Vorschlag aus den Einstellungen, je Angebot änderbar)
+			'kosten_stunde' => (float) getDolGlobalString('KA_KOSTEN_STUNDE', '45'),
+			'std_pro_lfm' => (float) getDolGlobalString('KA_STD_PRO_LFM', '2.5'),
+			'gk_pct' => (float) getDolGlobalString($mfh ? 'KA_GK_MFH' : 'KA_GK_PRIVAT', $mfh ? '8' : '12'),
+			'runden' => 0, // Bruttopreis je Küche runden auf 0 (aus), 1, 10, 50, 100 €
 			'grundlage' => '', // Gespräch, z. B. „Beratungsgespräch beim Hausbesuch am 20.11.2026“ (leer = Standardtext)
 			'grundlage_docs' => 1, // Namen der Unterlagen im Angebot nennen
 			'positionen' => array(), // Zusatz-/Minderpositionen [typ, label, modus nobilia|vk, betrag]
@@ -180,9 +185,12 @@ class KaKalk
 	public function compute()
 	{
 		$p = $this->params;
-		$kStd = (float) getDolGlobalString('KA_KOSTEN_STUNDE', '45');
-		$stdLfm = (float) getDolGlobalString('KA_STD_PRO_LFM', '2.5');
-		$gk = (float) getDolGlobalString($this->art === 'mfh' ? 'KA_GK_MFH' : 'KA_GK_PRIVAT', $this->art === 'mfh' ? '8' : '12');
+		$def = self::defaultParams($this->art);
+		$kStd = isset($p['kosten_stunde']) ? (float) $p['kosten_stunde'] : $def['kosten_stunde'];
+		$stdLfm = isset($p['std_pro_lfm']) ? (float) $p['std_pro_lfm'] : $def['std_pro_lfm'];
+		$gk = isset($p['gk_pct']) ? (float) $p['gk_pct'] : $def['gk_pct'];
+		$runden = (float) ($p['runden'] ?? 0);
+		$tvaRate = (float) ($p['tva'] ?? 20);
 
 		$out = array('typen' => array(), 'ek' => 0.0, 'stueck' => 0.0, 'lfm' => 0.0, 'montage_std' => 0.0,
 			'moebel_vk' => 0.0, 'montage_vk' => 0.0, 'transport_vk' => 0.0, 'muell_vk' => 0.0,
@@ -238,7 +246,14 @@ class KaKalk
 
 			$vkCalc = $moebel + $montage + $transport + $muell;
 			// Endpreis je Küche gilt ohne Zusatzpositionen; diese kommen dazu
-			$vk = ($t->vk_override !== null && $t->vk_override > 0) ? round((float) $t->vk_override + $posVk, 2) : round($vkCalc, 2);
+			if ($t->vk_override !== null && $t->vk_override > 0) {
+				$vk = round((float) $t->vk_override + $posVk, 2);
+			} else {
+				$vk = round($vkCalc, 2);
+				if ($runden > 0) { // Bruttopreis je Küche aufrunden, netto daraus
+					$vk = round(ceil(round($vk * (1 + $tvaRate / 100), 2) / $runden) * $runden / (1 + $tvaRate / 100), 2);
+				}
+			}
 			$kosten = $ek + $transport + $muellKosten + $std * $kStd;
 
 			$row = array(

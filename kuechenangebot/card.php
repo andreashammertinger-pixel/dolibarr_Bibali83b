@@ -136,7 +136,7 @@ if ($action === 'save' && $canwrite) {
 			$p[$k] = GETPOST('p_'.$k, 'aZ09');
 		}
 		foreach (array('aufschlag_wert', 'transport_betrag', 'montage_pauschal', 'montage_arbeiter', 'montage_std', 'montage_satz', 'montage_lfm_satz',
-			'montage_std_kalk', 'muell_pauschal', 'muell_std', 'muell_satz', 'muell_faktor', 'tva', 'gueltig_tage') as $k) {
+			'montage_std_kalk', 'muell_pauschal', 'muell_std', 'muell_satz', 'muell_faktor', 'tva', 'gueltig_tage', 'kosten_stunde', 'std_pro_lfm', 'gk_pct', 'runden') as $k) {
 			$p[$k] = kaNum('p_'.$k, (float) ($p[$k] ?? 0));
 		}
 		$p['plan_label'] = trim(GETPOST('p_plan_label', 'alphanohtml'));
@@ -340,6 +340,21 @@ if ($action === 'setfactor' && $user->hasRight('kuechenangebot', 'setup') && $ka
 		}
 	}
 	header('Location: '.$_SERVER['PHP_SELF'].'?id='.$kalk->id.'#kitchens');
+	exit;
+}
+
+if ($action === 'resetparams' && $canwrite && $kalk->id) {
+	$keep = array('positionen', 'version', 'vorgaenger', 'nachfolger', 'gesperrt', 'plan_label', 'grundlage', 'grundlage_docs', 'verbraucher');
+	$np = KaKalk::defaultParams($kalk->art);
+	foreach ($keep as $kk) {
+		if (array_key_exists($kk, $kalk->params)) {
+			$np[$kk] = $kalk->params[$kk];
+		}
+	}
+	$kalk->params = $np;
+	$kalk->save($user);
+	setEventMessages($langs->trans('KaCalcResetDone'), null);
+	header('Location: '.$_SERVER['PHP_SELF'].'?id='.$kalk->id.'#calc');
 	exit;
 }
 
@@ -636,7 +651,11 @@ $inp = function ($name, $val, $dec = 2, $cls = 'width75') use ($p, $disabled) {
 };
 print '<a id="calc"></a>';
 print '<div class="div-table-responsive-no-min"><table class="noborder centpercent">';
-print '<tr class="liste_titre"><td colspan="2">'.$langs->trans('KaStepCalc').'</td></tr>';
+print '<tr class="liste_titre"><td colspan="2">'.$langs->trans('KaStepCalc').' <span class="opacitymedium small">'.$langs->trans('KaCalcHint').'</span>';
+if ($canwrite && $kalk->id) {
+	print ' <a class="reposition small marginleftonly" href="'.$_SERVER['PHP_SELF'].'?id='.$kalk->id.'&action=resetparams&token='.newToken().'" onclick="return confirm(\''.dol_escape_js($langs->transnoentities('KaCalcResetConfirm')).'\')">'.$langs->trans('KaCalcReset').'</a>';
+}
+print '</td></tr>';
 print '<tr class="oddeven"><td class="titlefieldcreate">'.$langs->trans('KaMarkup').'</td><td>'.$sel('aufschlag_modus', array('pct' => 'KaMarkupPct', 'pauschal' => 'KaMarkupFlat'), $p['aufschlag_modus']).' '.$inp('aufschlag_wert', $p['aufschlag_wert']).'</td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('KaTransport').'</td><td>'.$sel('transport_modus', array('none' => 'KaTransportNone', 'projekt' => 'KaTransportProject', 'kueche' => 'KaTransportKitchen'), $p['transport_modus']).' € '.$inp('transport_betrag', $p['transport_betrag']).'</td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('KaAssembly').'</td><td>'.$sel('montage_modus', array('stunden' => 'KaAssemblyHours', 'pauschal' => 'KaAssemblyFlat', 'lfm' => 'KaAssemblyLfm'), $p['montage_modus']);
@@ -680,6 +699,12 @@ if (!$rows) {
 	print '<tr class="oddeven"><td colspan="6"><span class="opacitymedium">-</span></td></tr>';
 }
 print '</table></td></tr>';
+print '<tr class="oddeven"><td>'.$form->textwithpicto($langs->trans('KaCalcInternal'), $langs->trans('KaCalcInternalHint')).'</td><td>'.$langs->trans('KaSetupCostHour').' '.$inp('kosten_stunde', $p['kosten_stunde'] ?? 0).' &nbsp; '.$langs->trans('KaSetupHoursLfm').' '.$inp('std_pro_lfm', $p['std_pro_lfm'] ?? 0, 1, 'width50').' &nbsp; '.$langs->trans('KaCalcGk').' '.$inp('gk_pct', $p['gk_pct'] ?? 0, 1, 'width50').' %</td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans('KaRound').'</td><td><select name="p_runden"'.$disabled.'>';
+foreach (array(0 => $langs->trans('KaRoundNone'), 1 => '1 €', 10 => '10 €', 50 => '50 €', 100 => '100 €') as $rv => $rl) {
+	print '<option value="'.$rv.'"'.((float) ($p['runden'] ?? 0) == $rv ? ' selected' : '').'>'.$rl.'</option>';
+}
+print '</select> <span class="opacitymedium small">'.$langs->trans('KaRoundHint').'</span></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('KaVatRate').' / '.$langs->trans('KaValidDays').'</td><td>'.$inp('tva', $p['tva'], 1, 'width50').' % &nbsp; '.$inp('gueltig_tage', $p['gueltig_tage'], 0, 'width50').' '.$langs->trans('Days').'</td></tr>';
 print '</table></div>';
 
