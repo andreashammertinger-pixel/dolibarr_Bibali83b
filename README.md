@@ -1,5 +1,7 @@
 # Dolibarr-Modul „Hausverwaltung“
 
+> Weiteres Modul in diesem Repository: **[Küchenangebot (migora)](kuechenangebot/README.md)** – Kundenangebote aus Nobilia-Planung. Build: `./build.sh kuechenangebot`.
+
 Externes Modul für **Dolibarr 20.0.x** (getestet mit 20.0.4, Multicompany-fähig über `entity`).
 Allgemein für Wohnungseigentumsgemeinschaften verwendbar – **je Liegenschaft eine Firma (Entität)** in Multicompany.
 Erste Anwendung: Bibali 83b (3 Gebäude, 11 Apartments); die Bibali-Daten sind nur Beispiel-Startdaten.
