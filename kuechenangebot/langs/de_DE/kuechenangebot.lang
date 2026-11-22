@@ -276,3 +276,7 @@ KaCat_armatur = Armatur
 KaCat_licht = Beleuchtung
 KaCat_abfall = Abfallsystem
 KaCat_sonstiges = Sonstiges
+KaPdfConfirmCustom = Ich bestätige, dass die Ware nach meinen Vorgaben individuell geplant und angefertigt wird (Naturmaß, Farbe, Struktur, Größe, Ausführung, Geräteauswahl). Mir ist bekannt, dass daher kein Rücktrittsrecht nach dem Fern- und Auswärtsgeschäfte-Gesetz besteht (§ 18 Abs 1 Z 3 FAGG).
+KaPdfConfirmStart = Ich verlange ausdrücklich, dass mit Aufmaß, Bestellung und Montage vor Ablauf einer allfälligen Rücktrittsfrist begonnen wird. Mir ist bekannt, dass ich ein allfälliges Rücktrittsrecht bei vollständiger Vertragserfüllung verliere (§§ 10, 18 Abs 1 Z 1 FAGG).
+KaVerbraucher = Privatkunde (Verbraucher)
+KaVerbraucherHint = Im Angebot erscheinen die Bestätigungen zum Rücktrittsrecht (individuelle Anfertigung, Beginn vor Fristende) zum Ankreuzen.

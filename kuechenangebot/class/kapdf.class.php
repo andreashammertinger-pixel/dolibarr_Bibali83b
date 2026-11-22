@@ -769,7 +769,16 @@ class KaPdf
 		$pdf = $this->pdf;
 		$w = $this->pw - $this->ml - $this->mr;
 		global $mysoc;
-		if ($pdf->GetY() > $this->ph - 75) {
+		// Privatkunden: Bestätigungen zum Rücktrittsrecht (§ 18 Abs 1 Z 3 und Z 1 FAGG)
+		$confirm = !empty($this->kalk->params['verbraucher']) ? array($this->t('KaPdfConfirmCustom'), $this->t('KaPdfConfirmStart')) : array();
+		$pdf->SetFont($this->font, '', 7.8);
+		$extra = 0;
+		foreach ($confirm as $c) {
+			$extra += $pdf->getNumLines($c, $w - 15) * 3.5 + 1.5;
+		}
+		$extra = $confirm ? $extra + 2 : 0;
+		$boxh = 50 + $extra;
+		if ($pdf->GetY() > $this->ph - 25 - $boxh) {
 			$pdf->AddPage();
 			$pdf->SetY(36);
 		}
@@ -777,7 +786,7 @@ class KaPdf
 		$y = $pdf->GetY();
 		$pdf->SetDrawColor($this->color[0], $this->color[1], $this->color[2]);
 		$pdf->SetLineWidth(0.4);
-		$pdf->Rect($this->ml, $y, $w, 50);
+		$pdf->Rect($this->ml, $y, $w, $boxh);
 		$pdf->SetLineWidth(0.2);
 		$pdf->SetXY($this->ml + 4, $y + 3);
 		$pdf->SetFont($this->font, 'B', 10.5);
@@ -790,7 +799,18 @@ class KaPdf
 		$pdf->SetX($this->ml + 4);
 		$pdf->SetFont($this->font, 'B', 12);
 		$pdf->Cell($w - 8, 7, $this->t('KaPdfTotalPrice').': '.kaMoney($this->calc['vk_brutto']).'  ('.$this->t('KaPdfInclVat', $this->num($this->calc['tva'])).')', 0, 2, 'L');
-		$ly = $y + 42;
+		if ($confirm) {
+			$cy = $pdf->GetY() + 2;
+			$pdf->SetDrawColor($this->dark[0], $this->dark[1], $this->dark[2]);
+			foreach ($confirm as $c) {
+				$pdf->Rect($this->ml + 4, $cy + 0.4, 3.2, 3.2);
+				$pdf->SetFont($this->font, '', 7.8);
+				$pdf->SetXY($this->ml + 10, $cy);
+				$pdf->MultiCell($w - 15, 3.5, $c, 0, 'L');
+				$cy = $pdf->GetY() + 1.5;
+			}
+		}
+		$ly = $y + 42 + $extra;
 		$pdf->SetDrawColor(120, 120, 120);
 		$cw = ($w - 20) / 3;
 		$labels = array($this->t('KaPdfPlaceDate'), $this->t('KaPdfSignCustomer'), $this->t('KaPdfSignCompany', $mysoc->name));
@@ -801,7 +821,7 @@ class KaPdf
 			$pdf->SetFont($this->font, '', 7.5);
 			$pdf->Cell($cw, 3.5, $lab, 0, 0, 'L');
 		}
-		$pdf->SetY($y + 52);
+		$pdf->SetY($y + $boxh + 2);
 		$pdf->SetFont($this->font, 'I', 9);
 		$pdf->SetTextColor($this->color[0], $this->color[1], $this->color[2]);
 		$pdf->SetX($this->ml);

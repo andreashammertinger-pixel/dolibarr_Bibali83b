@@ -54,6 +54,7 @@ class KaKalk
 			'tva' => (float) getDolGlobalString('KA_TVA', '20'),
 			'gueltig_tage' => (int) getDolGlobalString('KA_GUELTIG_TAGE', '30'),
 			'plaene_anhaengen' => 0,
+			'verbraucher' => $mfh ? 0 : 1, // Privatkunde: Bestätigungen zum Rücktrittsrecht im PDF
 			'zeige_geraetepreise' => 0,
 		);
 	}

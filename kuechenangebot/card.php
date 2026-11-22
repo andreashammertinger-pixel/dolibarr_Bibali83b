@@ -134,6 +134,10 @@ if ($action === 'save' && $canwrite) {
 			$p[$k] = kaNum('p_'.$k, (float) ($p[$k] ?? 0));
 		}
 		$p['plaene_anhaengen'] = GETPOST('p_plaene_anhaengen', 'int') ? 1 : 0;
+		$p['verbraucher'] = GETPOST('p_verbraucher', 'int') ? 1 : 0;
+		if ($isnew && $newname !== '') {
+			$p['verbraucher'] = (GETPOST('nc_type', 'aZ09') === 'company') ? 0 : 1;
+		}
 		$kalk->params = $p;
 	} elseif ($isnew) {
 		$kalk->params = KaKalk::defaultParams($kalk->art);
@@ -351,6 +355,7 @@ foreach (array('privat' => 'KaArtPrivat', 'mfh' => 'KaArtMfh') as $k => $lab) {
 	print '<label class="marginrightonly"><input type="radio" name="art" value="'.$k.'"'.($kalk->art === $k ? ' checked' : '').$disabled.'> '.$langs->trans($lab).'</label> ';
 }
 print '</td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans('KaVerbraucher').'</td><td><label><input type="checkbox" name="p_verbraucher" value="1"'.(!empty($kalk->params['verbraucher']) ? ' checked' : '').$disabled.'> '.$langs->trans('KaVerbraucher').'</label> <span class="opacitymedium small">'.$langs->trans('KaVerbraucherHint').'</span></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('KaLang2').'</td><td><select name="lang2"'.$disabled.'><option value="">'.$langs->trans('KaLang2None').'</option>';
 foreach (kaLang2Options() as $k => $lab) {
 	print '<option value="'.$k.'"'.($kalk->lang2 === $k ? ' selected' : '').'>'.dol_escape_htmltag($lab).'</option>';

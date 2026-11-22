@@ -256,3 +256,7 @@ KaCat_armatur = Tap
 KaCat_licht = Lighting
 KaCat_abfall = Waste system
 KaCat_sonstiges = Other
+KaPdfConfirmCustom = I confirm that the goods are individually planned and made to my specifications (site measurements, colour, texture, size, design, choice of appliances). I am aware that therefore no right of withdrawal exists under the Austrian Distance and Off-Premises Contracts Act (§ 18 (1) 3 FAGG).
+KaPdfConfirmStart = I expressly request that measurement, ordering and assembly begin before any withdrawal period expires. I am aware that I lose any right of withdrawal once the contract has been fully performed (§§ 10, 18 (1) 1 FAGG).
+KaVerbraucher = Private customer (consumer)
+KaVerbraucherHint = The offer shows the confirmations on the right of withdrawal (individual manufacture, start before the period ends) as tick boxes.
