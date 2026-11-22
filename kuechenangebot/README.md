@@ -70,6 +70,9 @@ Beim Hochladen der **BD…pdf** erzeugt das Modul eine Fassung mit migora-Planko
 
 **Wann der Kunde die Pläne bekommt:** Bis zur Annahme liegen die Pläne **nur intern** in der Küchenkalkulation (Link „Pläne mit migora-Plankopf“). Wird das Angebot auf **Unterschrieben** (oder Fakturiert) gesetzt, legt das Modul `Plaene_<Typ>.pdf` automatisch zu den Dokumenten des Angebots. Wird daraus ein Auftrag erstellt, kommen sie auch zum Auftrag. Wird das Angebot wieder geöffnet oder abgelehnt, werden sie beim Angebot entfernt. Vorher können sie also nicht versehentlich an eine E-Mail angehängt werden.
 
+## Interne Kalkulation (PDF)
+In der Küchenkalkulation öffnet **Interne Kalkulation (PDF)** eine Aufstellung zum Prüfen oder Ablegen. Sie ist rot als *INTERN – nicht für Kunden* markiert, wird jedes Mal neu erzeugt und nicht beim Angebot abgelegt. Sie kann also nicht versehentlich mitgeschickt werden. Inhalt: verwendete Sätze, je Küchentyp Einkauf (Katalogwert × Faktor oder laut AB) und Preisaufbau mit Kosten, Verkauf und Deckung je Position, Gesamtsummen, kostendeckender Preis, Deckungsbeitrag, Faktor und Preis-Check.
+
 ## Kennzahlen
 *Küchen → Kennzahlen*: Angenommene (unterschriebene) und fakturierte Angebote aus dem Modul zählen automatisch. Frühere Küchen lassen sich händisch nachtragen (Einkauf, Verkauf, Laufmeter, Stück, optional Selbstkosten), jeweils als privat oder Mehrfamilienhaus.
 

@@ -1,5 +1,8 @@
 # Changelog Küchenangebot
 
+## 1.11.0
+- **Interne Kalkulation (PDF)**: Knopf in der Küchenkalkulation öffnet eine Aufstellung nur zum internen Check bzw. als Vorlage (rot markiert „INTERN – nicht für Kunden“, wird nicht beim Angebot abgelegt): Kunde/Bauvorhaben/Art/Version/Angebot, verwendete Werte, je Küchentyp Nobilia-Angebot, Katalogwert, Faktor, Einkauf (ggf. laut AB), Laufmeter, Zusatzpositionen und Preisaufbau Kosten/Verkauf/Deckung je Küche (Küche, Montage, Antransport, Müll, Gemeinkosten, Rundung/Endpreis), Gesamtsummen inkl. kostendeckendem Preis, Deckungsbeitrag, Faktor, Preis-Check gegen bisherige Küchen
+
 ## 1.10.2
 - PDF Seite 1: „Ihr Ansprechpartner“ mehrzeilig – Name, darunter Telefonnummer (und ggf. E-Mail); Trennung in der Einstellung mit Komma
 

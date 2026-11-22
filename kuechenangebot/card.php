@@ -826,6 +826,9 @@ if ($kalk->fk_propal && !empty($propal->id)) {
 	print '</table>';
 	print '<div class="tabsAction"><a class="butAction" href="'.DOL_URL_ROOT.'/comm/propal/card.php?id='.$propal->id.'">'.$langs->trans('KaOpenProposal').' '.dol_escape_htmltag($propal->ref).'</a></div>';
 }
+if ($kalk->id && $kalk->typen) {
+	print '<div class="tabsAction"><a class="butAction" href="'.dol_buildpath('/kuechenangebot/calcpdf.php', 1).'?id='.$kalk->id.'" target="_blank">'.img_picto('', 'pdf', 'class="pictofixedwidth"').$langs->trans('KaCalcPdf').'</a></div>';
+}
 if ($kalk->id && $canversion && !$locked && $kalk->fk_propal && !empty($propal->id) && (int) $propal->statut >= 1) {
 	print '<div class="tabsAction"><a class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$kalk->id.'&action=newversion&token='.newToken().'">'.$langs->trans('KaVersionNew').'</a></div>';
 }
