@@ -76,7 +76,7 @@ class KaPdfReader
 					$s++;
 				}
 				$len = null;
-				if (preg_match('#/Length\s+(\d+)(?!\s+\d+\s+R)#', $dict, $lm)) {
+				if (preg_match('#/Length\s+(\d+)\b(?!\s+\d+\s+R)#', $dict, $lm)) {
 					$len = (int) $lm[1];
 				} elseif (preg_match('#/Length\s+(\d+)\s+(\d+)\s+R#', $dict, $lm)) {
 					$len = -((int) $lm[1]); // indirekt, später auflösen

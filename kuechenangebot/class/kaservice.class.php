@@ -391,6 +391,86 @@ class KaService
 		}
 	}
 
+	/**
+	 * nobilia-Auftragsbestätigung (AB) zu einem Küchentyp übernehmen.
+	 * Gültige AB (kein Storno, Gesamtpreis > 0, passt zum AN oder $force): Einkauf je Küche = AB-Gesamtpreis / Küchen,
+	 * der Faktor des Typs wird daraus berechnet (Einkauf / Katalogwert). Ist das Angebot schon unterschrieben,
+	 * wird der Verkaufspreis vorher festgeschrieben, damit sich nur der Einkauf ändert.
+	 * @return int 1 übernommen, 0 gespeichert aber nicht übernommen, <0 Fehler
+	 */
+	public function importConfirmation($user, $kalk, $typ, $tmp, $name, $force = false, $kuechen = 0)
+	{
+		global $langs;
+		$dir = $kalk->getDir();
+		dol_mkdir($dir);
+		$dest = $dir.'/typ'.$typ->id.'_AB_'.dol_sanitizeFileName($name ?: 'ab.pdf');
+		if (!@copy($tmp, $dest)) {
+			$this->error = 'Datei konnte nicht gespeichert werden';
+			return -1;
+		}
+		$parser = new KaNobiliaParser();
+		$ab = $parser->parseConfirmation($dest);
+		if (!$ab) {
+			@unlink($dest);
+			$this->error = $parser->error;
+			return -1;
+		}
+		if (!empty($typ->data['ab']['datei']) && $typ->data['ab']['datei'] !== basename($dest)) {
+			@unlink($dir.'/'.$typ->data['ab']['datei']);
+		}
+		$cmp = KaNobiliaParser::compareConfirmation($typ->data, $ab);
+		$k = $kuechen > 0 ? (int) $kuechen : (int) $ab['kuechen'];
+		$info = array(
+			'datei' => basename($dest), 'nr' => $ab['nr'], 'datum' => $ab['datum'], 'kommission' => $ab['kommission'], 'kv' => $ab['kv'],
+			'liefertermin' => $ab['liefertermin'], 'storno' => $ab['storno'], 'gesamt' => $ab['gesamt'], 'brutto' => $ab['brutto'], 'netto' => $ab['netto'],
+			'kuechen' => max(1, $k), 'vergleich' => $cmp, 'ausfuehrung' => $ab['ausfuehrung'], 'npos' => count($ab['positionen']),
+			'angewendet' => 0, 'grund' => '',
+		);
+		if ($ab['storno']) {
+			$info['grund'] = 'storno';
+		} elseif (!$ab['gesamt'] || $ab['gesamt'] <= 0) {
+			$info['grund'] = 'ohnepreis';
+		} elseif ((float) $typ->katalog <= 0) {
+			$info['grund'] = 'ohnekatalog';
+		} elseif (!$cmp['passt'] && !$force) {
+			$info['grund'] = 'abweichung';
+		}
+		if ($info['grund'] === '') {
+			$this->freezePrices($kalk);
+			$typ->fetchFresh();
+			$ek = $ab['gesamt'] / $info['kuechen'];
+			$info['faktor_vorher'] = (float) $typ->faktor;
+			$typ->faktor = round($ek / (float) $typ->katalog, 6);
+			$info['faktor'] = $typ->faktor;
+			$info['ek'] = round($ek, 2);
+			$info['angewendet'] = 1;
+		}
+		$typ->data['ab'] = $info;
+		$typ->save();
+		$kalk->fetch($kalk->id);
+		$kalk->save($user);
+		return $info['angewendet'] ? 1 : 0;
+	}
+
+	/** Bei unterschriebenem Angebot die Verkaufspreise festschreiben (Endpreis je Küche), bevor sich der Einkauf ändert */
+	protected function freezePrices($kalk)
+	{
+		if (!$kalk->fk_propal) {
+			return;
+		}
+		$p = new Propal($this->db);
+		if ($p->fetch($kalk->fk_propal) <= 0 || !self::plansReleased($p)) {
+			return;
+		}
+		$calc = $kalk->compute();
+		foreach ($kalk->typen as $k => $t) {
+			if ($t->vk_override === null || $t->vk_override <= 0) {
+				$t->vk_override = round($calc['typen'][$k]['vk'] - $calc['typen'][$k]['pos_vk'], 2);
+				$t->save();
+			}
+		}
+	}
+
 	/** Zeilen für den Plankopf links: Einstellung KA_PLAN_KONTAKT oder Ansprechpartner + Firmen-E-Mail */
 	public static function planContact()
 	{

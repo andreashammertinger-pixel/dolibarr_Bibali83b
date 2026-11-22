@@ -46,6 +46,14 @@ if ($kalk->fetch(GETPOSTINT('id')) <= 0) {
 }
 $name = basename(GETPOST('file', 'alphanohtml'));
 $f = $kalk->getDir().'/unterlagen/'.$name;
+if (GETPOSTINT('ab')) {
+	foreach ($kalk->typen as $t) {
+		if ($t->id == GETPOSTINT('ab') && !empty($t->data['ab']['datei'])) {
+			$name = basename($t->data['ab']['datei']);
+			$f = $kalk->getDir().'/'.$name;
+		}
+	}
+}
 if ($name === '' || !is_file($f)) {
 	httponly_accessforbidden('not found', 404);
 }

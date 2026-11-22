@@ -1,5 +1,14 @@
 # Changelog Küchenangebot
 
+## 1.8.0
+- **nobilia-Auftragsbestätigung (AB) importieren** je Küchentyp: AB-Nr., AB-Datum, Kommission, KV-Zeichen, Liefertermin, Ausführung und alle Positionen mit Brutto/Netto werden gelesen; die Liefer-/Rechnungsadresse wird ignoriert
+- Gültige AB (kein Storno, Gesamtpreis > 0, passt zum Nobilia-Angebot): **Einkauf je Küche = AB-Gesamtpreis**, der Faktor des Typs wird daraus berechnet (Einkauf / Katalogwert). Storno-ABs und ABs ohne Preis werden erkannt und nicht übernommen
+- **Vergleich AB ↔ AN**: Artikel und Farben (Front, Korpus, Arbeitsplatte, Griff); bei Abweichung nur mit „trotz Abweichung übernehmen“
+- Ist das Angebot schon unterschrieben, wird der Verkaufspreis vor der Übernahme festgeschrieben – es ändert sich nur der Einkauf (Nachkalkulation)
+- „Faktor als Standard übernehmen“ für Katalogpunkte bzw. Euro-Werte
+- Kennzahlen: Verkauf aus dem Dolibarr-Angebot, Einkauf aus der Kalkulation (laut AB)
+- Fix PDF-Leser: indirekte Längenangaben mit mehrstelliger Objektnummer (z. B. PDFlib-Dateien) wurden falsch gelesen
+
 ## 1.7.0
 - **Deckblatt 50 : 50**: links Titel, Einleitung und Highlights, rechts das 3D-Bild in einheitlicher Größe (oben bündig mit „Ihr Küchenangebot“), darunter Gesamtpreis
 - **Mehrere Küchentypen** (Mehrfamilienhaus): Übersicht „Küchentypen“ mit Stückzahl und Preis je Küche brutto auf dem Deckblatt; Highlights zusammengeführt – gleiche Werte einmal, abweichende je Typ („Kaschmir (Typ 23)“), Geräte mit Angabe der Typen, wenn sie nicht in allen Küchen sind

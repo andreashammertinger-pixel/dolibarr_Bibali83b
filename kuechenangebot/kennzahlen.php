@@ -80,7 +80,7 @@ foreach (array('privat' => 'KaArtPrivat', 'mfh' => 'KaArtMfh') as $art => $lab) 
 
 // automatisch
 print load_fiche_titre($langs->trans('KaKennzahlAuto'), '', '');
-$sql = 'SELECT k.rowid, k.label, k.art, k.total_ek, k.total_ht, k.total_lfm, k.total_stueck, k.total_kosten, p.ref, p.rowid as pid, p.fk_statut, p.datep';
+$sql = 'SELECT k.rowid, k.label, k.art, k.total_ek, p.total_ht, k.total_lfm, k.total_stueck, k.total_kosten, p.ref, p.rowid as pid, p.fk_statut, p.datep';
 $sql .= ' FROM '.MAIN_DB_PREFIX.'ka_kalk as k INNER JOIN '.MAIN_DB_PREFIX.'propal as p ON p.rowid = k.fk_propal';
 $sql .= ' WHERE k.entity = '.((int) $conf->entity).' AND p.fk_statut IN (2, 4) ORDER BY p.datep DESC';
 $res = $db->query($sql);

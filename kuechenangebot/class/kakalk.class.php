@@ -332,7 +332,7 @@ class KaKalk
 		global $conf;
 		$art = $this->db->escape($this->art);
 		$rows = array();
-		$sql = 'SELECT k.total_ek as ek, k.total_ht as vk, k.total_lfm as lfm, k.total_stueck as stueck, k.total_kosten as kosten';
+		$sql = 'SELECT k.total_ek as ek, p.total_ht as vk, k.total_lfm as lfm, k.total_stueck as stueck, k.total_kosten as kosten';
 		$sql .= ' FROM '.MAIN_DB_PREFIX.'ka_kalk as k INNER JOIN '.MAIN_DB_PREFIX.'propal as p ON p.rowid = k.fk_propal';
 		$sql .= ' WHERE k.entity = '.((int) $conf->entity)." AND k.art = '".$art."' AND p.fk_statut IN (2, 4)";
 		if ($this->id) {
@@ -408,6 +408,18 @@ class KaTyp
 	public function __construct($db)
 	{
 		$this->db = $db;
+	}
+
+	/** Typ neu aus der Datenbank laden (nach Änderungen durch andere Abläufe) */
+	public function fetchFresh()
+	{
+		foreach (self::fetchAll($this->db, $this->fk_kalk) as $t) {
+			if ($t->id == $this->id) {
+				foreach (get_object_vars($t) as $k => $v) {
+					$this->$k = $v;
+				}
+			}
+		}
 	}
 
 	/** Einkaufspreis je Küche (Katalogwert × Faktor) */

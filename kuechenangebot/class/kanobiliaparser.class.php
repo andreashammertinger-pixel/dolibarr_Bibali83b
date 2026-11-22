@@ -376,4 +376,212 @@ class KaNobiliaParser
 		imagedestroy($out);
 		return $ok;
 	}
+
+	/**
+	 * nobilia-Auftragsbestätigung (AB) lesen: Kopf, Ausführung, Positionen mit Brutto/Netto, Gesamtpreis.
+	 * Die Liefer-/Rechnungsadresse wird bewusst nicht ausgewertet.
+	 * @param string $file AB-PDF
+	 * @return array|null
+	 */
+	public function parseConfirmation($file)
+	{
+		$r = KaPdfReader::fromFile($file);
+		if (!$r->getPageCount()) {
+			$this->error = 'PDF konnte nicht gelesen werden';
+			return null;
+		}
+		$res = array('nr' => '', 'datum' => '', 'kommission' => '', 'kv' => '', 'liefertermin' => '', 'storno' => false,
+			'ausfuehrung' => array(), 'positionen' => array(), 'brutto' => 0.0, 'netto' => 0.0, 'gesamt' => null, 'zahlung' => '');
+		$col = array('brutto' => 462, 'netto' => 530, 'text' => 241, 'wg' => 437);
+		$cur = null;
+		$head = array('Programm' => 'programm', 'Frontausführung' => 'front', 'Griff' => 'griff', 'Korpusfarbe' => 'korpus',
+			'Korpusfarbe innen' => 'korpus_innen', 'Sockelfarbe' => 'sockel', 'Arbeitsplattendekor' => 'apl', 'Arbeitsplattenkante' => 'apl_kante', 'Preisgruppe' => 'preisgruppe', 'Kollektion' => 'kollektion');
+		for ($p = 1; $p <= $r->getPageCount(); $p++) {
+			foreach ($r->getPageLines($p) as $line) {
+				$ch = $line['chunks'];
+				$flat = trim(preg_replace('/\s+/u', ' ', str_replace("\t", ' ', $line['text'])));
+				if ($flat === 'Storno') {
+					$res['storno'] = true;
+				}
+				if (!$res['nr'] && preg_match('/Auftragsbestätigungs-Nr\.:?\s*(\d{5,})/u', $flat, $m)) {
+					$res['nr'] = $m[1];
+				}
+				if (preg_match('/Gesamtpreis in €\s*(-?[\d.]+,\d{2})/u', $flat, $m)) {
+					$res['gesamt'] = self::num($m[1]);
+				}
+				if (preg_match('/^Zahlungsbedingungen/u', $flat) || preg_match('/^(Vorkasse|Lieferung gegen|\d+ Tage)/u', $flat)) {
+					$res['zahlung'] = trim($res['zahlung'].' '.$flat);
+				}
+				// Kopffelder "Label ....: Wert" (zwei Spalten je Zeile)
+				$pairs = array();
+				$label = null;
+				foreach ($ch as $i => $c) {
+					$t = trim($c['t']);
+					if ($t === ':' || preg_match('/^\.{3,}$/', $t)) {
+						continue;
+					}
+					if (isset($ch[$i + 1]) && (preg_match('/^\.{3,}$/', trim($ch[$i + 1]['t'])) || trim($ch[$i + 1]['t']) === ':')) {
+						$label = trim(preg_replace('/[.\s]+$/u', '', $t));
+						continue;
+					}
+					if ($label !== null) {
+						$pairs[$label] = isset($pairs[$label]) ? $pairs[$label].' '.$t : $t;
+						if (!isset($ch[$i + 1]) || $ch[$i + 1]['x'] - $c['x'] > 100) {
+							$label = null;
+						}
+					}
+				}
+				foreach ($pairs as $k => $v) {
+					$v = trim($v);
+					if ($k === 'AB-Datum') {
+						$res['datum'] = $v;
+					} elseif ($k === 'Ihre Kommission') {
+						$res['kommission'] = $v;
+					} elseif ($k === 'Ihr KV-Zeichen') {
+						$res['kv'] = $v;
+					} elseif ($k === 'Liefertermin') {
+						$res['liefertermin'] = trim($v, '# ');
+						if (stripos($v, 'storno') !== false) {
+							$res['storno'] = true;
+						}
+					} elseif (isset($head[$k])) {
+						$code = '';
+						$txt = $v;
+						if (preg_match('/^(\S+)\s+(.+)$/u', $v, $mm) && preg_match('/\d/', $mm[1])) {
+							$code = $mm[1];
+							$txt = $mm[2];
+						}
+						$res['ausfuehrung'][$head[$k]] = array('code' => $code, 'text' => $txt);
+					}
+				}
+				// Positionstabelle
+				if (preg_match('/^Pos\s+Stück\s+Kurzbezeichnung/u', $flat)) {
+					foreach ($ch as $c) {
+						$t = trim($c['t']);
+						if (strpos($t, 'Brutto') === 0) {
+							$col['brutto'] = $c['x'];
+						} elseif (strpos($t, 'Netto') === 0) {
+							$col['netto'] = $c['x'];
+						} elseif ($t === 'Artikeltext') {
+							$col['text'] = $c['x'];
+						} elseif ($t === 'WG') {
+							$col['wg'] = $c['x'];
+						}
+					}
+					continue;
+				}
+				if (count($ch) >= 3 && preg_match('/^\d+$/', trim($ch[0]['t'])) && $ch[0]['x'] < 45 && preg_match('/^\d+$/', trim($ch[1]['t']))) {
+					$pos = array('pos' => (int) $ch[0]['t'], 'stueck' => (float) $ch[1]['t'], 'kbz' => trim($ch[2]['t']), 'typnr' => '', 'text' => '', 'wg' => '', 'brutto' => null, 'netto' => null);
+					foreach (array_slice($ch, 3) as $c) {
+						$t = trim($c['t']);
+						if (preg_match('/^-?[\d.]+,\d{2}$/', $t) && $c['x'] > $col['wg'] + 10) {
+							if ($c['x'] >= $col['netto'] - 5) {
+								$pos['netto'] = self::num($t);
+							} else {
+								$pos['brutto'] = self::num($t);
+							}
+						} elseif ($c['x'] >= $col['wg'] - 5 && $c['x'] < $col['brutto'] - 5 && preg_match('/^[A-Z]{1,3}$/', $t)) {
+							$pos['wg'] = $t;
+						} elseif ($c['x'] >= $col['text'] - 3) {
+							$pos['text'] .= ($pos['text'] === '' ? '' : ' ').$t;
+						} elseif ($c['x'] < $col['text'] - 30 && preg_match('/^\d{3,}$/', $t) && $pos['typnr'] === '') {
+							$pos['typnr'] = $t;
+						}
+					}
+					$res['positionen'][] = $pos;
+					$cur = count($res['positionen']) - 1;
+					continue;
+				}
+				if ($cur !== null && count($ch) == 1 && $ch[0]['x'] >= $col['text'] - 3 && $ch[0]['x'] < $col['wg']) {
+					$res['positionen'][$cur]['text'] .= ' '.trim($ch[0]['t']);
+				} elseif (count($ch) && $ch[0]['x'] < $col['text'] - 30) {
+					$cur = null;
+				}
+			}
+		}
+		foreach ($res['positionen'] as $pp) {
+			$res['brutto'] += (float) $pp['brutto'];
+			$res['netto'] += (float) $pp['netto'];
+		}
+		if (!$res['nr'] && !$res['positionen']) {
+			$this->error = 'Keine nobilia-Auftragsbestätigung erkannt';
+			return null;
+		}
+		// Gilt die AB für mehrere gleiche Küchen? (alle Stückzahlen Vielfache von n)
+		$n = 0;
+		foreach ($res['positionen'] as $pp) {
+			$st = (int) round($pp['stueck']);
+			if ($st > 0) {
+				$n = $n ? self::gcd($n, $st) : $st;
+			}
+		}
+		$res['kuechen'] = max(1, $n);
+		return $res;
+	}
+
+	protected static function gcd($a, $b)
+	{
+		return $b ? self::gcd($b, $a % $b) : $a;
+	}
+
+	/**
+	 * AB mit dem Nobilia-Angebot (AN) vergleichen
+	 * @return array{artikel_an:int,artikel_ab:int,gleich:int,nur_an:string[],nur_ab:string[],farben:array,passt:bool}
+	 */
+	public static function compareConfirmation($an, $ab)
+	{
+		$norm = function ($s) {
+			return strtoupper(preg_replace('/\s+/', '', (string) $s));
+		};
+		$a = array();
+		foreach ((array) ($an['positionen'] ?? array()) as $p) {
+			$k = $norm($p['artikel']);
+			if ($k !== '' && !preg_match('/^(SOCKEL|ARBEITSPLATTEN|MP-?SONDER)$/', $k)) {
+				$a[] = $k;
+			}
+		}
+		$b = array();
+		foreach ((array) ($ab['positionen'] ?? array()) as $p) {
+			$k = $norm($p['kbz']);
+			if ($k !== '' && strpos($k, 'BLOCK') !== 0 && !preg_match('/^\d{4}$/', $k)) {
+				$b[] = $k;
+			}
+		}
+		$ua = array_values(array_unique($a));
+		$ub = array_values(array_unique($b));
+		$same = array_values(array_intersect($ua, $ub));
+		// Farben: Text des AN-Merkmals im AB-Text wiederfinden
+		$mk = array();
+		foreach ((array) ($an['merkmale'] ?? array()) as $m) {
+			$mk[$m['label']] = $m['value'];
+		}
+		$simp = function ($s) {
+			$s = mb_strtolower((string) $s);
+			$s = preg_replace('/\b(nachbildung|nb|strukturiert|matt|hochglanz|dekor)\b/u', '', $s);
+			return trim(preg_replace('/\s+/u', ' ', $s));
+		};
+		$farben = array();
+		foreach (array('front' => 'Front-Kombination', 'korpus' => 'Korpusfarbe außen', 'apl' => 'Arbeitsplatten-Farbe', 'griff' => 'Griff-Kombination') as $k => $lab) {
+			$va = $mk[$lab] ?? '';
+			$vb = $ab['ausfuehrung'][$k]['text'] ?? '';
+			if ($va === '' || $vb === '') {
+				continue;
+			}
+			$sa = $simp($va);
+			$sb = $simp($vb);
+			$farben[$k] = array('an' => $va, 'ab' => $vb, 'gleich' => ($sa !== '' && (strpos($sb, $sa) !== false || strpos($sa, $sb) !== false)));
+		}
+		$okFarben = true;
+		foreach ($farben as $f) {
+			if (!$f['gleich']) {
+				$okFarben = false;
+			}
+		}
+		$ratio = count($ua) ? count($same) / count($ua) : 0;
+		return array(
+			'artikel_an' => count($ua), 'artikel_ab' => count($ub), 'gleich' => count($same),
+			'nur_an' => array_values(array_diff($ua, $ub)), 'nur_ab' => array_values(array_diff($ub, $ua)),
+			'farben' => $farben, 'passt' => ($ratio >= 0.85 && $okFarben),
+		);
+	}
 }

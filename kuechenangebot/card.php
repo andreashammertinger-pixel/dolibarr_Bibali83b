@@ -240,6 +240,16 @@ if ($action === 'save' && $canwrite) {
 					setEventMessages($langs->trans('KaParseError', $svc->error), null, 'errors');
 				}
 			}
+			if (!empty($_FILES['ab_'.$t->id]['tmp_name'])) {
+				$r = $svc->importConfirmation($user, $kalk, $t, $_FILES['ab_'.$t->id]['tmp_name'], $_FILES['ab_'.$t->id]['name'], (bool) GETPOST('ab_force_'.$t->id, 'int'), GETPOSTINT('ab_kuechen_'.$t->id));
+				if ($r < 0) {
+					setEventMessages($langs->trans('KaAbError', $svc->error), null, 'errors');
+				} elseif ($r === 0) {
+					setEventMessages($langs->trans('KaAbNotApplied_'.($t->data['ab']['grund'] ?? 'abweichung')), null, 'warnings');
+				} else {
+					setEventMessages($langs->trans('KaAbApplied', $t->data['ab']['nr'], kaMoney($t->data['ab']['ek']), kaFmt($t->faktor, 4)), null);
+				}
+			}
 			if (!empty($_FILES['img_'.$t->id]['tmp_name'])) {
 				if ($svc->setImage($kalk, $t, $_FILES['img_'.$t->id]['tmp_name']) < 0) {
 					setEventMessages($svc->error, null, 'errors');
@@ -318,6 +328,19 @@ if ($action === 'confirm_newversion' && $canversion && !$locked && $kalk->id && 
 		exit;
 	}
 	setEventMessages($svc->error, null, 'errors');
+}
+
+if ($action === 'setfactor' && $user->hasRight('kuechenangebot', 'setup') && $kalk->id) {
+	require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
+	foreach ($kalk->typen as $t) {
+		if ($t->id == GETPOSTINT('typid') && !empty($t->data['ab']['angewendet'])) {
+			$const = ($t->preis_modus === 'punkte') ? 'KA_FAKTOR_PUNKTE' : 'KA_FAKTOR_EUR';
+			dolibarr_set_const($db, $const, (string) $t->faktor, 'chaine', 0, '', $conf->entity);
+			setEventMessages($langs->trans('KaAbFactorSet', kaFmt($t->faktor, 4), $langs->transnoentities($t->preis_modus === 'punkte' ? 'KaPricePoints' : 'KaPriceEur')), null);
+		}
+	}
+	header('Location: '.$_SERVER['PHP_SELF'].'?id='.$kalk->id.'#kitchens');
+	exit;
 }
 
 if ($action === 'deldoc' && $canwrite && $kalk->id) {
@@ -511,6 +534,44 @@ foreach ($kalk->typen as $t) {
 		$released = !empty($propal->id) && KaService::plansReleased($propal);
 		print '<span class="opacitymedium">'.$langs->trans($released ? 'KaPlansReleased' : 'KaPlansInternal').'</span><br>';
 	}
+	// nobilia-Auftragsbestätigung
+	$ab = $t->data['ab'] ?? null;
+	if ($ab) {
+		$abUrl = dol_buildpath('/kuechenangebot/doc.php', 1).'?id='.$kalk->id.'&ab='.$t->id;
+		print '<b>'.$langs->trans('KaAb').':</b> <a href="'.$abUrl.'" target="_blank">'.img_mime('x.pdf').' '.dol_escape_htmltag($ab['nr']).'</a> '.$langs->trans('KaAbFrom').' '.dol_escape_htmltag($ab['datum']);
+		if (!empty($ab['kv'])) {
+			print ' · '.dol_escape_htmltag($ab['kv']);
+		}
+		if (!empty($ab['liefertermin'])) {
+			print ' · '.$langs->trans('KaAbDelivery').' '.dol_escape_htmltag($ab['liefertermin']);
+		}
+		if (!empty($ab['angewendet'])) {
+			print '<br><span class="ok">'.$langs->trans('KaAbUsed', kaMoney($ab['ek']), (int) $ab['kuechen'], kaFmt($ab['faktor'], 4), kaFmt($ab['faktor_vorher'] ?? 1, 4)).'</span>';
+			if ($user->hasRight('kuechenangebot', 'setup')) {
+				print ' <a class="reposition" href="'.$_SERVER['PHP_SELF'].'?id='.$kalk->id.'&action=setfactor&typid='.$t->id.'&token='.newToken().'">'.$langs->trans('KaAbSetDefault', $langs->transnoentities($t->preis_modus === 'punkte' ? 'KaPricePoints' : 'KaPriceEur')).'</a>';
+			}
+		} else {
+			print '<br><span class="warning">'.$langs->trans('KaAbNotApplied_'.($ab['grund'] ?: 'abweichung')).'</span>';
+		}
+		$cmp = $ab['vergleich'] ?? array();
+		if ($cmp) {
+			print '<br><span class="opacitymedium">'.$langs->trans('KaAbCompare', (int) $cmp['gleich'], (int) $cmp['artikel_an']);
+			$diff = array();
+			foreach ((array) ($cmp['farben'] ?? array()) as $k => $f) {
+				if (!$f['gleich']) {
+					$diff[] = $langs->trans('KaAbField_'.$k).': AN '.dol_escape_htmltag($f['an']).' / AB '.dol_escape_htmltag($f['ab']);
+				}
+			}
+			if ($cmp['nur_an']) {
+				$diff[] = $langs->trans('KaAbOnlyAn').' '.dol_escape_htmltag(implode(', ', $cmp['nur_an']));
+			}
+			if ($cmp['nur_ab']) {
+				$diff[] = $langs->trans('KaAbOnlyAb').' '.dol_escape_htmltag(implode(', ', $cmp['nur_ab']));
+			}
+			print ($diff ? ' – '.implode(' · ', $diff) : '').'</span>';
+		}
+		print '<br>';
+	}
 	print '<details><summary class="cursorpointer">'.$langs->trans('KaShowPositions').'</summary><table class="noborder small">';
 	foreach ((array) ($t->data['positionen'] ?? array()) as $p) {
 		print '<tr><td>'.dol_escape_htmltag($p['pos']).'</td><td>'.dol_escape_htmltag($p['artikel']).'</td><td>'.dol_escape_htmltag(dol_trunc($p['text'], 110)).'</td><td class="right nowraponall">'.($p['preis'] !== null ? kaMoney($p['preis'], false) : '').'</td></tr>';
@@ -519,6 +580,9 @@ foreach ($kalk->typen as $t) {
 	if ($canwrite) {
 		print '<div class="paddingtop">'.$langs->trans('KaReplaceFiles').': AN <input type="file" name="replace_an_'.$t->id.'" accept=".pdf,application/pdf"> BD <input type="file" name="replace_bd_'.$t->id.'" accept=".pdf,application/pdf"> ';
 		print $langs->trans('KaImageReplace').' <input type="file" name="img_'.$t->id.'" accept="image/jpeg,image/png"> ';
+		print '<br>'.$langs->trans('KaAbUpload').' <input type="file" name="ab_'.$t->id.'" accept=".pdf,application/pdf"> ';
+		print $langs->trans('KaAbKitchens').' <input name="ab_kuechen_'.$t->id.'" class="width50 right" placeholder="auto"> ';
+		print '<label><input type="checkbox" name="ab_force_'.$t->id.'" value="1"> '.$langs->trans('KaAbForce').'</label> ';
 		print '<a class="reposition marginleftonly" href="'.$_SERVER['PHP_SELF'].'?id='.$kalk->id.'&action=deltyp&typid='.$t->id.'&token='.newToken().'">'.img_delete().' '.$langs->trans('KaDeleteKitchen').'</a></div>';
 	}
 	print '</td></tr>';

@@ -38,6 +38,14 @@ Danach geht es wie gewohnt in Dolibarr weiter: freigeben, per E-Mail senden (bei
 Deckblatttexte lassen sich über *Einstellungen → Übersetzung* anpassen (Schlüssel `KaPdfManufacturerText`, `KaPdfDurableText`, `KaPdfWarrantyText` …).
 Nobilia-Begriffe übersetzt ein eingebautes Wörterbuch. Fehlende Begriffe ergänzen Sie in den Einstellungen (`deutsch = übersetzung`). Unbekannte Begriffe bleiben deutsch.
 
+## nobilia-Auftragsbestätigung (AB): echter Einkaufspreis
+Nach der Bestellung bei nobilia kommt die **AB** mit den echten Einkaufspreisen. Beim Küchentyp unter *nobilia-Auftragsbestätigung (AB)* hochladen:
+* Gelesen werden AB-Nr., AB-Datum, Kommission, KV-Zeichen (z. B. Top 307), Liefertermin, Ausführung und alle Positionen mit Brutto/Netto. **Die Adresse in der AB wird ignoriert.**
+* **Gesamtpreis in €** der AB = Einkauf. *gilt für Küchen* wird aus den Stückzahlen erkannt (eine AB je Wohnung = 1) und kann überschrieben werden.
+* Der **Faktor** des Küchentyps wird daraus berechnet (Einkauf je Küche / Katalogwert aus dem AN) und angezeigt. Mit *Faktor als Standard übernehmen* gilt er für künftige Kalkulationen mit Katalogpunkten bzw. Euro-Werten.
+* **Kontrollen:** Storno-ABs (z. B. „Liefertermin: # Storno“, Gesamtpreis 0,00) und ABs ohne Preis werden nicht übernommen. Passt die AB nicht zum Nobilia-Angebot (Artikel oder Farben anders, z. B. weil die Planung inzwischen geändert wurde), erscheint der Vergleich; übernommen wird dann nur mit *trotz Abweichung übernehmen*.
+* Ist das Angebot bereits **unterschrieben**, wird der Verkaufspreis vorher festgeschrieben (*Endpreis je Küche*). Es ändert sich nur der Einkauf: Deckungsbeitrag und Kennzahlen zeigen dann die echte Nachkalkulation.
+
 ## Änderungen nach dem Versand: Versionen
 Möchte der Kunde nach dem Versand etwas ändern (z. B. andere Fronten), wird eine **neue Version** angelegt:
 1. In der Küchenkalkulation **Neue Version erstellen** klicken. Der Knopf erscheint, sobald das Angebot freigegeben ist. Kunde, Bauvorhaben, Sätze, Hinweise, Unterlagen und Nobilia-Dateien werden übernommen. Die bisherige Version wird gesperrt und bleibt zum Nachschauen erhalten.
