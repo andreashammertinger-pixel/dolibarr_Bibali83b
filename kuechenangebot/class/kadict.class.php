@@ -148,7 +148,7 @@ class KaDict
 			return $cache[$l];
 		}
 		$t = isset(self::$dict[$l]) ? self::$dict[$l] : array();
-		foreach (preg_split('/\r?\n/', getDolGlobalString('KA_DICT_'.strtoupper($l))) as $line) {
+		foreach (explode("\n", str_replace(array('\r\n', '\n', "\r"), "\n", getDolGlobalString('KA_DICT_'.strtoupper($l)))) as $line) {
 			if (strpos($line, '=') !== false) {
 				list($k, $v) = array_map('trim', explode('=', $line, 2));
 				if ($k !== '') {

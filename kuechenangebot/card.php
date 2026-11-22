@@ -121,7 +121,7 @@ if ($action === 'save' && $canwrite) {
 	$l2 = GETPOST('lang2', 'aZ09');
 	$kalk->lang2 = array_key_exists($l2, kaLang2Options()) ? $l2 : '';
 	$kalk->label = GETPOST('label', 'alphanohtml');
-	$kalk->objekt = GETPOST('objekt', 'restricthtml');
+	$kalk->objekt = kaLines(GETPOST('objekt', 'restricthtml'));
 
 	// 3. Kalkulation
 	if (GETPOSTISSET('p_aufschlag_modus')) {
@@ -190,8 +190,8 @@ if ($action === 'save' && $canwrite) {
 			}
 		}
 		$kalk->hinweise['init'] = 1;
-		$kalk->note_de = GETPOST('note_de', 'restricthtml');
-		$kalk->note_lang2 = GETPOST('note_lang2', 'restricthtml');
+		$kalk->note_de = kaLines(GETPOST('note_de', 'restricthtml'));
+		$kalk->note_lang2 = kaLines(GETPOST('note_lang2', 'restricthtml'));
 	}
 	if (empty($kalk->hinweise['init'])) {
 		foreach (kaFetchBausteine($db) as $code => $b) {
@@ -486,7 +486,7 @@ foreach (kaLang2Options() as $k => $lab) {
 }
 print '</select> <span class="opacitymedium small">'.$langs->trans('KaLang2Hint').'</span></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('KaLabel').'</td><td><input name="label" class="minwidth500" value="'.dol_escape_htmltag($kalk->label).'"'.$disabled.'></td></tr>';
-print '<tr class="oddeven"><td>'.$langs->trans('KaObjekt').'</td><td><textarea name="objekt" rows="2" class="minwidth500"'.$disabled.'>'.dol_escape_htmltag($kalk->objekt).'</textarea></td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans('KaObjekt').'</td><td><textarea name="objekt" rows="2" class="minwidth500"'.$disabled.'>'.dol_escape_htmltag(kaLines($kalk->objekt), 0, 1).'</textarea></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('KaPlanLabel').'</td><td><input name="p_plan_label" class="minwidth500" value="'.dol_escape_htmltag($kalk->params['plan_label'] ?? '').'" placeholder="'.dol_escape_htmltag(KaService::planLabel($kalk)).'"'.$disabled.'> <span class="opacitymedium small">'.$langs->trans('KaPlanLabelHint').'</span></td></tr>';
 print '</table></div><br>';
 
@@ -799,9 +799,9 @@ if ($nobHints) {
 	}
 	print '</td></tr>';
 }
-print '<tr class="oddeven"><td class="tdtop">'.$langs->trans('KaNoteFree').'</td><td><textarea name="note_de" rows="3" class="centpercent"'.$disabled.'>'.dol_escape_htmltag($kalk->note_de).'</textarea></td></tr>';
+print '<tr class="oddeven"><td class="tdtop">'.$langs->trans('KaNoteFree').'</td><td><textarea name="note_de" rows="3" class="centpercent"'.$disabled.'>'.dol_escape_htmltag(kaLines($kalk->note_de), 0, 1).'</textarea></td></tr>';
 if ($kalk->lang2) {
-	print '<tr class="oddeven"><td class="tdtop">'.$langs->trans('KaNoteFreeLang2').' ('.dol_escape_htmltag($kalk->lang2).')</td><td><textarea name="note_lang2" rows="3" class="centpercent"'.$disabled.'>'.dol_escape_htmltag($kalk->note_lang2).'</textarea></td></tr>';
+	print '<tr class="oddeven"><td class="tdtop">'.$langs->trans('KaNoteFreeLang2').' ('.dol_escape_htmltag($kalk->lang2).')</td><td><textarea name="note_lang2" rows="3" class="centpercent"'.$disabled.'>'.dol_escape_htmltag(kaLines($kalk->note_lang2), 0, 1).'</textarea></td></tr>';
 }
 print '</table></div><br>';
 

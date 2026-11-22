@@ -45,13 +45,13 @@ $action = GETPOST('action', 'aZ09');
 if ($action === 'save') {
 	$rows = GETPOST('b', 'array');
 	foreach ((is_array($rows) ? $rows : array()) as $rid => $r) {
-		$sql = 'UPDATE '.MAIN_DB_PREFIX.'ka_baustein SET label = \''.$db->escape(dol_string_nohtmltag($r['label'] ?? '')).'\', text_de = \''.$db->escape(dol_string_nohtmltag($r['de'] ?? '')).'\', text_hr = \''.$db->escape(dol_string_nohtmltag($r['hr'] ?? '')).'\', text_en = \''.$db->escape(dol_string_nohtmltag($r['en'] ?? '')).'\', vorauswahl = '.(!empty($r['vorauswahl']) ? 1 : 0).', aktiv = '.(!empty($r['aktiv']) ? 1 : 0).', rang = '.((int) ($r['rang'] ?? 0));
+		$sql = 'UPDATE '.MAIN_DB_PREFIX.'ka_baustein SET label = \''.$db->escape(dol_string_nohtmltag($r['label'] ?? '')).'\', text_de = \''.$db->escape(kaLines(dol_string_nohtmltag($r['de'] ?? '', 0))).'\', text_hr = \''.$db->escape(kaLines(dol_string_nohtmltag($r['hr'] ?? '', 0))).'\', text_en = \''.$db->escape(kaLines(dol_string_nohtmltag($r['en'] ?? '', 0))).'\', vorauswahl = '.(!empty($r['vorauswahl']) ? 1 : 0).', aktiv = '.(!empty($r['aktiv']) ? 1 : 0).', rang = '.((int) ($r['rang'] ?? 0));
 		$sql .= ' WHERE rowid = '.((int) $rid).' AND entity = '.((int) $conf->entity);
 		$db->query($sql);
 	}
 	$code = strtoupper(preg_replace('/[^A-Za-z0-9_]/', '', GETPOST('new_code', 'alphanohtml')));
 	if ($code !== '' && GETPOST('new_de', 'restricthtml') !== '') {
-		$db->query('INSERT INTO '.MAIN_DB_PREFIX.'ka_baustein (entity, code, label, text_de, text_hr, text_en, vorauswahl, aktiv, rang) VALUES ('.((int) $conf->entity).", '".$db->escape($code)."', '".$db->escape(GETPOST('new_label', 'alphanohtml'))."', '".$db->escape(dol_string_nohtmltag(GETPOST('new_de', 'restricthtml')))."', '".$db->escape(dol_string_nohtmltag(GETPOST('new_hr', 'restricthtml')))."', '".$db->escape(dol_string_nohtmltag(GETPOST('new_en', 'restricthtml')))."', ".(GETPOST('new_vorauswahl', 'int') ? 1 : 0).', 1, 999)');
+		$db->query('INSERT INTO '.MAIN_DB_PREFIX.'ka_baustein (entity, code, label, text_de, text_hr, text_en, vorauswahl, aktiv, rang) VALUES ('.((int) $conf->entity).", '".$db->escape($code)."', '".$db->escape(GETPOST('new_label', 'alphanohtml'))."', '".$db->escape(kaLines(dol_string_nohtmltag(GETPOST('new_de', 'restricthtml'), 0)))."', '".$db->escape(kaLines(dol_string_nohtmltag(GETPOST('new_hr', 'restricthtml'), 0)))."', '".$db->escape(kaLines(dol_string_nohtmltag(GETPOST('new_en', 'restricthtml'), 0)))."', ".(GETPOST('new_vorauswahl', 'int') ? 1 : 0).', 1, 999)');
 	}
 	setEventMessages($langs->trans('KaSaved'), null);
 	header('Location: '.$_SERVER['PHP_SELF']);
@@ -76,7 +76,7 @@ foreach (kaFetchBausteine($db, false) as $code => $b) {
 	$n = 'b['.$b->rowid.']';
 	print '<tr class="oddeven"><td class="tdtop"><b>'.dol_escape_htmltag($code).'</b><br><input name="'.$n.'[label]" value="'.dol_escape_htmltag($b->label).'" class="width150"><br><input name="'.$n.'[rang]" value="'.((int) $b->rang).'" class="width50" title="Reihenfolge"></td>';
 	foreach (array('de', 'hr', 'en') as $l) {
-		print '<td><textarea name="'.$n.'['.$l.']" rows="4" class="centpercent">'.dol_escape_htmltag($b->{'text_'.$l}).'</textarea></td>';
+		print '<td><textarea name="'.$n.'['.$l.']" rows="4" class="centpercent">'.dol_escape_htmltag(kaLines($b->{'text_'.$l}), 0, 1).'</textarea></td>';
 	}
 	print '<td class="center"><input type="checkbox" name="'.$n.'[vorauswahl]" value="1"'.($b->vorauswahl ? ' checked' : '').'></td><td class="center"><input type="checkbox" name="'.$n.'[aktiv]" value="1"'.($b->aktiv ? ' checked' : '').'></td>';
 	print '<td><a href="'.$_SERVER['PHP_SELF'].'?action=del&rowid='.$b->rowid.'&token='.newToken().'">'.img_delete().'</a></td></tr>';

@@ -961,7 +961,7 @@ class KaPdf
 			$b = $bs[$code];
 			$t = ($l !== 'de' && !empty($b->{'text_'.$l})) ? $b->{'text_'.$l} : $b->text_de;
 			if (trim((string) $t) !== '') {
-				$out[] = $t;
+				$out[] = kaLines($t);
 			}
 		}
 		foreach ((array) $this->kalk->hinweise['nobilia'] as $t) {
@@ -969,7 +969,7 @@ class KaPdf
 		}
 		$free = ($l !== 'de' && trim($this->kalk->note_lang2) !== '') ? $this->kalk->note_lang2 : $this->kalk->note_de;
 		if (trim($free) !== '') {
-			$out[] = trim($free);
+			$out[] = trim(kaLines($free));
 		}
 		return $out;
 	}

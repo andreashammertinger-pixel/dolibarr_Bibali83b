@@ -475,7 +475,7 @@ class KaService
 	public static function planContact()
 	{
 		global $mysoc;
-		$lines = array_values(array_filter(array_map('trim', preg_split('/\r?\n/', getDolGlobalString('KA_PLAN_KONTAKT')))));
+		$lines = array_values(array_filter(array_map('trim', explode("\n", kaLines(getDolGlobalString('KA_PLAN_KONTAKT'))))));
 		if (!$lines) {
 			$lines = array_values(array_filter(array_map('trim', explode(',', getDolGlobalString('KA_KONTAKT')))));
 			if (!empty($mysoc->email)) {

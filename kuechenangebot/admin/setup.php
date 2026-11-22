@@ -62,18 +62,18 @@ if ($action === 'save') {
 	foreach ($txt as $k => $lab) {
 		dolibarr_set_const($db, $k, trim(GETPOST($k, 'alphanohtml')), 'chaine', 0, '', $conf->entity);
 	}
-	dolibarr_set_const($db, 'KA_PLAN_KONTAKT', dol_string_nohtmltag(GETPOST('KA_PLAN_KONTAKT', 'restricthtml')), 'chaine', 0, '', $conf->entity);
+	dolibarr_set_const($db, 'KA_PLAN_KONTAKT', kaLines(dol_string_nohtmltag(GETPOST('KA_PLAN_KONTAKT', 'restricthtml'), 0)), 'chaine', 0, '', $conf->entity);
 	$l2 = GETPOST('KA_LANG2_DEFAULT', 'aZ09');
 	dolibarr_set_const($db, 'KA_LANG2_DEFAULT', array_key_exists($l2, kaLang2Options()) ? $l2 : '', 'chaine', 0, '', $conf->entity);
 	foreach (array('DE', 'HR', 'EN') as $l) {
-		$v = trim(GETPOST('KA_TERMS_'.$l, 'restricthtml'));
+		$v = trim(kaLines(GETPOST('KA_TERMS_'.$l, 'restricthtml')));
 		$def = kaDefaultTerms();
-		if ($v === trim($def[strtolower($l)])) {
+		if (str_replace("\r", '', $v) === trim($def[strtolower($l)])) {
 			$v = ''; // unverändert = Standard behalten (bekommt Aktualisierungen)
 		}
-		dolibarr_set_const($db, 'KA_TERMS_'.$l, dol_string_nohtmltag($v), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, 'KA_TERMS_'.$l, str_replace("\r", '', dol_string_nohtmltag($v, 0)), 'chaine', 0, '', $conf->entity);
 		if ($l !== 'DE') {
-			dolibarr_set_const($db, 'KA_DICT_'.$l, dol_string_nohtmltag(GETPOST('KA_DICT_'.$l, 'restricthtml')), 'chaine', 0, '', $conf->entity);
+			dolibarr_set_const($db, 'KA_DICT_'.$l, kaLines(dol_string_nohtmltag(GETPOST('KA_DICT_'.$l, 'restricthtml'), 0)), 'chaine', 0, '', $conf->entity);
 		}
 	}
 	setEventMessages($langs->trans('KaSetupSaved'), null);
@@ -104,16 +104,16 @@ foreach (kaLang2Options() as $k => $lab) {
 	print '<option value="'.$k.'"'.(getDolGlobalString('KA_LANG2_DEFAULT') === $k ? ' selected' : '').'>'.dol_escape_htmltag($lab).'</option>';
 }
 print '</select></td></tr>';
-print '<tr class="oddeven"><td class="tdtop">'.$langs->trans('KaSetupPlanContact').'</td><td><textarea name="KA_PLAN_KONTAKT" rows="3" class="minwidth400" placeholder="'.dol_escape_htmltag(implode("\n", KaService::planContact())).'">'.dol_escape_htmltag(getDolGlobalString('KA_PLAN_KONTAKT')).'</textarea><br><span class="opacitymedium small">'.$langs->trans('KaSetupPlanContactHint').'</span></td></tr>';
+print '<tr class="oddeven"><td class="tdtop">'.$langs->trans('KaSetupPlanContact').'</td><td><textarea name="KA_PLAN_KONTAKT" rows="3" class="minwidth400" placeholder="'.dol_escape_htmltag(implode("\n", KaService::planContact()), 0, 1).'">'.dol_escape_htmltag(kaLines(getDolGlobalString('KA_PLAN_KONTAKT')), 0, 1).'</textarea><br><span class="opacitymedium small">'.$langs->trans('KaSetupPlanContactHint').'</span></td></tr>';
 print '<tr class="liste_titre"><td colspan="2">'.$langs->trans('KaSetupTerms').' <span class="opacitymedium small">'.$langs->trans('KaSetupTermsHint').'</span></td></tr>';
 $def = kaDefaultTerms();
 foreach (array('DE' => 'Deutsch', 'HR' => 'Hrvatski', 'EN' => 'English') as $l => $lab) {
 	$v = getDolGlobalString('KA_TERMS_'.$l) ?: $def[strtolower($l)];
-	print '<tr class="oddeven"><td class="tdtop">'.$lab.'</td><td><textarea name="KA_TERMS_'.$l.'" rows="14" class="centpercent">'.dol_escape_htmltag($v).'</textarea></td></tr>';
+	print '<tr class="oddeven"><td class="tdtop">'.$lab.'</td><td><textarea name="KA_TERMS_'.$l.'" rows="14" class="centpercent">'.dol_escape_htmltag(kaLines($v), 0, 1).'</textarea></td></tr>';
 }
 print '<tr class="liste_titre"><td colspan="2">Wörterbuch Nobilia-Begriffe (Ergänzungen, eine Zeile je Begriff: <code>deutsch = übersetzung</code>)</td></tr>';
 foreach (array('HR' => 'Hrvatski', 'EN' => 'English') as $l => $lab) {
-	print '<tr class="oddeven"><td class="tdtop">'.$lab.'</td><td><textarea name="KA_DICT_'.$l.'" rows="4" class="centpercent" placeholder="Kaschmirgrau = kašmir siva">'.dol_escape_htmltag(getDolGlobalString('KA_DICT_'.$l)).'</textarea></td></tr>';
+	print '<tr class="oddeven"><td class="tdtop">'.$lab.'</td><td><textarea name="KA_DICT_'.$l.'" rows="4" class="centpercent" placeholder="Kaschmirgrau = kašmir siva">'.dol_escape_htmltag(kaLines(getDolGlobalString('KA_DICT_'.$l)), 0, 1).'</textarea></td></tr>';
 }
 print '</table><div class="center"><input type="submit" class="button button-save" value="'.$langs->trans('Save').'"></div></form>';
 print '<br><div class="opacitymedium small">Texte des Deckblatts (Hersteller, Qualität, Gewährleistung usw.) lassen sich über <i>Einstellungen → Übersetzung</i> anpassen, z. B. Schlüssel <code>KaPdfDurableText</code> oder <code>KaPdfWarrantyText</code>.</div>';

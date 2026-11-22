@@ -5,6 +5,16 @@
  * \brief   Hilfsfunktionen, Standardtexte (Angebotsbestimmungen, Textbausteine)
  */
 
+/**
+ * Zeilenumbrüche vereinheitlichen; repariert auch Texte, in denen Umbrüche als Zeichen „\n“ gespeichert wurden
+ * @param string $t
+ * @return string
+ */
+function kaLines($t)
+{
+	return str_replace(array('\r\n', '\n', '\r', "\r\n", "\r"), "\n", (string) $t);
+}
+
 /** Zusätzliche Sprachen für die Übersetzungskopie */
 function kaLang2Options()
 {
@@ -66,8 +76,8 @@ function kaTerms($lang = 'de')
 		$def = kaDefaultTerms();
 		$txt = isset($def[$lang]) ? $def[$lang] : $def['de'];
 	}
-	$txt = str_replace('{GUELTIG_TAGE}', (string) getDolGlobalInt('KA_GUELTIG_TAGE', 30), $txt);
-	return array_values(array_filter(array_map('trim', preg_split('/\r?\n/', $txt))));
+	$txt = str_replace('{GUELTIG_TAGE}', (string) getDolGlobalInt('KA_GUELTIG_TAGE', 30), kaLines($txt));
+	return array_values(array_filter(array_map('trim', explode("\n", $txt))));
 }
 
 /**
