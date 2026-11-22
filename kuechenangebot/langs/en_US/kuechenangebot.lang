@@ -272,3 +272,10 @@ KaPlanLabelHint = shown bottom right in the plans; empty = "BVH" + project
 KaSetupPlanPrefix = Prefix of the plan label
 KaSetupPlanContact = Contact in the plan title block (3 lines)
 KaSetupPlanContactHint = Name, phone, e-mail – shown in the plans next to the migora logo. Empty = contact person + company e-mail.
+KaDocs = Documents (basis of the offer)
+KaDocsHint = e.g. submission plan, sketch, photos – internal only, not sent to the customer
+KaDocsNone = No documents.
+KaDocsUpload = Upload
+KaDocsUploaded = %s file(s) uploaded.
+KaDocUploadError = %s could not be uploaded.
+KaDocDelete = Really delete this file?

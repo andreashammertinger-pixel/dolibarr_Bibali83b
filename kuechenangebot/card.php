@@ -239,6 +239,27 @@ if ($action === 'save' && $canwrite) {
 		} elseif (!empty($_FILES['file_bd']['tmp_name'])) {
 			setEventMessages($langs->trans('KaFileAn').': '.$langs->trans('ErrorFieldRequired', $langs->transnoentities('KaFileAn')), null, 'warnings');
 		}
+		// Unterlagen (Grundlage des Angebots): beliebige Dateien, nur intern
+		if (!empty($_FILES['docs']['name']) && is_array($_FILES['docs']['name'])) {
+			$ddir = $kalk->getDir().'/unterlagen';
+			dol_mkdir($ddir);
+			$nup = 0;
+			foreach ($_FILES['docs']['name'] as $di => $dname) {
+				if ($dname === '' || empty($_FILES['docs']['tmp_name'][$di])) {
+					continue;
+				}
+				$dest = $ddir.'/'.dol_sanitizeFileName($dname);
+				$r = dol_move_uploaded_file($_FILES['docs']['tmp_name'][$di], $dest, 1, 0, $_FILES['docs']['error'][$di]);
+				if (is_numeric($r) && $r > 0) {
+					$nup++;
+				} else {
+					setEventMessages($langs->trans('KaDocUploadError', $dname).(is_string($r) ? ' ('.$langs->trans($r).')' : ''), null, 'errors');
+				}
+			}
+			if ($nup) {
+				setEventMessages($langs->trans('KaDocsUploaded', $nup), null);
+			}
+		}
 		$kalk->fetch($kalk->id);
 		$kalk->save($user); // Summen aktualisieren
 		if (KaService::planLabel($kalk) !== $oldPlanLabel) {
@@ -259,6 +280,15 @@ if ($action === 'save' && $canwrite) {
 		exit;
 	}
 	$action = 'create';
+}
+
+if ($action === 'deldoc' && $canwrite && $kalk->id) {
+	$f = $kalk->getDir().'/unterlagen/'.basename(GETPOST('file', 'alphanohtml'));
+	if (is_file($f)) {
+		dol_delete_file($f, 0, 1);
+	}
+	header('Location: '.$_SERVER['PHP_SELF'].'?id='.$kalk->id.'#docs');
+	exit;
 }
 
 if ($action === 'deltyp' && $canwrite && $kalk->id) {
@@ -452,6 +482,25 @@ if ($canwrite) {
 	print $langs->trans('KaQty').' <input name="new_qty" value="1" class="width50 right"> ';
 	print '<input type="submit" class="button smallpaddingimp" value="'.$langs->trans('KaUpload').'" onclick="document.getElementById(\'ka_anchor\').value=\'kitchens\'">';
 	print '</td></tr>';
+}
+print '</table></div><br>';
+
+// --- Unterlagen (Grundlage des Angebots)
+print '<a id="docs"></a><div class="div-table-responsive-no-min"><table class="noborder centpercent">';
+print '<tr class="liste_titre"><td colspan="4">'.$langs->trans('KaDocs').' <span class="opacitymedium small">'.$langs->trans('KaDocsHint').'</span></td></tr>';
+$docs = $kalk->id ? dol_dir_list($kalk->getDir().'/unterlagen', 'files', 0, '', '', 'date', SORT_DESC, 1) : array();
+foreach ($docs as $f) {
+	$durl = dol_buildpath('/kuechenangebot/doc.php', 1).'?id='.$kalk->id.'&file='.urlencode($f['name']);
+	print '<tr class="oddeven"><td><a href="'.$durl.'" target="_blank">'.img_mime($f['name']).' '.dol_escape_htmltag($f['name']).'</a></td>';
+	print '<td class="right">'.dol_print_size($f['size']).'</td><td class="right">'.dol_print_date($f['date'], 'dayhour').'</td>';
+	print '<td class="right">'.($canwrite ? '<a href="'.$_SERVER['PHP_SELF'].'?id='.$kalk->id.'&action=deldoc&file='.urlencode($f['name']).'&token='.newToken().'" onclick="return confirm(\''.dol_escape_js($langs->transnoentities('KaDocDelete')).'\')">'.img_delete().'</a>' : '').'</td></tr>';
+}
+if (!$docs) {
+	print '<tr class="oddeven"><td colspan="4"><span class="opacitymedium">'.$langs->trans('KaDocsNone').'</span></td></tr>';
+}
+if ($canwrite) {
+	print '<tr class="oddeven"><td colspan="4"><input type="file" name="docs[]" multiple> ';
+	print '<input type="submit" class="button smallpaddingimp" value="'.$langs->trans('KaDocsUpload').'" onclick="document.getElementById(\'ka_anchor\').value=\'docs\'"></td></tr>';
 }
 print '</table></div><br>';
 

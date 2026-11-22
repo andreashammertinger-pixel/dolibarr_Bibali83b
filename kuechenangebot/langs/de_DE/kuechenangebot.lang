@@ -292,3 +292,10 @@ KaPlanLabelHint = steht rechts unten in den Plänen; leer = „BVH“ + Bauvorha
 KaSetupPlanPrefix = Vorsatz Bezeichnung im Plankopf
 KaSetupPlanContact = Kontakt im Plankopf (3 Zeilen)
 KaSetupPlanContactHint = Name, Telefon, E-Mail – erscheinen in den Plänen rechts neben dem migora-Logo. Leer = Ansprechpartner + Firmen-E-Mail.
+KaDocs = Unterlagen (Grundlage des Angebots)
+KaDocsHint = z. B. Einreichplan, Skizze, Fotos – nur intern, gehen nicht an den Kunden
+KaDocsNone = Keine Unterlagen.
+KaDocsUpload = Hochladen
+KaDocsUploaded = %s Datei(en) hochgeladen.
+KaDocUploadError = %s konnte nicht hochgeladen werden.
+KaDocDelete = Datei wirklich löschen?

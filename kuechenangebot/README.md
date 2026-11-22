@@ -38,6 +38,9 @@ Danach geht es wie gewohnt in Dolibarr weiter: freigeben, per E-Mail senden (bei
 Deckblatttexte lassen sich über *Einstellungen → Übersetzung* anpassen (Schlüssel `KaPdfManufacturerText`, `KaPdfDurableText`, `KaPdfWarrantyText` …).
 Nobilia-Begriffe übersetzt ein eingebautes Wörterbuch. Fehlende Begriffe ergänzen Sie in den Einstellungen (`deutsch = übersetzung`). Unbekannte Begriffe bleiben deutsch.
 
+## Unterlagen (Grundlage des Angebots)
+Unter den Küchentypen gibt es den Bereich **Unterlagen**. Dort lassen sich beliebig viele Dateien sammeln, z. B. Einreichplan, Skizze, Fotos vom Raum oder Mails als PDF. Der Bereich darf auch leer bleiben. Die Dateien liegen nur intern bei der Kalkulation (`kalk/<id>/unterlagen/`), werden nicht zum Dolibarr-Angebot gelegt und gehen nicht an den Kunden. Wird die Kalkulation gelöscht, werden sie mitgelöscht.
+
 ## Pläne mit migora-Plankopf
 Beim Hochladen der **BD…pdf** erzeugt das Modul eine Fassung mit migora-Plankopf. Das ist die PHP-Fassung des *migora Planumwandlers* (Repository `migora_logo_change`) mit denselben Bereichen und Positionen:
 * links: Logo und Kontakt der Planerin werden **aus dem PDF entfernt** (nicht nur überdeckt) und durch `img/plankopf_logo.jpg` sowie drei Kontaktzeilen ersetzt (*Einstellungen → Kontakt im Plankopf*, sonst Ansprechpartner und Firmen-E-Mail)

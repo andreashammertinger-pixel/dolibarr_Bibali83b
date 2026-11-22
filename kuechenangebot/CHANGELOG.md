@@ -1,5 +1,8 @@
 # Changelog Küchenangebot
 
+## 1.4.0
+- **Unterlagen (Grundlage des Angebots)** in der Küchenkalkulation: beliebig viele Dateien hochladen (Einreichplan, Skizze, Fotos, PDFs …), anzeigen, herunterladen, löschen. Nur intern – sie werden nicht zum Angebot gelegt und nicht an den Kunden geschickt
+
 ## 1.3.0
 - **Pläne mit migora-Plankopf**: Beim Hochladen der Pläne (BD…pdf) werden Logo und Kontakt der Planerin sowie die Kundenadresse aus dem PDF entfernt und durch migora-Logo, Kontakt und die Bezeichnung (z. B. „BVH …“) ersetzt – PHP-Fassung des migora Planumwandlers (Repository migora_logo_change), gleiche Bereiche und Positionen
 - **Freigabe erst nach Annahme**: Die Pläne liegen bis dahin nur intern in der Küchenkalkulation (Download-Link). Bei „Unterschrieben“ bzw. „Fakturiert“ kommen sie automatisch zu den Dokumenten des Angebots, bei Auftragserstellung auch zum Auftrag; beim Wiederöffnen werden sie beim Angebot entfernt
