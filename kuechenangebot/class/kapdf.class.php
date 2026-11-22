@@ -293,111 +293,134 @@ class KaPdf
 		}
 		$y = max($pdf->GetY(), $yy, 66) + 5;
 
-		// Titel
-		$pdf->SetXY($this->ml, $y);
-		$pdf->SetFont($this->font, 'B', 18);
-		$pdf->SetTextColor($this->color[0], $this->color[1], $this->color[2]);
-		$pdf->Cell($w, 8, $this->t('KaPdfTitle'), 0, 1, 'L');
-		$pdf->SetFont($this->font, '', 9.5);
-		$pdf->SetTextColor($this->dark[0], $this->dark[1], $this->dark[2]);
-		$pdf->SetX($this->ml);
-		$pdf->MultiCell($w, 4.5, $this->t('KaPdfIntro'), 0, 'L');
-		if (!empty($this->kalk->params['verbraucher'])) {
-			$pdf->SetX($this->ml);
-			$pdf->SetFont($this->font, 'B', 8.8);
-			$pdf->MultiCell($w, 4.3, $this->t('KaPdfIndividual'), 0, 'L');
-		}
-		$y = $pdf->GetY() + 2;
+		// Zwei Spalten 50 : 50 – links Text, rechts Bild (immer gleiche Größe), Preis und Typen
+		$gap = 6;
+		$cw = ($w - $gap) / 2;
+		$lx = $this->ml;
+		$rx = $this->ml + $cw + $gap;
+		$top = $y;
+		$c = $this->calc;
+		$multi = count($this->kalk->typen) > 1;
 
-		// 3D-Bild: so groß, dass Highlights und Preis noch auf die Seite passen
+		// rechts: 3D-Bild
 		$typ = $this->kalk->typen ? $this->kalk->typen[0] : null;
 		$img = $typ ? $this->imageFile($typ) : '';
-		$hls = $this->highlights($typ);
-		// Schriftgröße und Bildhöhe so wählen, dass Highlights und Preis auf Seite 1 passen
-		$avail = $this->ph - 22 - $y - 6;
-		$hfs = 7.9;
-		$lh = 3.7;
-		$minImg = $img ? 40 : 0;
-		for ($try = 0; $try < 8; $try++) {
-			$pdf->SetFont($this->font, '', $hfs);
-			$need = 8;
-			foreach ($hls as $hl) {
-				$need += max(1, $pdf->getNumLines($hl[1], 135 - $this->ml - 5 - 37)) * $lh + 0.8;
+		$ry = $top + 1.5;
+		if ($img) {
+			$size = @getimagesize($img);
+			$ih = ($size && $size[0]) ? $cw * $size[1] / $size[0] : $cw * 0.6;
+			$ih = min($ih, 75);
+			$iw = ($size && $size[1]) ? min($cw, $ih * $size[0] / $size[1]) : $cw;
+			$pdf->Image($img, $rx + ($cw - $iw) / 2, $ry, $iw, $ih, '', '', '', true, 200);
+			$pdf->SetDrawColor(220, 220, 220);
+			$pdf->Rect($rx + ($cw - $iw) / 2, $ry, $iw, $ih);
+			$ry += $ih + 0.8;
+			$pdf->SetFont($this->font, 'I', 6.3);
+			$pdf->SetTextColor(130, 130, 130);
+			$pdf->SetXY($rx, $ry);
+			$pdf->MultiCell($cw, 2.8, $this->t('KaPdfPicture').($multi ? ' · '.($typ->label ?: '#1') : ''), 0, 'R');
+			$ry = $pdf->GetY() + 3;
+		}
+
+		// rechts: Preisbox
+		$boxh = 38 + (($multi || $c['stueck'] > 1) ? 5 : 0);
+		$pdf->SetFillColor($this->color[0], $this->color[1], $this->color[2]);
+		$pdf->Rect($rx, $ry, $cw, $boxh, 'F');
+		$pdf->SetTextColor(255, 255, 255);
+		$pdf->SetXY($rx + 4, $ry + 3);
+		$pdf->SetFont($this->font, '', 10);
+		$pdf->Cell($cw - 8, 5, $this->t('KaPdfTotalPrice'), 0, 2, 'L');
+		$pdf->SetFont($this->font, 'B', 20);
+		$pdf->Cell($cw - 8, 10, kaMoney($c['vk_brutto']), 0, 2, 'L');
+		$pdf->SetFont($this->font, '', 8.5);
+		$pdf->MultiCell($cw - 8, 4, $this->t('KaPdfInclDelivery').', '.$this->t('KaPdfInclVat', $this->num($c['tva'])), 0, 'L');
+		$pdf->SetX($rx + 4);
+		$pdf->SetFont($this->font, '', 8);
+		$pdf->Cell($cw - 8, 4.5, $this->t('KaPdfNetPrice', kaMoney($c['vk_netto'])), 0, 2, 'L');
+		if ($multi || $c['stueck'] > 1) {
+			$pdf->SetX($rx + 4);
+			$pdf->Cell($cw - 8, 4.5, $this->t('KaPdfTypes', $this->num($c['stueck'], 0), count($this->kalk->typen)), 0, 2, 'L');
+		}
+		$pdf->SetXY($rx + 4, $ry + $boxh - 7);
+		$pdf->SetFont($this->font, 'B', 8.5);
+		$pdf->Cell($cw - 8, 4, 'nobilia', 0, 0, 'L');
+		$ry += $boxh + 4;
+
+		// rechts: Übersicht der Küchentypen (Mehrfamilienhaus)
+		$pdf->SetTextColor($this->dark[0], $this->dark[1], $this->dark[2]);
+		if ($multi) {
+			$pdf->SetXY($rx, $ry);
+			$pdf->SetFont($this->font, 'B', 9);
+			$pdf->SetTextColor($this->color[0], $this->color[1], $this->color[2]);
+			$pdf->Cell($cw, 5, $this->t('KaPdfTypesTitle'), 0, 2, 'L');
+			$pdf->SetTextColor($this->dark[0], $this->dark[1], $this->dark[2]);
+			$pdf->SetFont($this->font, '', 7.8);
+			$pdf->SetFillColor(240, 236, 234);
+			$pdf->SetX($rx);
+			$pdf->Cell($cw - 46, 4.5, $this->t('KaPdfType'), 0, 0, 'L', true);
+			$pdf->Cell(14, 4.5, $this->t('KaPdfPieces'), 0, 0, 'R', true);
+			$pdf->Cell(32, 4.5, $this->t('KaPdfPerKitchenGross'), 0, 1, 'R', true);
+			foreach ($this->kalk->typen as $k => $t) {
+				if ($pdf->GetY() > $this->ph - 26) {
+					break;
+				}
+				$row = $c['typen'][$k];
+				$pdf->SetX($rx);
+				$pdf->Cell($cw - 46, 4.2, dol_trunc($t->label ?: '#'.($k + 1), 40), 0, 0, 'L');
+				$pdf->Cell(14, 4.2, $this->num($row['qty']), 0, 0, 'R');
+				$pdf->Cell(32, 4.2, kaMoney($row['vk'] * (1 + $c['tva'] / 100)), 0, 1, 'R');
 			}
-			$need = max($need, 52);
-			if ($need + $minImg <= $avail || $hfs <= 6.6) {
+		}
+
+		// links: Titel, Einleitung, Highlights
+		$hls = $this->highlights($this->kalk->typen);
+		$intro = $this->t('KaPdfIntro');
+		$indiv = !empty($this->kalk->params['verbraucher']) ? $this->t('KaPdfIndividual') : '';
+		$bottom = $this->ph - 22;
+		$hfs = 8.2;
+		$lh = 3.8;
+		$labW = 25;
+		for ($try = 0; $try < 10; $try++) {
+			// Labelspalte so breit wie das längste Label (keine Trennung mitten im Wort)
+			$pdf->SetFont($this->font, 'B', $hfs);
+			$labW = 18;
+			foreach ($hls as $hl) {
+				$labW = max($labW, $pdf->GetStringWidth($hl[0]) + 1.5);
+			}
+			$labW = min($labW, 34);
+			$pdf->SetFont($this->font, '', $hfs);
+			$need = 10 + 2 + $pdf->getNumLines($intro, $cw) * ($lh + 0.5) + ($indiv ? $pdf->getNumLines($indiv, $cw) * ($lh + 0.3) + 1 : 0) + 8;
+			foreach ($hls as $hl) {
+				$need += max(1, $pdf->getNumLines($hl[1], $cw - $labW - 4)) * $lh + 0.8;
+			}
+			if ($top + $need <= $bottom || $hfs <= 6.6) {
 				break;
 			}
 			$hfs -= 0.2;
-			$lh = $hfs * 0.47;
+			$lh = $hfs * 0.46;
 		}
-		$this->hlFont = array($hfs, $lh);
-		if ($img) {
-			$size = @getimagesize($img);
-			$iw = $w;
-			$ih = ($size && $size[0]) ? $iw * $size[1] / $size[0] : 100;
-			$maxh = min(100, $avail - $need);
-			if ($maxh < $minImg) {
-				$maxh = $minImg;
-			}
-			if ($ih > $maxh) {
-				$ih = $maxh;
-				$iw = $ih * $size[0] / $size[1];
-			}
-			$x = $this->ml + ($w - $iw) / 2;
-			$pdf->Image($img, $x, $y, $iw, $ih, '', '', '', true, 200);
-			$pdf->SetDrawColor(220, 220, 220);
-			$pdf->Rect($x, $y, $iw, $ih);
-			$y += $ih + 0.8;
-			$pdf->SetFont($this->font, 'I', 6.5);
-			$pdf->SetTextColor(130, 130, 130);
-			$pdf->SetXY($this->ml, $y);
-			$pdf->Cell($w, 3, $this->t('KaPdfPicture'), 0, 1, 'R');
-			$y += 4;
-		}
-
-		// Preisbox rechts
-		$bx = 135;
-		$bw = $this->pw - $this->mr - $bx;
-		$by = $y;
-		$c = $this->calc;
-		$pdf->SetFillColor($this->color[0], $this->color[1], $this->color[2]);
-		$pdf->SetTextColor(255, 255, 255);
-		$lines = array();
-		$boxh = 44;
-		if (count($this->kalk->typen) > 1 || $c['stueck'] > 1) {
-			$boxh += 5;
-		}
-		$pdf->Rect($bx, $by, $bw, $boxh, 'F');
-		$pdf->SetXY($bx + 3, $by + 3);
-		$pdf->SetFont($this->font, '', 10);
-		$pdf->Cell($bw - 6, 5, $this->t('KaPdfTotalPrice'), 0, 2, 'L');
-		$pdf->SetFont($this->font, 'B', 19);
-		$pdf->Cell($bw - 6, 10, kaMoney($c['vk_brutto']), 0, 2, 'L');
-		$pdf->SetFont($this->font, '', 8.5);
-		$pdf->MultiCell($bw - 6, 4, $this->t('KaPdfInclDelivery')."\n".$this->t('KaPdfInclVat', $this->num($c['tva'])), 0, 'L');
-		$pdf->SetX($bx + 3);
-		$pdf->SetFont($this->font, '', 8);
-		$pdf->Cell($bw - 6, 4.5, $this->t('KaPdfNetPrice', kaMoney($c['vk_netto'])), 0, 2, 'L');
-		if (count($this->kalk->typen) > 1 || $c['stueck'] > 1) {
-			$pdf->SetX($bx + 3);
-			$pdf->Cell($bw - 6, 4.5, $this->t('KaPdfTypes', $this->num($c['stueck'], 0), count($this->kalk->typen)), 0, 2, 'L');
-		}
-		$pdf->SetXY($bx + 3, $by + $boxh - 7);
-		$pdf->SetFont($this->font, 'B', 8.5);
-		$pdf->Cell($bw - 6, 4, 'nobilia', 0, 0, 'L');
-
-		// Highlights links
+		$pdf->SetXY($lx, $top);
+		$pdf->SetFont($this->font, 'B', 18);
+		$pdf->SetTextColor($this->color[0], $this->color[1], $this->color[2]);
+		$pdf->Cell($cw, 9, $this->t('KaPdfTitle'), 0, 1, 'L');
 		$pdf->SetTextColor($this->dark[0], $this->dark[1], $this->dark[2]);
-		$hx = $this->ml;
-		$hw = $bx - $this->ml - 5;
-		$pdf->SetXY($hx, $by);
+		$pdf->SetX($lx);
+		$pdf->SetFont($this->font, '', $hfs + 0.6);
+		$pdf->MultiCell($cw, $lh + 0.5, $intro, 0, 'L');
+		if ($indiv !== '') {
+			$pdf->Ln(1);
+			$pdf->SetX($lx);
+			$pdf->SetFont($this->font, 'B', $hfs + 0.2);
+			$pdf->MultiCell($cw, $lh + 0.3, $indiv, 0, 'L');
+		}
+		$pdf->Ln(3);
+		$pdf->SetX($lx);
 		$pdf->SetFont($this->font, 'B', 11);
 		$pdf->SetTextColor($this->color[0], $this->color[1], $this->color[2]);
-		$pdf->Cell($hw, 6, $this->t('KaPdfHighlights'), 0, 1, 'L');
+		$pdf->Cell($cw, 6, $this->t('KaPdfHighlights'), 0, 1, 'L');
 		$pdf->SetTextColor($this->dark[0], $this->dark[1], $this->dark[2]);
 		foreach ($hls as $hl) {
-			$this->bulletRow($hx, $hw, $hl[0], $hl[1], $this->hlFont[0], $this->hlFont[1]);
+			$this->bulletRow($lx, $cw, $hl[0], $hl[1], $hfs, $lh, $labW);
 		}
 	}
 
@@ -412,60 +435,99 @@ class KaPdf
 	}
 
 	/**
-	 * Highlights für das Deckblatt
+	 * Highlights für das Deckblatt; bei mehreren Küchentypen zusammengeführt
+	 * (gleicher Wert einmal, sonst „Wert (Typ)“ je Typ)
+	 * @param KaTyp[] $typen
 	 * @return array<int,array{0:string,1:string}>
 	 */
-	protected function highlights($typ)
+	protected function highlights($typen)
 	{
+		$typen = array_values((array) $typen);
 		$out = array();
 		$out[] = array($this->t('KaPdfManufacturer'), $this->t('KaPdfManufacturerText'));
-		if ($typ) {
-			$prog = $typ->merkmal('Programm');
-			$front = $typ->merkmal('Front-Kombination');
-			if ($prog || $front) {
-				$out[] = array($this->t('KaPdfFront'), trim(($prog ? 'nobilia '.$prog : '').($front ? ', '.$this->tr($front) : ''), ', '));
-			}
-			$k = $typ->merkmal('Korpusfarbe außen');
-			if ($k) {
-				$ka = $typ->merkmal('Korpusausführung');
-				$out[] = array($this->t('KaPdfCorpus'), $this->tr($k).($ka ? ' ('.$this->tr($ka).')' : ''));
-			}
-			$a = $typ->merkmal('Arbeitsplatten-Farbe');
-			if ($a) {
-				$aa = $typ->merkmal('Arbeitsplatten-Ausführung');
-				$out[] = array($this->t('KaPdfWorktop'), $this->tr($a).($aa ? ', '.$this->tr($aa) : ''));
-			}
-			if ($this->hasPosition($typ, '/^Nischenwandverkleidung|^Nischenrückwand/u')) {
-				$n = $typ->merkmal('Nischenfarbe');
-				if ($n) {
-					$out[] = array($this->t('KaPdfNiche'), $this->tr($n));
+		$per = array(); // Label → [typIndex → Wert]
+		$order = array();
+		$devs = array();
+		$sinks = array();
+		foreach ($typen as $k => $typ) {
+			foreach ($this->typeRows($typ) as $lab => $val) {
+				if (!isset($per[$lab])) {
+					$per[$lab] = array();
+					$order[] = $lab;
 				}
+				$per[$lab][$k] = $val;
 			}
-			$g = $typ->merkmal('Griff-Kombination');
-			if ($g) {
-				$out[] = array($this->t('KaPdfHandles'), $this->tr($g));
-			}
-			$dev = array();
-			$sink = array();
 			foreach ((array) ($typ->data['geraete'] ?? array()) as $d) {
 				$name = $this->tr($d['name']);
 				if (in_array($d['kategorie'], array('spuele', 'armatur'))) {
-					$sink[] = $this->deviceShort($name, $d);
+					$sinks[$this->deviceShort($name, $d)][] = $k;
 				} elseif ($d['kategorie'] !== 'sonstiges' && !preg_match('/Aktivkohlefilter/u', $d['name'])) {
-					$dev[] = $name.($d['eek'] && $d['kategorie'] !== 'licht' ? ' · EEK '.$d['eek'] : '');
+					$devs[$name.($d['eek'] && $d['kategorie'] !== 'licht' ? ' · EEK '.$d['eek'] : '')][] = $k;
 				}
 			}
-			if ($dev) {
-				$out[] = array($this->t('KaPdfDevices'), implode("\n", $dev));
+		}
+		$n = count($typen);
+		foreach ($order as $lab) {
+			$vals = $per[$lab];
+			if (count($vals) === $n && count(array_unique($vals)) === 1) {
+				$out[] = array($lab, reset($vals));
+			} else {
+				$lines = array();
+				foreach ($vals as $k => $v) {
+					$lines[] = $v.' ('.($typen[$k]->label ?: '#'.($k + 1)).')';
+				}
+				$out[] = array($lab, implode("\n", $lines));
 			}
-			if ($sink) {
-				$out[] = array($this->t('KaPdfSink'), implode("\n", $sink));
+		}
+		foreach (array(array('KaPdfDevices', $devs), array('KaPdfSink', $sinks)) as $grp) {
+			if (!$grp[1]) {
+				continue;
 			}
+			$lines = array();
+			foreach ($grp[1] as $name => $ks) {
+				$ks = array_unique($ks);
+				$lines[] = $name.(($n > 1 && count($ks) < $n) ? ' ('.implode(', ', array_map(function ($k) use ($typen) {
+					return $typen[$k]->label ?: '#'.($k + 1);
+				}, $ks)).')' : '');
+			}
+			$out[] = array($this->t($grp[0]), implode("\n", $lines));
 		}
 		$out[] = array($this->t('KaPdfAssembly'), $this->t('KaPdfAssemblyText'));
 		$out[] = array($this->t('KaPdfDurable'), $this->t('KaPdfDurableText'));
 		$out[] = array($this->t('KaPdfWarranty'), $this->t('KaPdfWarrantyText'));
 		return $out;
+	}
+
+	/** Ausstattungs-Highlights eines Küchentyps: Label → Wert */
+	protected function typeRows($typ)
+	{
+		$r = array();
+		$prog = $typ->merkmal('Programm');
+		$front = $typ->merkmal('Front-Kombination');
+		if ($prog || $front) {
+			$r[$this->t('KaPdfFront')] = trim(($prog ? 'nobilia '.$prog : '').($front ? ', '.$this->tr($front) : ''), ', ');
+		}
+		$k = $typ->merkmal('Korpusfarbe außen');
+		if ($k) {
+			$ka = $typ->merkmal('Korpusausführung');
+			$r[$this->t('KaPdfCorpus')] = $this->tr($k).($ka ? ' ('.$this->tr($ka).')' : '');
+		}
+		$a = $typ->merkmal('Arbeitsplatten-Farbe');
+		if ($a) {
+			$aa = $typ->merkmal('Arbeitsplatten-Ausführung');
+			$r[$this->t('KaPdfWorktop')] = $this->tr($a).($aa ? ', '.$this->tr($aa) : '');
+		}
+		if ($this->hasPosition($typ, '/^Nischenwandverkleidung|^Nischenrückwand/u')) {
+			$nf = $typ->merkmal('Nischenfarbe');
+			if ($nf) {
+				$r[$this->t('KaPdfNiche')] = $this->tr($nf);
+			}
+		}
+		$g = $typ->merkmal('Griff-Kombination');
+		if ($g) {
+			$r[$this->t('KaPdfHandles')] = $this->tr($g);
+		}
+		return $r;
 	}
 
 	protected function deviceShort($name, $d)
@@ -485,7 +547,7 @@ class KaPdf
 		return false;
 	}
 
-	protected function bulletRow($x, $w, $label, $text, $fs = 8.3, $lh = 3.7)
+	protected function bulletRow($x, $w, $label, $text, $fs = 8.3, $lh = 3.7, $labW = 33)
 	{
 		$pdf = $this->pdf;
 		$y = $pdf->GetY();
@@ -493,10 +555,12 @@ class KaPdf
 		$pdf->Rect($x, $y + 1.4, 1.6, 1.6, 'F');
 		$pdf->SetXY($x + 3.5, $y);
 		$pdf->SetFont($this->font, 'B', $fs);
-		$pdf->Cell(33, $lh, $label, 0, 0, 'L');
+		$pdf->MultiCell($labW, $lh, $label, 0, 'L');
+		$yl = $pdf->GetY();
 		$pdf->SetFont($this->font, '', $fs);
-		$pdf->SetXY($x + 37, $y);
-		$pdf->MultiCell($w - 37, $lh, $text, 0, 'L');
+		$pdf->SetXY($x + $labW + 4, $y);
+		$pdf->MultiCell($w - $labW - 4, $lh, $text, 0, 'L');
+		$pdf->SetY(max($yl, $pdf->GetY()));
 		$pdf->SetY($pdf->GetY() + 0.8);
 	}
 

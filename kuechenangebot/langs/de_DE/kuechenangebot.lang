@@ -335,3 +335,5 @@ KaVersionCreated = Version %s angelegt. Änderungen eintragen und „Angebot ers
 KaVersionLocked = Diese Version ist bereits abgeschlossen.
 KaVersionReplaced = Ersetzt durch Version %s (siehe verknüpfte Angebote).
 KaVersionClosedOld = Vorversion %s wurde auf „Nicht unterschrieben“ gesetzt und verknüpft.
+KaPdfTypesTitle = Küchentypen
+KaPdfPerKitchenGross = je Küche brutto

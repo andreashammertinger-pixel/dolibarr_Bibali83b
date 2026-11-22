@@ -98,3 +98,5 @@ KaPdfChgPlanning = Planiranje prerađeno (novi crtež odnosno popis proizvoda)
 KaPdfChgAdded = Novo: %s
 KaPdfChgRemoved = Otpada: %s
 KaPdfChgPrice = Ukupna cijena: dosad %s, novo %s (razlika %s)
+KaPdfTypesTitle = Tipovi kuhinja
+KaPdfPerKitchenGross = po kuhinji bruto

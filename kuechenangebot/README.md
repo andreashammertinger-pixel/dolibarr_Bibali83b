@@ -31,7 +31,7 @@ Das Logo kommt aus *Einstellungen → Firma/Organisation* (bei migora: `Migora_k
 Danach geht es wie gewohnt in Dolibarr weiter: freigeben, per E-Mail senden (beide PDFs anhängen), unterschrieben → Auftrag/Rechnung.
 
 ## PDF
-1. **Deckblatt**: Logo, Empfänger, Angebotsdaten, großes **3D-Bild**, *Ihre Küche auf einen Blick* (Hersteller nobilia, Front, Korpus, Arbeitsplatte, Nischenrückwand, Griffe, **Elektrogeräte** mit EEK, Spüle und Armatur, **Aufbau durch Facharbeiter**, **Qualität**, **Gewährleistung** inkl. Garantieabwicklung über den Hersteller-Kundendienst) und der **Gesamtpreis** (brutto, netto).
+1. **Deckblatt** (zweispaltig): links Titel, Einleitung und Highlights, rechts das **3D-Bild** in einheitlicher Größe, darunter der Gesamtpreis und bei mehreren Küchentypen eine Übersicht mit Stückzahl und Preis je Küche. Bei mehreren Typen sind die Highlights zusammengeführt: Gleiche Werte stehen einmal, abweichende je Typ. Inhalt: *Ihre Küche auf einen Blick* (Hersteller nobilia, Front, Korpus, Arbeitsplatte, Nischenrückwand, Griffe, **Elektrogeräte** mit EEK, Spüle und Armatur, **Aufbau durch Facharbeiter**, **Qualität**, **Gewährleistung** inkl. Garantieabwicklung über den Hersteller-Kundendienst) und der **Gesamtpreis** (brutto, netto).
 2. **Leistungsumfang und Preis** (eine Zeile je Küchentyp), **Ausstattung im Detail**, Geräteliste.
 3. **Hinweise**, **Angebotsbestimmungen**, **AGB mit QR-Code** (wenn Adresse eingestellt), **Annahme des Angebots** mit Preis, Ort/Datum und Unterschriften.
 

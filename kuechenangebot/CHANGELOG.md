@@ -1,5 +1,10 @@
 # Changelog Küchenangebot
 
+## 1.7.0
+- **Deckblatt 50 : 50**: links Titel, Einleitung und Highlights, rechts das 3D-Bild in einheitlicher Größe (oben bündig mit „Ihr Küchenangebot“), darunter Gesamtpreis
+- **Mehrere Küchentypen** (Mehrfamilienhaus): Übersicht „Küchentypen“ mit Stückzahl und Preis je Küche brutto auf dem Deckblatt; Highlights zusammengeführt – gleiche Werte einmal, abweichende je Typ („Kaschmir (Typ 23)“), Geräte mit Angabe der Typen, wenn sie nicht in allen Küchen sind
+- Labelspalte der Highlights passt sich dem längsten Begriff an (keine Trennung mitten im Wort)
+
 ## 1.6.0
 - **Versionen**: „Neue Version erstellen“ (wenn das Angebot freigegeben ist) kopiert die Kalkulation samt Kunde, Sätzen, Hinweisen, Unterlagen und Nobilia-Dateien; die alte Version wird gesperrt. Beim Erstellen des neuen Angebots wird das alte verknüpft und auf „Nicht unterschrieben“ gesetzt
 - **Zusatz- und Minderpositionen** je Küchentyp (+/−), Preisbasis Nobilia-Wert (× Faktor + Aufschlag) oder Verkaufspreis netto; im Küchenpreis enthalten, im Angebot unter „inkl. Änderungen“ genannt

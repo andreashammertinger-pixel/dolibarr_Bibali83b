@@ -315,3 +315,5 @@ KaVersionCreated = Version %s created. Enter the changes and click "Create offer
 KaVersionLocked = This version is already closed.
 KaVersionReplaced = Replaced by version %s (see linked offers).
 KaVersionClosedOld = Previous version %s was set to "not signed" and linked.
+KaPdfTypesTitle = Kitchen types
+KaPdfPerKitchenGross = per kitchen gross
