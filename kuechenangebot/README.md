@@ -38,6 +38,14 @@ Danach geht es wie gewohnt in Dolibarr weiter: freigeben, per E-Mail senden (bei
 Deckblatttexte lassen sich über *Einstellungen → Übersetzung* anpassen (Schlüssel `KaPdfManufacturerText`, `KaPdfDurableText`, `KaPdfWarrantyText` …).
 Nobilia-Begriffe übersetzt ein eingebautes Wörterbuch. Fehlende Begriffe ergänzen Sie in den Einstellungen (`deutsch = übersetzung`). Unbekannte Begriffe bleiben deutsch.
 
+## Pläne mit migora-Plankopf
+Beim Hochladen der **BD…pdf** erzeugt das Modul eine Fassung mit migora-Plankopf. Das ist die PHP-Fassung des *migora Planumwandlers* (Repository `migora_logo_change`) mit denselben Bereichen und Positionen:
+* links: Logo und Kontakt der Planerin werden **aus dem PDF entfernt** (nicht nur überdeckt) und durch `img/plankopf_logo.jpg` sowie drei Kontaktzeilen ersetzt (*Einstellungen → Kontakt im Plankopf*, sonst Ansprechpartner und Firmen-E-Mail)
+* rechts: Die alte Kundenadresse wird durch die **Bezeichnung im Plankopf** ersetzt (Feld in Schritt 1, leer = „BVH“ + Bauvorhaben)
+* Findet der Umwandler auf einer Seite keinen Plankopf, erscheint eine Warnung. Das passiert vor allem, wenn die Planerin ihre Vorlage ändert.
+
+**Wann der Kunde die Pläne bekommt:** Bis zur Annahme liegen die Pläne **nur intern** in der Küchenkalkulation (Link „Pläne mit migora-Plankopf“). Wird das Angebot auf **Unterschrieben** (oder Fakturiert) gesetzt, legt das Modul `Plaene_<Typ>.pdf` automatisch zu den Dokumenten des Angebots. Wird daraus ein Auftrag erstellt, kommen sie auch zum Auftrag. Wird das Angebot wieder geöffnet oder abgelehnt, werden sie beim Angebot entfernt. Vorher können sie also nicht versehentlich an eine E-Mail angehängt werden.
+
 ## Kennzahlen
 *Küchen → Kennzahlen*: Angenommene (unterschriebene) und fakturierte Angebote aus dem Modul zählen automatisch. Frühere Küchen lassen sich händisch nachtragen (Einkauf, Verkauf, Laufmeter, Stück, optional Selbstkosten), jeweils als privat oder Mehrfamilienhaus.
 
@@ -95,6 +103,8 @@ Grundlage ist die migora-Vorlage (Angebot 2024-0040). Sie wurde für Verbraucher
 | `class/kanobiliaparser.class.php` | Auswertung Nobilia/CARAT: Kopf, Merkmale, Positionen, Summen, Geräte, Laufmeter, 3D-Bild |
 | `class/kakalk.class.php` | Kalkulation, Küchentypen, Kennzahlen-Vergleich |
 | `class/kaservice.class.php` | Kunde anlegen/Dubletten, Import, Dolibarr-Angebot erzeugen |
+| `class/kaplanconverter.class.php` | Plankopf ersetzen (Text- und Bildoperatoren in den Bereichen entfernen, Overlay zeichnen, PDF neu schreiben) |
+| `core/triggers/interface_99_modKuechenangebot_KaTriggers.class.php` | Pläne bei Unterschrift/Auftrag freigeben |
 | `class/kapdf.class.php` | PDF im migora-Layout (TCPDF, DejaVu Sans für č/ć/ž/š) |
 | `class/kadict.class.php` | Fachwörterbuch de → hr/en |
 | `core/modules/propale/doc/pdf_migorakueche.modules.php` | Dokumentvorlage für Angebote |

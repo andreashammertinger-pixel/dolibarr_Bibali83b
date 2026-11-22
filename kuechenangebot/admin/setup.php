@@ -41,6 +41,7 @@ if (!$res) {
 
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 dol_include_once('/kuechenangebot/lib/kuechenangebot.lib.php');
+dol_include_once('/kuechenangebot/class/kaservice.class.php');
 $langs->loadLangs(array('admin', 'kuechenangebot@kuechenangebot'));
 if (!$user->admin && !$user->hasRight('kuechenangebot', 'setup')) {
 	accessforbidden();
@@ -52,7 +53,7 @@ $num = array(
 	'KA_FAKTOR_EUR' => array('KaSetupFactorEur', '1'), 'KA_FAKTOR_PUNKTE' => array('KaSetupFactorPoints', '1'),
 	'KA_TVA' => array('KaSetupVat', '20'), 'KA_GUELTIG_TAGE' => array('KaSetupValid', '30'),
 );
-$txt = array('KA_PDF_FARBE' => 'KaSetupColor', 'KA_AGB_URL' => 'KaSetupAgbUrl', 'KA_KONTAKT' => 'KaSetupContact');
+$txt = array('KA_PDF_FARBE' => 'KaSetupColor', 'KA_AGB_URL' => 'KaSetupAgbUrl', 'KA_KONTAKT' => 'KaSetupContact', 'KA_PLAN_PREFIX' => 'KaSetupPlanPrefix');
 $action = GETPOST('action', 'aZ09');
 if ($action === 'save') {
 	foreach ($num as $k => $d) {
@@ -61,6 +62,7 @@ if ($action === 'save') {
 	foreach ($txt as $k => $lab) {
 		dolibarr_set_const($db, $k, trim(GETPOST($k, 'alphanohtml')), 'chaine', 0, '', $conf->entity);
 	}
+	dolibarr_set_const($db, 'KA_PLAN_KONTAKT', dol_string_nohtmltag(GETPOST('KA_PLAN_KONTAKT', 'restricthtml')), 'chaine', 0, '', $conf->entity);
 	$l2 = GETPOST('KA_LANG2_DEFAULT', 'aZ09');
 	dolibarr_set_const($db, 'KA_LANG2_DEFAULT', array_key_exists($l2, kaLang2Options()) ? $l2 : '', 'chaine', 0, '', $conf->entity);
 	foreach (array('DE', 'HR', 'EN') as $l) {
@@ -102,6 +104,7 @@ foreach (kaLang2Options() as $k => $lab) {
 	print '<option value="'.$k.'"'.(getDolGlobalString('KA_LANG2_DEFAULT') === $k ? ' selected' : '').'>'.dol_escape_htmltag($lab).'</option>';
 }
 print '</select></td></tr>';
+print '<tr class="oddeven"><td class="tdtop">'.$langs->trans('KaSetupPlanContact').'</td><td><textarea name="KA_PLAN_KONTAKT" rows="3" class="minwidth400" placeholder="'.dol_escape_htmltag(implode("\n", KaService::planContact())).'">'.dol_escape_htmltag(getDolGlobalString('KA_PLAN_KONTAKT')).'</textarea><br><span class="opacitymedium small">'.$langs->trans('KaSetupPlanContactHint').'</span></td></tr>';
 print '<tr class="liste_titre"><td colspan="2">'.$langs->trans('KaSetupTerms').' <span class="opacitymedium small">'.$langs->trans('KaSetupTermsHint').'</span></td></tr>';
 $def = kaDefaultTerms();
 foreach (array('DE' => 'Deutsch', 'HR' => 'Hrvatski', 'EN' => 'English') as $l => $lab) {

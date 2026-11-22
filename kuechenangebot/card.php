@@ -81,6 +81,7 @@ if ($action === 'save' && $canwrite) {
 	$error = 0;
 	$isnew = !$kalk->id;
 	$artBefore = $kalk->art;
+	$oldPlanLabel = KaService::planLabel($kalk);
 
 	// 1. Kunde
 	$socid = GETPOSTINT('socid');
@@ -133,7 +134,7 @@ if ($action === 'save' && $canwrite) {
 			'montage_std_kalk', 'muell_pauschal', 'muell_std', 'muell_satz', 'muell_faktor', 'tva', 'gueltig_tage') as $k) {
 			$p[$k] = kaNum('p_'.$k, (float) ($p[$k] ?? 0));
 		}
-		$p['plaene_anhaengen'] = GETPOST('p_plaene_anhaengen', 'int') ? 1 : 0;
+		$p['plan_label'] = trim(GETPOST('p_plan_label', 'alphanohtml'));
 		$p['verbraucher'] = GETPOST('p_verbraucher', 'int') ? 1 : 0;
 		if ($isnew && $newname !== '') {
 			$p['verbraucher'] = (GETPOST('nc_type', 'aZ09') === 'company') ? 0 : 1;
@@ -240,6 +241,9 @@ if ($action === 'save' && $canwrite) {
 		}
 		$kalk->fetch($kalk->id);
 		$kalk->save($user); // Summen aktualisieren
+		if (KaService::planLabel($kalk) !== $oldPlanLabel) {
+			$svc->convertAllPlans($kalk); // Bezeichnung im Plankopf geändert
+		}
 
 		if (GETPOST('generate', 'alpha') && !$error) {
 			$pid = $svc->generateProposal($user, $kalk);
@@ -260,7 +264,7 @@ if ($action === 'save' && $canwrite) {
 if ($action === 'deltyp' && $canwrite && $kalk->id) {
 	foreach ($kalk->typen as $t) {
 		if ($t->id == GETPOSTINT('typid')) {
-			foreach (array($t->file_an, $t->file_bd, $t->image) as $f) {
+			foreach (array($t->file_an, $t->file_bd, $t->image, KaService::planFile($t)) as $f) {
 				if ($f) {
 					@unlink($kalk->getDir().'/'.$f);
 				}
@@ -363,6 +367,7 @@ foreach (kaLang2Options() as $k => $lab) {
 print '</select> <span class="opacitymedium small">'.$langs->trans('KaLang2Hint').'</span></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('KaLabel').'</td><td><input name="label" class="minwidth500" value="'.dol_escape_htmltag($kalk->label).'"'.$disabled.'></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('KaObjekt').'</td><td><textarea name="objekt" rows="2" class="minwidth500"'.$disabled.'>'.dol_escape_htmltag($kalk->objekt).'</textarea></td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans('KaPlanLabel').'</td><td><input name="p_plan_label" class="minwidth500" value="'.dol_escape_htmltag($kalk->params['plan_label'] ?? '').'" placeholder="'.dol_escape_htmltag(KaService::planLabel($kalk)).'"'.$disabled.'> <span class="opacitymedium small">'.$langs->trans('KaPlanLabelHint').'</span></td></tr>';
 print '</table></div><br>';
 
 // --- 2. Küchentypen
@@ -408,6 +413,21 @@ foreach ($kalk->typen as $t) {
 			$s[] = dol_escape_htmltag($k).' '.kaMoney($v, false);
 		}
 		print '<span class="opacitymedium">Nobilia: '.implode(' · ', $s).'</span><br>';
+	}
+	if ($t->file_bd) {
+		$st = $t->data['plan_status'] ?? '';
+		$pf = $kalk->getDir().'/'.KaService::planFile($t);
+		print '<b>'.$langs->trans('KaPlans').':</b> ';
+		if (is_readable($pf)) {
+			print '<a href="'.dol_buildpath('/kuechenangebot/plan.php', 1).'?id='.$kalk->id.'&typ='.$t->id.'" target="_blank">'.img_mime('x.pdf').' '.$langs->trans('KaPlansMigora').'</a> ';
+		}
+		if ($st === 'warn') {
+			print '<span class="warning">'.$langs->trans('KaPlansWarn', (int) ($t->data['plan_missing'] ?? 0)).'</span> ';
+		} elseif ($st === 'error') {
+			print '<span class="error">'.$langs->trans('KaPlansError').'</span> ';
+		}
+		$released = !empty($propal->id) && KaService::plansReleased($propal);
+		print '<span class="opacitymedium">'.$langs->trans($released ? 'KaPlansReleased' : 'KaPlansInternal').'</span><br>';
 	}
 	print '<details><summary class="cursorpointer">'.$langs->trans('KaShowPositions').'</summary><table class="noborder small">';
 	foreach ((array) ($t->data['positionen'] ?? array()) as $p) {
@@ -464,7 +484,6 @@ print '<div class="ka-sub" data-group="muell_modus" data-show="pauschal">€ '.$
 print '<div class="ka-sub" data-group="muell_modus" data-show="stunden">'.$langs->trans('Hours').' '.$inp('muell_std', $p['muell_std'], 1, 'width50').' × '.$langs->trans('KaRate').' '.$inp('muell_satz', $p['muell_satz']).' × '.$langs->trans('KaCostFactor').' '.$inp('muell_faktor', $p['muell_faktor'], 2, 'width50').'</div>';
 print '</td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('KaVatRate').' / '.$langs->trans('KaValidDays').'</td><td>'.$inp('tva', $p['tva'], 1, 'width50').' % &nbsp; '.$inp('gueltig_tage', $p['gueltig_tage'], 0, 'width50').' '.$langs->trans('Days').'</td></tr>';
-print '<tr class="oddeven"><td></td><td><label><input type="checkbox" name="p_plaene_anhaengen" value="1"'.(!empty($p['plaene_anhaengen']) ? ' checked' : '').$disabled.'> '.$langs->trans('KaAttachPlans').'</label></td></tr>';
 print '</table></div>';
 
 // Ergebnis

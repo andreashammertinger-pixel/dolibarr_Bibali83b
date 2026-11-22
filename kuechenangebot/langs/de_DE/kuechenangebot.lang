@@ -281,3 +281,14 @@ KaPdfConfirmStart = Ich verlange ausdrücklich, dass mit Aufmaß, Bestellung und
 KaVerbraucher = Privatkunde (Verbraucher)
 KaVerbraucherHint = Im Angebot erscheinen die Bestätigungen zum Rücktrittsrecht (individuelle Anfertigung, Beginn vor Fristende) zum Ankreuzen.
 KaPdfIndividual = Dieses Angebot wurde nach Ihren individuellen Angaben erstellt: Die Küche wird nach Naturmaß, Farbe, Struktur, Größe, Ausführung und Geräteauswahl eigens für Sie geplant und angefertigt.
+KaPlans = Pläne
+KaPlansMigora = Pläne mit migora-Plankopf
+KaPlansWarn = Auf %s Seite(n) wurde kein Plankopf der Planerin gefunden – bitte Pläne kontrollieren.
+KaPlansError = Pläne konnten nicht umgewandelt werden.
+KaPlansInternal = nur intern – gehen erst mit „Unterschrieben“ zum Angebot
+KaPlansReleased = freigegeben – liegen beim Angebot
+KaPlanLabel = Bezeichnung im Plankopf
+KaPlanLabelHint = steht rechts unten in den Plänen; leer = „BVH“ + Bauvorhaben
+KaSetupPlanPrefix = Vorsatz Bezeichnung im Plankopf
+KaSetupPlanContact = Kontakt im Plankopf (3 Zeilen)
+KaSetupPlanContactHint = Name, Telefon, E-Mail – erscheinen in den Plänen rechts neben dem migora-Logo. Leer = Ansprechpartner + Firmen-E-Mail.

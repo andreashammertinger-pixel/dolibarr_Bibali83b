@@ -261,3 +261,14 @@ KaPdfConfirmStart = I expressly request that measurement, ordering and assembly 
 KaVerbraucher = Private customer (consumer)
 KaVerbraucherHint = The offer shows the confirmations on the right of withdrawal (individual manufacture, start before the period ends) as tick boxes.
 KaPdfIndividual = This offer has been prepared according to your individual specifications: the kitchen is planned and made especially for you according to site measurements, colour, texture, size, design and choice of appliances.
+KaPlans = Plans
+KaPlansMigora = Plans with migora title block
+KaPlansWarn = No planner title block found on %s page(s) – please check the plans.
+KaPlansError = Plans could not be converted.
+KaPlansInternal = internal only – added to the offer once it is signed
+KaPlansReleased = released – attached to the offer
+KaPlanLabel = Label in the plan title block
+KaPlanLabelHint = shown bottom right in the plans; empty = "BVH" + project
+KaSetupPlanPrefix = Prefix of the plan label
+KaSetupPlanContact = Contact in the plan title block (3 lines)
+KaSetupPlanContactHint = Name, phone, e-mail – shown in the plans next to the migora logo. Empty = contact person + company e-mail.

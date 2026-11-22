@@ -161,6 +161,8 @@ class KaService
 			if ($pl['bild']) {
 				$typ->image = $img;
 			}
+			$typ->save();
+			$this->convertPlan($kalk, $typ);
 		}
 		$typ->save();
 		// neue Kunden-Hinweise aus den Nobilia-Unterlagen vorauswählen, Bezeichnung übernehmen
@@ -292,18 +294,138 @@ class KaService
 			$this->errors = $p->errors;
 			return -2;
 		}
-		// Pläne als zusätzliche Dokumente
-		$dir = $conf->propal->multidir_output[$p->entity].'/'.dol_sanitizeFileName($p->ref);
-		foreach (glob($dir.'/Plaene_*.pdf') ?: array() as $old) {
-			@unlink($old);
+		// Pläne mit migora-Plankopf: erst ab „Unterschrieben“ beim Angebot, vorher entfernen
+		$this->syncPlans($kalk, $p);
+		return $p->id;
+	}
+
+	/** Zeilen für den Plankopf links: Einstellung KA_PLAN_KONTAKT oder Ansprechpartner + Firmen-E-Mail */
+	public static function planContact()
+	{
+		global $mysoc;
+		$lines = array_values(array_filter(array_map('trim', preg_split('/\r?\n/', getDolGlobalString('KA_PLAN_KONTAKT')))));
+		if (!$lines) {
+			$lines = array_values(array_filter(array_map('trim', explode(',', getDolGlobalString('KA_KONTAKT')))));
+			if (!empty($mysoc->email)) {
+				$lines[] = $mysoc->email;
+			}
 		}
-		if (!empty($kalk->params['plaene_anhaengen'])) {
+		return array_slice($lines, 0, 3);
+	}
+
+	/** Bezeichnung rechts im Plankopf */
+	public static function planLabel($kalk)
+	{
+		$l = trim((string) ($kalk->params['plan_label'] ?? ''));
+		if ($l === '') {
+			$l = trim(getDolGlobalString('KA_PLAN_PREFIX', 'BVH').' '.$kalk->label);
+		}
+		return $l;
+	}
+
+	/** Dateiname der umgewandelten Pläne eines Typs */
+	public static function planFile($typ)
+	{
+		return 'typ'.$typ->id.'_Plaene_migora.pdf';
+	}
+
+	/**
+	 * Pläne eines Typs mit migora-Plankopf erzeugen (intern in der Kalkulation)
+	 * @return int 1 = ok, 0 = keine Pläne, <0 Fehler
+	 */
+	public function convertPlan($kalk, $typ)
+	{
+		dol_include_once('/kuechenangebot/class/kaplanconverter.class.php');
+		if (!$typ->file_bd || !is_readable($kalk->getDir().'/'.$typ->file_bd)) {
+			return 0;
+		}
+		$conv = KaPlanConverter::fromFile($kalk->getDir().'/'.$typ->file_bd);
+		$logo = dol_buildpath('/kuechenangebot/img/plankopf_logo.jpg', 0);
+		$ok = $conv->convert($kalk->getDir().'/'.self::planFile($typ), self::planContact(), self::planLabel($kalk), $logo);
+		if (!$ok) {
+			$this->error = 'Pläne: '.$conv->error;
+			$typ->data['plan_status'] = 'error';
+			$typ->save();
+			return -1;
+		}
+		$miss = 0;
+		foreach ($conv->pagesInfo as $pi) {
+			if (!$pi['removed']) {
+				$miss++;
+			}
+		}
+		$typ->data['plan_status'] = $miss ? 'warn' : 'ok';
+		$typ->data['plan_missing'] = $miss;
+		$typ->save();
+		return 1;
+	}
+
+	/** Alle Pläne der Kalkulation neu erzeugen (z. B. nach Änderung der Bezeichnung) */
+	public function convertAllPlans($kalk)
+	{
+		foreach ($kalk->typen as $typ) {
+			$this->convertPlan($kalk, $typ);
+		}
+	}
+
+	/** Pläne dürfen zum Kunden: Angebot unterschrieben oder fakturiert */
+	public static function plansReleased($propal)
+	{
+		return $propal && in_array((int) $propal->statut, array(2, 4), true);
+	}
+
+	/**
+	 * Pläne beim Angebot (und bei daraus erstellten Aufträgen) ablegen bzw. entfernen
+	 * @param KaKalk $kalk
+	 * @param Propal $propal
+	 */
+	public function syncPlans($kalk, $propal)
+	{
+		global $conf;
+		$dirs = array($conf->propal->multidir_output[$propal->entity].'/'.dol_sanitizeFileName($propal->ref));
+		$released = self::plansReleased($propal);
+		if ($released) {
+			$propal->fetchObjectLinked($propal->id, 'propal', null, 'commande');
+			foreach ((array) ($propal->linkedObjects['commande'] ?? array()) as $cmd) {
+				$dirs[] = $conf->commande->multidir_output[$cmd->entity].'/'.dol_sanitizeFileName($cmd->ref);
+			}
+		}
+		$n = 0;
+		foreach ($dirs as $i => $dir) {
+			foreach (glob($dir.'/Plaene_*.pdf') ?: array() as $old) {
+				@unlink($old);
+			}
+			if (!$released) {
+				continue;
+			}
+			dol_mkdir($dir);
 			foreach ($kalk->typen as $typ) {
-				if ($typ->file_bd && is_readable($kalk->getDir().'/'.$typ->file_bd)) {
-					@copy($kalk->getDir().'/'.$typ->file_bd, $dir.'/Plaene_'.dol_sanitizeFileName($typ->label ?: 'Kueche'.$typ->id).'.pdf');
+				$src = $kalk->getDir().'/'.self::planFile($typ);
+				if (!is_readable($src)) {
+					$this->convertPlan($kalk, $typ);
+				}
+				if (is_readable($src)) {
+					$name = 'Plaene_'.dol_sanitizeFileName(str_replace(' ', '_', $typ->label ?: 'Kueche'.$typ->id)).'.pdf';
+					if (@copy($src, $dir.'/'.$name) && $i === 0) {
+						$n++;
+					}
 				}
 			}
 		}
-		return $p->id;
+		return $n;
+	}
+
+	/** Für den Trigger: Pläne zu einem Angebot freigeben */
+	public function syncPlansForProposal($propalid)
+	{
+		$kalk = new KaKalk($this->db);
+		if ($kalk->fetch(0, $propalid) <= 0) {
+			return 0;
+		}
+		$p = new Propal($this->db);
+		if ($p->fetch($propalid) <= 0) {
+			return 0;
+		}
+		return $this->syncPlans($kalk, $p);
 	}
 }

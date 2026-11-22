@@ -34,7 +34,7 @@ class KaPdfReader
 	 */
 	public static function fromFile($file)
 	{
-		return new self((string) @file_get_contents($file));
+		return new static((string) @file_get_contents($file));
 	}
 
 	/** @return int */
@@ -85,7 +85,7 @@ class KaPdfReader
 				$raw = substr($body, $s, ($es !== false ? $es : strlen($body)) - $s);
 				$stream = array('raw' => $raw, 'len' => $len);
 			}
-			$this->objects[$num] = array('dict' => trim($dict), 'stream' => $stream);
+			$this->objects[$num] = array('dict' => trim($dict), 'stream' => $stream, 'gen' => (int) $m[2][$i][0]);
 		}
 		// indirekte Längen auflösen
 		foreach ($this->objects as $num => $o) {

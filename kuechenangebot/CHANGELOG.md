@@ -1,5 +1,11 @@
 # Changelog Küchenangebot
 
+## 1.3.0
+- **Pläne mit migora-Plankopf**: Beim Hochladen der Pläne (BD…pdf) werden Logo und Kontakt der Planerin sowie die Kundenadresse aus dem PDF entfernt und durch migora-Logo, Kontakt und die Bezeichnung (z. B. „BVH …“) ersetzt – PHP-Fassung des migora Planumwandlers (Repository migora_logo_change), gleiche Bereiche und Positionen
+- **Freigabe erst nach Annahme**: Die Pläne liegen bis dahin nur intern in der Küchenkalkulation (Download-Link). Bei „Unterschrieben“ bzw. „Fakturiert“ kommen sie automatisch zu den Dokumenten des Angebots, bei Auftragserstellung auch zum Auftrag; beim Wiederöffnen werden sie beim Angebot entfernt
+- Neue Felder: „Bezeichnung im Plankopf“ je Kalkulation, Einstellungen „Kontakt im Plankopf“ und „Vorsatz Bezeichnung“
+- Entfernt: Option „Original-Pläne anhängen“ (hätte Pläne mit dem Logo der Planerin weitergegeben)
+
 ## 1.2.0
 - Privatkunden: Satz „Dieses Angebot wurde nach Ihren individuellen Angaben erstellt …“ auf dem Deckblatt, unter dem Gesamtbetrag und in der Angebotszeile in Dolibarr (de/hr/en)
 - Fix: Angebotszeile in Dolibarr zeigte Programm/Front und Küchentyp nicht an
