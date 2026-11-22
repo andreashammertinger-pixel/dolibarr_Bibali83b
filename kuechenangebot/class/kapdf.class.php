@@ -278,9 +278,11 @@ class KaPdf
 		if ($this->kalk->label) {
 			$info[] = array($this->t('KaPdfProject'), $this->kalk->label);
 		}
-		$contact = getDolGlobalString('KA_KONTAKT');
-		if ($contact) {
-			$info[] = array($this->t('KaPdfContact'), $contact);
+		$contact = trim(kaLines(getDolGlobalString('KA_KONTAKT')));
+		if ($contact !== '') {
+			// „Name, Telefon, E-Mail“ → je Angabe eine Zeile (Telefonnummer unter dem Namen)
+			$parts = array_filter(array_map('trim', preg_split('/\s*[,;\n]\s*/u', $contact)));
+			$info[] = array($this->t('KaPdfContact'), implode("\n", $parts));
 		}
 		$yy = $y;
 		foreach ($info as $row) {

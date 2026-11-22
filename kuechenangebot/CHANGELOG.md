@@ -1,5 +1,8 @@
 # Changelog Küchenangebot
 
+## 1.10.2
+- PDF Seite 1: „Ihr Ansprechpartner“ mehrzeilig – Name, darunter Telefonnummer (und ggf. E-Mail); Trennung in der Einstellung mit Komma
+
 ## 1.10.1
 - Fix: Mehrzeilige Felder (Angebotsbestimmungen, Wörterbuch, Kontakt im Plankopf, Textbausteine, Objektadresse, Anmerkungen) zeigten Zeilenumbrüche als „\n“ an; nach dem Speichern standen die Angebotsbestimmungen als ein Absatz unter Punkt 1. Umbrüche bleiben jetzt erhalten, bereits so gespeicherte Texte werden beim Lesen automatisch repariert
 

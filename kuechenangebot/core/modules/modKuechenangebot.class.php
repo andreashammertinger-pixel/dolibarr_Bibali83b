@@ -29,7 +29,7 @@ class modKuechenangebot extends DolibarrModules
 		$this->descriptionlong = 'Liest Nobilia-Angebot und Pläne (PDF) ein, kalkuliert Aufschlag, Antransport, Aufbau und Müllentsorgung, vergleicht mit Kennzahlen bisheriger Küchen (privat / Mehrfamilienhaus) und erzeugt ein Dolibarr-Angebot mit eigenem PDF (Deckblatt mit 3D-Bild, Hinweise, Angebotsbestimmungen, AGB-QR-Code, Unterschriftsfeld) – immer Deutsch, optional Kopie in Kroatisch oder Englisch.';
 		$this->editor_name = 'migora gmbh';
 		$this->editor_url = 'https://www.migora.at';
-		$this->version = '1.10.1';
+		$this->version = '1.10.2';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->picto = 'propal';
 
