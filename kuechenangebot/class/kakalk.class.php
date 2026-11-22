@@ -53,6 +53,8 @@ class KaKalk
 			'muell_faktor' => 1,
 			'tva' => (float) getDolGlobalString('KA_TVA', '20'),
 			'gueltig_tage' => (int) getDolGlobalString('KA_GUELTIG_TAGE', '30'),
+			'grundlage' => '', // Gespräch, z. B. „Beratungsgespräch beim Hausbesuch am 20.11.2026“ (leer = Standardtext)
+			'grundlage_docs' => 1, // Namen der Unterlagen im Angebot nennen
 			'plan_label' => '', // Bezeichnung rechts im Plankopf (leer = „BVH “ + Bauvorhaben)
 			'verbraucher' => $mfh ? 0 : 1, // Privatkunde: Bestätigungen zum Rücktrittsrecht im PDF
 			'zeige_geraetepreise' => 0,

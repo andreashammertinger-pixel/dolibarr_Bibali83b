@@ -41,6 +41,8 @@ Nobilia-Begriffe übersetzt ein eingebautes Wörterbuch. Fehlende Begriffe ergä
 ## Unterlagen (Grundlage des Angebots)
 Unter den Küchentypen gibt es den Bereich **Unterlagen**. Dort lassen sich beliebig viele Dateien sammeln, z. B. Einreichplan, Skizze, Fotos vom Raum oder Mails als PDF. Der Bereich darf auch leer bleiben. Die Dateien liegen nur intern bei der Kalkulation (`kalk/<id>/unterlagen/`), werden nicht zum Dolibarr-Angebot gelegt und gehen nicht an den Kunden. Wird die Kalkulation gelöscht, werden sie mitgelöscht.
 
+Im Angebot steht auf Seite 2 unter dem Preis kurz, worauf es beruht, z. B. *„Grundlage dieses Angebots: Beratungsgespräch beim Hausbesuch am 20.11.2026 sowie folgende Unterlagen: Einreichplan, Foto Raum.“* Den Text zum Gespräch trägst du im Bereich Unterlagen ein (leer = „unser Beratungsgespräch mit Ihnen“). Die Unterlagen erscheinen mit ihrem Dateinamen ohne Endung, Unterstriche werden zu Leerzeichen. Mit dem Häkchen „Unterlagen im Angebot nennen“ lässt sich die Aufzählung abschalten. Ein selbst eingetragener Gesprächstext erscheint auch in der Übersetzungskopie auf Deutsch.
+
 ## Pläne mit migora-Plankopf
 Beim Hochladen der **BD…pdf** erzeugt das Modul eine Fassung mit migora-Plankopf. Das ist die PHP-Fassung des *migora Planumwandlers* (Repository `migora_logo_change`) mit denselben Bereichen und Positionen:
 * links: Logo und Kontakt der Planerin werden **aus dem PDF entfernt** (nicht nur überdeckt) und durch `img/plankopf_logo.jpg` sowie drei Kontaktzeilen ersetzt (*Einstellungen → Kontakt im Plankopf*, sonst Ansprechpartner und Firmen-E-Mail)

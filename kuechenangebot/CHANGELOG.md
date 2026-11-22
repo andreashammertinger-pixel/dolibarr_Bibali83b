@@ -1,5 +1,8 @@
 # Changelog Küchenangebot
 
+## 1.5.0
+- Angebot nennt die **Grundlage**: „Grundlage dieses Angebots: Beratungsgespräch … sowie folgende Unterlagen: …“ (Seite 2 unter dem Preis). Text zum Gespräch je Kalkulation eintragbar, Unterlagen werden aus dem Bereich „Unterlagen“ genannt (abschaltbar); de/hr/en
+
 ## 1.4.0
 - **Unterlagen (Grundlage des Angebots)** in der Küchenkalkulation: beliebig viele Dateien hochladen (Einreichplan, Skizze, Fotos, PDFs …), anzeigen, herunterladen, löschen. Nur intern – sie werden nicht zum Angebot gelegt und nicht an den Kunden geschickt
 

@@ -299,3 +299,9 @@ KaDocsUpload = Hochladen
 KaDocsUploaded = %s Datei(en) hochgeladen.
 KaDocUploadError = %s konnte nicht hochgeladen werden.
 KaDocDelete = Datei wirklich löschen?
+KaPdfBasis = Grundlage dieses Angebots
+KaPdfBasisTalk = unser Beratungsgespräch mit Ihnen
+KaPdfBasisWithDocs = %s sowie folgende Unterlagen: %s.
+KaBasisTalk = Grundlage im Angebot: Gespräch
+KaBasisPlaceholder = z. B. Beratungsgespräch beim Hausbesuch am 20.11.2026 (leer = „unser Beratungsgespräch mit Ihnen“)
+KaBasisDocs = Unterlagen im Angebot nennen

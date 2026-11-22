@@ -279,3 +279,9 @@ KaDocsUpload = Upload
 KaDocsUploaded = %s file(s) uploaded.
 KaDocUploadError = %s could not be uploaded.
 KaDocDelete = Really delete this file?
+KaPdfBasis = Basis of this offer
+KaPdfBasisTalk = our consultation with you
+KaPdfBasisWithDocs = %s and the following documents: %s.
+KaBasisTalk = Basis in the offer: conversation
+KaBasisPlaceholder = e.g. consultation during home visit on 20/11/2026 (empty = "our consultation with you")
+KaBasisDocs = List the documents in the offer

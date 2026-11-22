@@ -548,9 +548,17 @@ class KaPdf
 		$this->sumRow($this->t('KaPdfGrandTotal'), kaMoney($c['vk_brutto']), true);
 		if (!empty($this->kalk->params['verbraucher'])) {
 			$pdf->Ln(2);
+			$pdf->setCellPaddings(0, 0, 0, 0);
 			$pdf->SetX($this->ml);
 			$pdf->SetFont($this->font, 'B', 8.5);
 			$pdf->MultiCell($w, 4.2, $this->t('KaPdfIndividual'), 0, 'L');
+		}
+		$basis = $this->basisText();
+		if ($basis !== '') {
+			$pdf->Ln(1.5);
+			$pdf->setCellPaddings(0, 0, 0, 0);
+			$pdf->SetFont($this->font, '', 8.5);
+			$pdf->writeHTMLCell($w, 4.2, $this->ml, $pdf->GetY(), '<b>'.dol_escape_htmltag($this->t('KaPdfBasis')).':</b> '.dol_escape_htmltag($basis), 0, 1, false, true, 'L');
 		}
 
 		// Ausstattung je Küchentyp
@@ -608,6 +616,26 @@ class KaPdf
 		$pdf->Cell(54, $bold ? 7 : 5, $label, 0, 0, 'L', $bold);
 		$pdf->Cell(26, $bold ? 7 : 5, $value, 0, 1, 'R', $bold);
 		$pdf->SetTextColor($this->dark[0], $this->dark[1], $this->dark[2]);
+	}
+
+	/** „Grundlage dieses Angebots: Gespräch … sowie folgende Unterlagen: …“ */
+	protected function basisText()
+	{
+		$talk = trim((string) ($this->kalk->params['grundlage'] ?? ''));
+		if ($talk === '') {
+			$talk = $this->t('KaPdfBasisTalk');
+		}
+		$names = array();
+		if (!empty($this->kalk->params['grundlage_docs'])) {
+			foreach (glob($this->kalk->getDir().'/unterlagen/*') ?: array() as $f) {
+				if (is_file($f)) {
+					$n = pathinfo($f, PATHINFO_FILENAME);
+					$names[] = trim(preg_replace('/\s+/', ' ', str_replace(array('_', '-'), ' ', preg_replace('/\.noexe$/', '', $n))));
+				}
+			}
+			sort($names, SORT_NATURAL | SORT_FLAG_CASE);
+		}
+		return $names ? $this->t('KaPdfBasisWithDocs', $talk, implode(', ', $names)) : $talk.'.';
 	}
 
 	/** Ausstattung und Geräte eines Küchentyps */

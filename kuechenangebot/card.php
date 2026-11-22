@@ -135,6 +135,8 @@ if ($action === 'save' && $canwrite) {
 			$p[$k] = kaNum('p_'.$k, (float) ($p[$k] ?? 0));
 		}
 		$p['plan_label'] = trim(GETPOST('p_plan_label', 'alphanohtml'));
+		$p['grundlage'] = trim(GETPOST('p_grundlage', 'alphanohtml'));
+		$p['grundlage_docs'] = GETPOST('p_grundlage_docs', 'int') ? 1 : 0;
 		$p['verbraucher'] = GETPOST('p_verbraucher', 'int') ? 1 : 0;
 		if ($isnew && $newname !== '') {
 			$p['verbraucher'] = (GETPOST('nc_type', 'aZ09') === 'company') ? 0 : 1;
@@ -498,6 +500,8 @@ foreach ($docs as $f) {
 if (!$docs) {
 	print '<tr class="oddeven"><td colspan="4"><span class="opacitymedium">'.$langs->trans('KaDocsNone').'</span></td></tr>';
 }
+print '<tr class="oddeven"><td colspan="4">'.$langs->trans('KaBasisTalk').' <input name="p_grundlage" class="minwidth500" value="'.dol_escape_htmltag($kalk->params['grundlage'] ?? '').'" placeholder="'.dol_escape_htmltag($langs->trans('KaBasisPlaceholder')).'"'.$disabled.'>';
+print ' &nbsp; <label><input type="checkbox" name="p_grundlage_docs" value="1"'.(!isset($kalk->params['grundlage_docs']) || !empty($kalk->params['grundlage_docs']) ? ' checked' : '').$disabled.'> '.$langs->trans('KaBasisDocs').'</label></td></tr>';
 if ($canwrite) {
 	print '<tr class="oddeven"><td colspan="4"><input type="file" name="docs[]" multiple> ';
 	print '<input type="submit" class="button smallpaddingimp" value="'.$langs->trans('KaDocsUpload').'" onclick="document.getElementById(\'ka_anchor\').value=\'docs\'"></td></tr>';
