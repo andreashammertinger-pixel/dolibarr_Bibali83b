@@ -1,5 +1,10 @@
 # Changelog Küchenangebot
 
+## 1.11.1
+- Fußzeile: österreichische Bezeichnungen statt „Prof Id 1/2/3“ – St.-Nr., FN, Firmenbuchgericht, Geschäftsführer (hr/en übersetzt)
+- Seite 1: Bezeichnung des Küchentyps (z. B. „Stan B, D, F“) in eigener Zeile unter „Darstellung unverbindlich …“
+- „Ausstattung im Detail“ zeigt das 3D-Bild bei jedem Küchentyp, auch beim ersten
+
 ## 1.11.0
 - **Interne Kalkulation (PDF)**: Knopf in der Küchenkalkulation öffnet eine Aufstellung nur zum internen Check bzw. als Vorlage (rot markiert „INTERN – nicht für Kunden“, wird nicht beim Angebot abgelegt): Kunde/Bauvorhaben/Art/Version/Angebot, verwendete Werte, je Küchentyp Nobilia-Angebot, Katalogwert, Faktor, Einkauf (ggf. laut AB), Laufmeter, Zusatzpositionen und Preisaufbau Kosten/Verkauf/Deckung je Küche (Küche, Montage, Antransport, Müll, Gemeinkosten, Rundung/Endpreis), Gesamtsummen inkl. kostendeckendem Preis, Deckungsbeitrag, Faktor, Preis-Check gegen bisherige Küchen
 

@@ -376,3 +376,7 @@ KaPdfPerKitchenNet = je Küche netto
 KaPdfGrandTotalNet = Gesamtbetrag netto
 KaPdfAcceptanceTextNet = Ich/Wir nehmen das Angebot Nr. %s vom %s zum Gesamtpreis von %s netto (zuzüglich der gesetzlichen Umsatzsteuer) an und erteile(n) den Auftrag zu den angeführten Bedingungen.
 KaCalcPdf = Interne Kalkulation (PDF)
+KaPdfTaxNo = St.-Nr.
+KaPdfFn = FN
+KaPdfCourt = Firmenbuchgericht
+KaPdfManagers = Geschäftsführer

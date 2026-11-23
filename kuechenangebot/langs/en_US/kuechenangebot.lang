@@ -356,3 +356,7 @@ KaPdfPerKitchenNet = per kitchen net
 KaPdfGrandTotalNet = Grand total net
 KaPdfAcceptanceTextNet = I/We accept offer no. %s dated %s at a total price of %s net (plus statutory VAT) and place the order under the conditions stated.
 KaCalcPdf = Internal costing (PDF)
+KaPdfTaxNo = Tax no.
+KaPdfFn = Company reg. no. (FN)
+KaPdfCourt = Commercial court
+KaPdfManagers = Managing directors

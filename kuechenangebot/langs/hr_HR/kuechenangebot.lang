@@ -106,3 +106,7 @@ KaPdfNetShort = neto
 KaPdfPerKitchenNet = po kuhinji neto
 KaPdfGrandTotalNet = Sveukupno neto
 KaPdfAcceptanceTextNet = Prihvaćam/prihvaćamo ponudu br. %s od %s po ukupnoj cijeni od %s neto (uvećano za zakonski PDV) i dajem/dajemo narudžbu pod navedenim uvjetima.
+KaPdfTaxNo = Porezni broj
+KaPdfFn = Broj u registru (FN)
+KaPdfCourt = Registarski sud
+KaPdfManagers = Direktori

@@ -214,15 +214,28 @@ class KaPdf
 		if ($mysoc->tva_intra) {
 			$l2[] = ($mysoc->country_code === 'AT' ? 'UID' : $this->l->transnoentitiesnoconv('VATIntraShort')).' '.$mysoc->tva_intra;
 		}
-		foreach (array(1, 2, 3, 4) as $k) {
-			$v = $mysoc->{'idprof'.$k};
-			if ($v) {
-				$lab = $this->l->transcountrynoentities('ProfId'.$k, $mysoc->country_code);
-				$l2[] = ($lab && strpos($lab, 'ProfId') === false ? $lab.' ' : '').$v;
+		if ($mysoc->country_code === 'AT') {
+			// Österreich: Prof Id 1 = Steuernummer, 2 = Firmenbuchgericht, 3 = Firmenbuchnummer
+			if ($mysoc->idprof1) {
+				$l2[] = $this->t('KaPdfTaxNo').' '.$mysoc->idprof1;
+			}
+			if ($mysoc->idprof3) {
+				$l2[] = $this->t('KaPdfFn').' '.$mysoc->idprof3;
+			}
+			if ($mysoc->idprof2) {
+				$l2[] = $this->t('KaPdfCourt').' '.$mysoc->idprof2;
+			}
+		} else {
+			foreach (array(1, 2, 3, 4) as $k) {
+				$v = $mysoc->{'idprof'.$k};
+				if ($v) {
+					$lab = $this->l->transcountrynoentities('ProfId'.$k, $mysoc->country_code);
+					$l2[] = ($lab && !preg_match('/Prof\s*Id/i', $lab) ? $lab.' ' : '').$v;
+				}
 			}
 		}
 		if (!empty($mysoc->managers)) {
-			$l2[] = $this->l->transnoentitiesnoconv('Managers').': '.$mysoc->managers;
+			$l2[] = $this->t('KaPdfManagers').': '.$mysoc->managers;
 		}
 		$pdf->SetXY($this->ml, $y + 1.5);
 		$pdf->MultiCell(150, 3, implode(' · ', array_filter($parts))."\n".implode(' · ', $l2), 0, 'L');
@@ -323,7 +336,13 @@ class KaPdf
 			$pdf->SetFont($this->font, 'I', 6.3);
 			$pdf->SetTextColor(130, 130, 130);
 			$pdf->SetXY($rx, $ry);
-			$pdf->MultiCell($cw, 2.8, $this->t('KaPdfPicture').($multi ? ' · '.$this->lbl($typ, 0) : ''), 0, 'R');
+			$pdf->MultiCell($cw, 2.8, $this->t('KaPdfPicture'), 0, 'R');
+			if ($typ->label !== '') {
+				$pdf->SetX($rx);
+				$pdf->SetFont($this->font, 'B', 7.5);
+				$pdf->SetTextColor(90, 90, 90);
+				$pdf->MultiCell($cw, 3.4, $this->lbl($typ, 0), 0, 'R');
+			}
 			$ry = $pdf->GetY() + 3;
 		}
 
@@ -862,14 +881,14 @@ class KaPdf
 		$pdf = $this->pdf;
 		$w = $this->pw - $this->ml - $this->mr;
 		$multi = count($this->kalk->typen) > 1;
-		if ($k > 0 && $this->imageFile($typ) && $pdf->GetY() > $this->ph - 100) {
+		if ($this->imageFile($typ) && $pdf->GetY() > $this->ph - 100) {
 			$pdf->AddPage();
 			$pdf->SetY(36);
 		}
 		$this->heading($this->t('KaPdfDetails').($multi || $typ->label ? ' – '.$this->lbl($typ, $k) : ''));
 
-		// weiteres 3D-Bild bei mehreren Typen
-		if ($k > 0) {
+		// 3D-Bild je Küchentyp (auch beim ersten), damit Text und Bild zusammen stehen
+		if (true) {
 			$img = $this->imageFile($typ);
 			if ($img) {
 				$size = @getimagesize($img);
