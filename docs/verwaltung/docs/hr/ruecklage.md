@@ -25,4 +25,13 @@ Rezultat po kući: najniže stanje, godina manjka i **minimalna stopa prema plan
 
 **Prikaz za ispis** (gumbi *Prikaz za ispis HR, DE, …*) na svakom jeziku – kao prilog za sastanak suvlasnika.
 
-**Uvoz**: JSON datoteka sa stavkama plana (višejezično). Kvačica *zamijeni postojeće stavke plana* sprječava dvostruki unos.
+### Uređivanje stavki plana
+
+- **Uredi stavke plana** (gumb iznad popisa): sve stavke mijenjate izravno u tablici – godinu, naziv, zgradu i ključ raspodjele, iznos po današnjim cijenama, osnovu procjene, aktivnost. Dolje unesite do 3 nove stavke, s *Obriši* uklonite, zatim *Spremi*.
+- **Nova stavka plana**: pojedinačna stavka s napomenom i prijevodima.
+- **Klik na naziv**: detalji stavke s napomenom i prijevodima po jeziku (za prikaz za ispis i objašnjenje).
+
+!!! tip "Prijevodi"
+    Ako promijenite tekst u tablici, prijevod na istom jeziku automatski se ažurira. Ostale jezike provjerite preko *klika na naziv*.
+
+**Uvoz** (sklopljeno, neobavezno – npr. za novi objekt): JSON datoteka sa stavkama plana (višejezično). Kvačica *zamijeni postojeće stavke plana* sprječava dvostruki unos.

@@ -94,6 +94,78 @@ if ($canwrite && $action === 'save') {
 		setEventMessages($repo->error, null, 'errors');
 	}
 }
+// Alle Planpositionen direkt in der Tabelle bearbeiten (ohne Import)
+if ($canwrite && $action === 'saveall') {
+	$existing = $repo->getReservePlan(false);
+	$rows = (array) GETPOST('rows', 'array');
+	$changed = $added = $deleted = 0;
+	$errs = array();
+	foreach ($rows as $rid => $r) {
+		$rid = (int) $rid;
+		$r = array_map(function ($v) {
+			return is_string($v) ? trim(strip_tags($v)) : $v;
+		}, (array) $r);
+		if ($rid > 0 && !isset($existing[$rid])) {
+			continue;
+		}
+		if ($rid > 0 && !empty($r['del'])) {
+			$repo->delete('hv_reserve_plan', $rid);
+			$deleted++;
+			continue;
+		}
+		$label = (string) ($r['label'] ?? '');
+		$year = (int) ($r['year'] ?? 0);
+		if ($rid <= 0 && $label === '') {
+			continue; // leere neue Zeile
+		}
+		if ($label === '' || $year < 2000) {
+			$errs[] = ($label !== '' ? $label : '#'.$rid).': '.$langs->trans('HvPlanYear').' / '.$langs->trans('Label');
+			continue;
+		}
+		$fields = array(
+			'label' => $label,
+			'fk_building' => (int) ($r['building'] ?? 0),
+			'alloc_key' => in_array($r['key'] ?? '', HvCalculator::keys(), true) ? $r['key'] : 'area',
+			'year_planned' => $year,
+			'amount' => (float) price2num((string) ($r['amount'] ?? '0')),
+			'basis' => (string) ($r['basis'] ?? ''),
+			'active' => !empty($r['active']) ? 1 : 0,
+		);
+		if ($rid > 0) {
+			$old = $existing[$rid];
+			// Übersetzung, die dem bisherigen Grundtext entspricht (Sprache der Eingabe), mitziehen
+			$tr = !empty($old->i18n) ? json_decode($old->i18n, true) : array();
+			foreach (array('label', 'basis') as $f) {
+				if ((string) $old->$f !== $fields[$f]) {
+					foreach ($tr as $l => $vals) {
+						if (isset($vals[$f]) && $vals[$f] === (string) $old->$f) {
+							$tr[$l][$f] = $fields[$f];
+						}
+					}
+				}
+			}
+			$fields['i18n'] = $tr ? json_encode($tr, JSON_UNESCAPED_UNICODE) : null;
+			$same = true;
+			foreach ($fields as $k => $v) {
+				if ($k !== 'i18n' && (string) $old->$k != (string) $v) {
+					$same = false;
+				}
+			}
+			if (!$same && $repo->save('hv_reserve_plan', $fields, $rid) > 0) {
+				$changed++;
+			}
+		} else {
+			$fields['position'] = 0;
+			$fields['note'] = '';
+			if ($repo->save('hv_reserve_plan', $fields, 0) > 0) {
+				$added++;
+			}
+		}
+	}
+	setEventMessages($langs->trans('HvPlanSavedAll', $changed, $added, $deleted), $errs ?: null, $errs ? 'warnings' : 'mesgs');
+	header('Location: '.$_SERVER['PHP_SELF'].($errs ? '?action=editall' : '').'#planitems');
+	exit;
+}
 if ($canwrite && $action === 'confirm_delete' && GETPOST('confirm') === 'yes') {
 	$repo->delete('hv_reserve_plan', $id);
 	header('Location: '.$_SERVER['PHP_SELF']);
@@ -209,7 +281,7 @@ if ($print) {
 		$btn .= '<a class="butAction small" href="'.$_SERVER['PHP_SELF'].'?print=1&lang='.$l.'" target="_blank">'.$langs->trans('HvPrintView').' '.strtoupper(substr($l, 0, 2)).'</a>';
 	}
 	if ($canwrite) {
-		$btn .= dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', $_SERVER['PHP_SELF'].'?action=create');
+		$btn .= dolGetButtonTitle($langs->trans('HvPlanNewItem'), '', 'fa fa-plus-circle', $_SERVER['PHP_SELF'].'?action=create');
 	}
 	print load_fiche_titre($langs->trans('HvReservePlan'), $btn, 'bank_account');
 	print '<div class="opacitymedium">'.$langs->trans('HvPlanAssumptions', price($proj['inflation']), dol_print_date(dol_now(), 'day')).'</div><br>';
@@ -279,7 +351,46 @@ foreach ($proj['years'] as $yr) {
 print '</table></div><br>';
 
 // Planpositionen
-print $print ? '<h3>'.$T->trans('HvPlanItems').'</h3>' : load_fiche_titre($T->trans('HvPlanItems'), '', '');
+$itemBtns = '';
+if (!$print && $canwrite && $action !== 'editall') {
+	$itemBtns = '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=editall#planitems">'.img_picto('', 'edit', 'class="pictofixedwidth"').$langs->trans('HvPlanEditAll').'</a>';
+	$itemBtns .= '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?action=create">'.img_picto('', 'add', 'class="pictofixedwidth"').$langs->trans('HvPlanNewItem').'</a>';
+}
+print '<a id="planitems"></a>';
+print $print ? '<h3>'.$T->trans('HvPlanItems').'</h3>' : load_fiche_titre($T->trans('HvPlanItems'), $itemBtns, '');
+if (!$print && $canwrite && $action === 'editall') {
+	print '<div class="opacitymedium">'.$langs->trans('HvPlanEditAllHelp').'</div>';
+	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="saveall">';
+	print '<style>.hvplanedit td{vertical-align:middle}.hvplanedit input.hvw{width:100%;box-sizing:border-box}.hvplanedit select{max-width:170px}</style>';
+	print '<div class="div-table-responsive"><table class="noborder centpercent hvplanedit"><tr class="liste_titre"><th>'.$langs->trans('HvPlanYear').'</th><th style="min-width:320px">'.$langs->trans('Label').'</th><th>'.$langs->trans('HvBuilding').' / '.$langs->trans('HvAllocKey').'</th><th class="right">'.$langs->trans('HvPlanAmount').' (€)</th><th style="min-width:240px">'.$langs->trans('HvPlanBasis').'</th><th class="center">'.$langs->trans('Active').'</th><th class="center">'.$langs->trans('Delete').'</th></tr>';
+	$keySel = function ($name, $cur) use ($langs) {
+		$h = '<select name="'.$name.'" class="flat">';
+		foreach (HvCalculator::keys() as $k) {
+			$h .= '<option value="'.$k.'"'.($cur === $k ? ' selected' : '').'>'.$langs->trans('HvKey_'.$k).'</option>';
+		}
+		return $h.'</select>';
+	};
+	$rowsEdit = $items;
+	for ($i = 1; $i <= 3; $i++) {
+		$rowsEdit['new'.$i] = (object) array('rowid' => -$i, 'label' => '', 'fk_building' => 0, 'alloc_key' => 'area', 'year_planned' => '', 'amount' => '', 'basis' => '', 'active' => 1);
+	}
+	foreach ($rowsEdit as $p) {
+		$n = 'rows['.((int) $p->rowid).']';
+		$isNew = (int) $p->rowid < 0;
+		print '<tr class="oddeven'.($isNew ? ' hvnewrow' : '').'">';
+		print '<td><input name="'.$n.'[year]" class="width50" inputmode="numeric" value="'.dol_escape_htmltag((string) $p->year_planned).'"'.($isNew ? ' placeholder="'.((int) dol_print_date(dol_now(), '%Y') + 5).'"' : '').'></td>';
+		print '<td><input name="'.$n.'[label]" class="hvw" value="'.dol_escape_htmltag($p->label).'"'.($isNew ? ' placeholder="'.dol_escape_htmltag($langs->trans('HvPlanNewItem')).'"' : '').'></td>';
+		print '<td>'.hvSelectBuilding($n.'[building]', (string) (int) $p->fk_building, $buildings, true).' '.'<br>'.$keySel($n.'[key]', $p->alloc_key ?: 'area').'</td>';
+		print '<td class="right"><input name="'.$n.'[amount]" class="width75 right" inputmode="decimal" value="'.($p->amount !== '' ? dol_escape_htmltag(price2num($p->amount)) : '').'"></td>';
+		print '<td><input name="'.$n.'[basis]" class="hvw" value="'.dol_escape_htmltag($p->basis).'"></td>';
+		print '<td class="center"><input type="checkbox" name="'.$n.'[active]" value="1"'.($p->active ? ' checked' : '').'></td>';
+		print '<td class="center">'.($isNew ? '' : '<input type="checkbox" name="'.$n.'[del]" value="1">').'</td></tr>';
+	}
+	print '</table></div><div class="center"><input type="submit" class="button button-save" value="'.$langs->trans('Save').'"> <a class="button button-cancel" href="'.$_SERVER['PHP_SELF'].'#planitems">'.$langs->trans('Cancel').'</a></div></form>';
+	llxFooter();
+	$db->close();
+	exit;
+}
 print '<div class="div-table-responsive"><table class="noborder centpercent"><tr class="liste_titre"><th>'.$T->trans('HvPlanYear').'</th><th>'.$T->trans('Label').'</th><th>'.$T->trans('HvBuilding').'</th><th class="right">'.$T->trans('HvPlanAmount').'</th><th>'.$T->trans('HvPlanBasis').'</th>'.(!$print ? '<th class="center">'.$langs->trans('Active').'</th><th></th>' : '').'</tr>';
 $sum = 0;
 foreach ($items as $p) {
@@ -291,7 +402,11 @@ foreach ($items as $p) {
 	}
 	$b = (int) $p->fk_building ? ($buildings[(int) $p->fk_building] ?? null) : null;
 	$note = $txt($p, 'note');
-	print '<tr class="oddeven'.($p->active ? '' : ' opacitymedium').'"><td>'.((int) $p->year_planned).'</td><td>'.dol_escape_htmltag($txt($p, 'label')).($note ? '<br><span class="opacitymedium small">'.dol_escape_htmltag($note).'</span>' : '').'</td>';
+	$lbl = dol_escape_htmltag($txt($p, 'label'));
+	if (!$print && $canwrite) {
+		$lbl = '<a href="'.$_SERVER['PHP_SELF'].'?action=edit&id='.$p->rowid.'" title="'.dol_escape_htmltag($langs->trans('HvPlanEditDetails')).'">'.$lbl.'</a>';
+	}
+	print '<tr class="oddeven'.($p->active ? '' : ' opacitymedium').'"><td>'.((int) $p->year_planned).'</td><td>'.$lbl.($note ? '<br><span class="opacitymedium small">'.dol_escape_htmltag($note).'</span>' : '').'</td>';
 	print '<td>'.dol_escape_htmltag($bname($b)).(!$b ? ' <span class="opacitymedium">('.$T->trans('HvKey_'.($p->alloc_key ?: 'area')).')</span>' : '').'</td>';
 	print '<td class="right">'.$fm($p->amount).'</td><td class="small">'.dol_escape_htmltag($txt($p, 'basis')).'</td>';
 	if (!$print) {
@@ -312,9 +427,9 @@ if ($print) {
 	exit;
 }
 if ($canwrite) {
-	print '<br>'.load_fiche_titre($langs->trans('HvPlanImport'), '', '');
+	print '<br><details><summary class="opacitymedium" style="cursor:pointer">'.$langs->trans('HvPlanImport').' ('.$langs->trans('HvPlanImportOptional').')</summary><br>';
 	print '<p>'.$langs->trans('HvPlanImportHelp').' <a href="'.dol_buildpath('/hausverwaltung/data/vorlage_ruecklagenplan.json', 1).'" download>'.$langs->trans('HvImportTemplate').'</a></p>';
-	print '<form method="POST" enctype="multipart/form-data" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="import"><input type="file" name="planfile" accept=".json,application/json"> <label><input type="checkbox" name="replace" value="1" checked> '.$langs->trans('HvPlanReplace').'</label> <input type="submit" class="button" value="'.$langs->trans('HvPlanImport').'"></form>';
+	print '<form method="POST" enctype="multipart/form-data" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="import"><input type="file" name="planfile" accept=".json,application/json"> <label><input type="checkbox" name="replace" value="1" checked> '.$langs->trans('HvPlanReplace').'</label> <input type="submit" class="button" value="'.$langs->trans('HvPlanImport').'"></form></details>';
 }
 llxFooter();
 $db->close();

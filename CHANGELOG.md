@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.13.0
+- Rücklagen-Planung: **Planpositionen direkt im Modul bearbeiten** – Knopf „Planpositionen bearbeiten“ (alle Positionen in einer Tabelle: Jahr, Bezeichnung, Gebäude/Schlüssel, Betrag, Schätzgrundlage, aktiv, löschen, bis zu 3 neue), Knopf „Neue Planposition“, Klick auf die Bezeichnung öffnet Details und Übersetzungen
+- Geänderte Texte ziehen die Übersetzung derselben Sprache automatisch mit
+- Import nur noch optional (eingeklappt)
+
 ## 1.12.0
 - **Hausverwaltungs-Begriffe in Dolibarr** (Seite Sprachen, ein Klick, nur für die aktuelle Firma, alle Sprachen, update-sicher): Geschäftspartner → *Apartments & Kontakte*, Kunden → *Apartments*, Kontakte/Adressen → *Eigentümer & Kontakte*, Rechnung | Zahlung → *Vorschreibung | Zahlung*, Kundenrechnungen → *Vorschreibungen*, Kundenzahlungen → *Zahlungen der Eigentümer*, Spalten Name/Art/Apartment-Nr./Zuständig; Interessenten ausgeblendet; Zurücksetzen möglich
 - Doku mit den neuen Menünamen (Handbuch de/hr, Eigentümerhilfe 5 Sprachen)
