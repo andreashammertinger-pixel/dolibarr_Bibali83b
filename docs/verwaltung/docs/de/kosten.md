@@ -8,7 +8,7 @@ Jede **Kostenart** hat:
 
 | Feld | Bedeutung |
 |---|---|
-| Bezeichnung | wird in Erläuterung und Abrechnung gedruckt; Übersetzungen je Sprache möglich |
+| Bezeichnung | wird in Erläuterung und Abrechnung gedruckt; mit KI-Übersetzung automatisch in allen Sprachen (siehe [Sprachen und Texte](sprachen.md#ki-ubersetzung)) |
 | Gebäude | ein Haus oder **alle Gebäude** |
 | Betrag netto je Periode + MwSt | z. B. Versicherungsprämie pro Jahr |
 | Zeitraum (Monate) | 12 = Jahresbetrag, 6 = halbjährlich, 1 = monatlich |

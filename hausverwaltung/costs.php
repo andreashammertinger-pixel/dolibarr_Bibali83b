@@ -71,12 +71,34 @@ if ($canwrite && $action === 'save') {
 			$trl[$l]['label'] = $v;
 		}
 	}
+	// der Text im Hauptfeld gilt für die Sprache, in der geschrieben wurde (auch ohne Übersetzung der anderen)
+	if ($fields['label'] !== '' && ($trl || GETPOSTISSET('hv_srclang'))) {
+		$trl[hvSrcLang()]['label'] = $fields['label'];
+	}
 	$fields['i18n'] = $trl ? json_encode($trl, JSON_UNESCAPED_UNICODE) : null;
+	// KI-Übersetzung: neue Kostenart oder geänderte Bezeichnung, wenn beim Speichern bestätigt
+	$aiErr = '';
+	if (GETPOST('hv_translate', 'int') === '1' && $fields['label'] !== '') {
+		dol_include_once('/hausverwaltung/class/hvtranslator.class.php');
+		if (HvTranslator::enabled()) {
+			$allItems = $repo->getCostItems(false);
+			$old = ($id && isset($allItems[$id])) ? $allItems[$id] : null;
+			$oldTr = ($old && !empty($old->i18n)) ? (array) json_decode($old->i18n, true) : array();
+			$skip = array();
+			foreach ($trl as $l => $v) {
+				if (($oldTr[$l]['label'] ?? '') !== $v['label']) {
+					$skip[] = $l; // in diesem Speichervorgang von Hand geändert
+				}
+			}
+			$src = hvSrcLang();
+			$fields['i18n'] = hvAiTranslateI18n($fields['i18n'], array('label' => $fields['label']), $src, array_diff($skip, array($src)), $aiErr);
+		}
+	}
 	if (empty($fields['label'])) {
 		setEventMessages($langs->trans('ErrorFieldRequired', $langs->transnoentities('Label')), null, 'errors');
 		$action = $id ? 'edit' : 'create';
 	} elseif ($repo->save('hv_costitem', $fields, $id) > 0) {
-		setEventMessages($langs->trans('HvSaved'), null);
+		setEventMessages($langs->trans('HvSaved'), $aiErr !== '' ? array($langs->trans('HvAiFailed', $aiErr)) : null, $aiErr !== '' ? 'warnings' : 'mesgs');
 		header('Location: '.$_SERVER['PHP_SELF']);
 		exit;
 	} else {
@@ -108,9 +130,15 @@ if ($action === 'delete') {
 
 if ($canwrite && in_array($action, array('create', 'edit'))) {
 	$c = ($id && isset($items[$id])) ? $items[$id] : (object) array('label' => '', 'fk_building' => 0, 'period_months' => 12, 'amount_net' => '', 'vat_rate' => 25, 'alloc_key' => 'area', 'fk_soc_supplier' => 0, 'reference' => '', 'position' => 0, 'active' => 1, 'note' => '');
-	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="save"><input type="hidden" name="id" value="'.$id.'">';
+	$tri = !empty($c->i18n) ? json_decode($c->i18n, true) : array();
+	dol_include_once('/hausverwaltung/class/hvtranslator.class.php');
+	$ai = HvTranslator::enabled();
+	// angezeigt und bearbeitet wird der Text in der Sprache des Benutzers (falls vorhanden)
+	$srcL = hvSrcLang();
+	$lblShown = (string) ($tri[$srcL]['label'] ?? $c->label);
+	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'" class="hv-ask-translate" data-hastr="'.(count($tri) > 0 ? '1' : '0').'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="save"><input type="hidden" name="id" value="'.$id.'">';
 	print '<table class="border centpercent tableforfieldedit">';
-	print '<tr><td class="titlefield fieldrequired">'.$langs->trans('Label').'</td><td><input name="label" class="minwidth300" value="'.dol_escape_htmltag($c->label).'"></td></tr>';
+	print '<tr><td class="titlefield fieldrequired">'.$langs->trans('Label').'</td><td><input name="label" class="minwidth300" data-hvsrc="1" data-orig="'.dol_escape_htmltag($lblShown).'" value="'.dol_escape_htmltag($lblShown).'">'.($ai ? ' <span class="opacitymedium">'.$langs->trans('HvAiWrittenIn').'</span> '.hvSrcLangSelect().' <span class="opacitymedium small">'.$langs->trans('HvAiAutoHelp').'</span>' : '').'</td></tr>';
 	print '<tr><td>'.$langs->trans('HvBuilding').'</td><td>'.hvSelectBuilding('fk_building', (string) (int) $c->fk_building, $buildings, true).'</td></tr>';
 	print '<tr><td>'.$langs->trans('HvRhythm').'</td><td>'.hvSelectPeriod('period_months', $c->period_months).'</td></tr>';
 	print '<tr><td>'.$langs->trans('HvAllocKey').'</td><td><select name="alloc_key" class="flat">';
@@ -125,13 +153,13 @@ if ($canwrite && in_array($action, array('create', 'edit'))) {
 	print '<tr><td>'.$langs->trans('Position').'</td><td><input name="position" class="width50" value="'.((int) $c->position).'"></td></tr>';
 	print '<tr><td>'.$langs->trans('Active').'</td><td><input type="checkbox" name="active" value="1"'.($c->active ? ' checked' : '').'></td></tr>';
 	print '<tr><td>'.$langs->trans('Note').'</td><td><textarea name="note" class="quatrevingtpercent" rows="2">'.dol_escape_htmltag($c->note).'</textarea></td></tr>';
-	$tri = !empty($c->i18n) ? json_decode($c->i18n, true) : array();
 	print '<tr><td>'.$langs->trans('HvPlanTranslations').'<br><span class="opacitymedium small">'.$langs->trans('HvCostTranslationsHelp').'</span></td><td>';
 	foreach (hvDocLangs() as $l) {
 		print '<div class="paddingbottom"><span class="inline-block width75">'.$l.'</span><input name="tr_label['.$l.']" class="minwidth400" value="'.dol_escape_htmltag($tri[$l]['label'] ?? '').'"></div>';
 	}
 	print '</td></tr>';
 	print '</table><div class="center"><input type="submit" class="button button-save" value="'.$langs->trans('Save').'"> <a class="button button-cancel" href="'.$_SERVER['PHP_SELF'].'">'.$langs->trans('Cancel').'</a></div></form><br>';
+	print hvTranslateAskJs();
 }
 
 $tot = array('m' => 0, 'y' => 0);
@@ -143,7 +171,7 @@ foreach ($items as $c) {
 		$tot['m'] += $m;
 		$tot['y'] += $m * 12;
 	}
-	print '<tr class="oddeven'.($c->active ? '' : ' opacitymedium').'"><td>'.dol_escape_htmltag($c->label).'</td><td>'.dol_escape_htmltag(hvBuildingLabel($c->fk_building, $buildings)).'</td>';
+	print '<tr class="oddeven'.($c->active ? '' : ' opacitymedium').'"><td>'.dol_escape_htmltag(hvI18n($c, 'label', $langs->defaultlang)).'</td><td>'.dol_escape_htmltag(hvBuildingLabel($c->fk_building, $buildings)).'</td>';
 	print '<td>'.$langs->trans('HvPeriod'.((int) $c->period_months)).'</td><td>'.$langs->trans('HvKey_'.($c->alloc_key ?: 'area')).'</td>';
 	print '<td class="right">'.hvMoney($c->amount_net).'</td><td class="right">'.vatrate($c->vat_rate, true).'</td><td class="right">'.hvMoney(HvCalculator::gross($c)).'</td>';
 	print '<td class="right">'.hvMoney($m).'</td><td class="right">'.hvMoney($m * 12).'</td>';

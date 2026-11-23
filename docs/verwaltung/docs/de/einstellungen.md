@@ -15,6 +15,7 @@
 | Erläuterung anhängen | Erläuterung zur Vorschreibung mitsenden |
 | Adresse Eigentümer-Zugang | erscheint in der Erläuterung |
 | Hilfe-Adresse | Basisadresse dieses Handbuchs |
+| KI-Übersetzung | API-Schlüssel (Anthropic, verschlüsselt gespeichert), ein/aus, *Verbindung testen* – siehe [Sprachen und Texte](sprachen.md#ki-ubersetzung) |
 | Baukostensteigerung / Planungszeitraum | für die Rücklagen-Planung |
 
 ## Neues Objekt anlegen

@@ -69,6 +69,31 @@ if ($action === 'save') {
 	exit;
 }
 
+// KI-Übersetzung: Schlüssel speichern / löschen / testen (eigenes Formular, Schlüssel wird nie angezeigt)
+dol_include_once('/hausverwaltung/class/hvtranslator.class.php');
+if ($action === 'aisave') {
+	$k = trim((string) GETPOST('ai_key', 'none'));
+	if (GETPOSTINT('ai_delete')) {
+		HvTranslator::saveKey($db, '');
+	} elseif ($k !== '') {
+		HvTranslator::saveKey($db, $k);
+	}
+	dolibarr_set_const($db, 'HAUSVERWALTUNG_AI_TRANSLATE', GETPOSTINT('ai_on') ? '1' : '0', 'chaine', 0, '', $conf->entity);
+	setEventMessages($langs->trans('SetupSaved'), null);
+	header('Location: '.$_SERVER['PHP_SELF'].'#ai');
+	exit;
+}
+if ($action === 'aitest') {
+	$tl = new HvTranslator();
+	$res = $tl->translate(array('t' => 'Gebäudeversicherung Haus 1'), 'de_DE', array('hr_HR', 'en_US'));
+	if ($res && !empty($res['hr_HR']['t'])) {
+		setEventMessages($langs->trans('HvAiTestOk', $res['hr_HR']['t'], $res['en_US']['t'] ?? '', (int) ($tl->usage['input_tokens'] ?? 0) + (int) ($tl->usage['output_tokens'] ?? 0)), null);
+	} else {
+		setEventMessages($langs->trans('HvAiFailed', $tl->error ?: '?'), null, 'errors');
+	}
+	header('Location: '.$_SERVER['PHP_SELF'].'#ai');
+	exit;
+}
 if ($action === 'importseed') {
 	$repo = new HvRepository($db);
 	// Startdaten aus hochgeladener JSON-Datei (Aufbau siehe data/vorlage_startdaten.json)
@@ -202,6 +227,20 @@ print '<tr class="oddeven"><td>'.$langs->trans('HvOwnerPortalSetting').'</td><td
 print '<tr class="oddeven"><td>'.$langs->trans('HvMailBccSetting').'</td><td><input name="HAUSVERWALTUNG_MAIL_BCC" class="minwidth250" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_MAIL_BCC')).'"></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('VAT').' (Vorschreibung)</td><td><input name="HAUSVERWALTUNG_VAT_RATE" class="width50" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_VAT_RATE', '0')).'"> %</td></tr>';
 print '</table><div class="center"><input type="submit" class="button button-save" value="'.$langs->trans('Save').'"></div></form><br>';
+
+// KI-Übersetzung
+print '<a id="ai"></a>'.load_fiche_titre($langs->trans('HvAiTitle'), '', 'language');
+print '<div class="opacitymedium">'.$langs->trans('HvAiHelp').'</div><br>';
+print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'" autocomplete="off"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="aisave">';
+print '<table class="noborder centpercent"><tr class="liste_titre"><td class="titlefield">'.$langs->trans('Parameter').'</td><td>'.$langs->trans('Value').'</td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans('HvAiKey').'</td><td><input type="password" name="ai_key" class="minwidth300" autocomplete="new-password" placeholder="'.dol_escape_htmltag(HvTranslator::hasKey() ? $langs->trans('HvAiKeySet') : 'sk-ant-…').'"> ';
+print (HvTranslator::hasKey() ? '<span class="badge badge-status4">'.$langs->trans('HvAiKeySet').'</span> <label><input type="checkbox" name="ai_delete" value="1"> '.$langs->trans('Delete').'</label>' : '<span class="opacitymedium">'.$langs->trans('HvAiKeyHowto').'</span>').'</td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans('HvAiOn').'</td><td><input type="checkbox" name="ai_on" value="1"'.(getDolGlobalString('HAUSVERWALTUNG_AI_TRANSLATE', '1') === '1' ? ' checked' : '').'> <span class="opacitymedium">'.$langs->trans('HvAiOnHelp', getDolGlobalString('HAUSVERWALTUNG_AI_MODEL', HvTranslator::DEFAULT_MODEL)).'</span></td></tr>';
+print '</table><div class="center"><input type="submit" class="button button-save" value="'.$langs->trans('Save').'"></div></form>';
+if (HvTranslator::hasKey()) {
+	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'" class="center"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="aitest"><input type="submit" class="button" value="'.$langs->trans('HvAiTest').'"></form>';
+}
+print '<br>';
 
 print load_fiche_titre($langs->trans('HvImportSeed'), '', '');
 print '<p>'.$langs->trans('HvImportSeedHelp').'</p>';

@@ -43,3 +43,18 @@ Dolibarr općenito govori o *trećim osobama*, *kupcima* i *izlaznim računima*.
 | Prodajni predstavnici | Zadužena osoba |
 
 *Mogući kupci* se skrivaju. Pojmovi ostaju sačuvani pri ažuriranju Dolibarra; **Vrati** vraća pojmove Dolibarra. Pojedine pojmove moguće je prilagoditi pod *Postavke → Prijevod*.
+
+## AI prijevod
+
+S API ključem (Postavke → *AI prijevod*) Dolibarr automatski prevodi tekstove za dokumente:
+
+- **Novi tekstovi** (nova vrsta troška, nova stavka plana, novi redak u *Uredi stavke plana*) pri spremanju se prevode na sve jezike dokumenata.
+- **Promijenjeni postojeći tekstovi**: pri spremanju Dolibarr pita **„Treba li promjenu preuzeti i na ostalim jezicima?“** – *Da, prevedi* ili *Ne, samo ovaj jezik*.
+- **napisano na**: jezik na kojem pišete (unaprijed postavljen Vaš jezik). Svaki djelatnik piše na svom jeziku.
+- Ručno ispravljeni prijevodi ne prepisuju se pri istom spremanju.
+- **Stranica Jezici → Prevedi**: promijenjeni tekstovni blokovi po želji se preuzimaju na sve jezike; **Automatski prevedi nedostajuće tekstove** jednim klikom popunjava novi jezik (npr. talijanski).
+
+!!! warning "Bez osobnih podataka"
+    Šalju se samo sami tekstovi. U ta polja ne upisujte imena, OIB ili bankovne podatke.
+
+Ako usluga nije dostupna, tekst se ipak sprema; poruka na to upozorava.

@@ -8,7 +8,7 @@ Svaka **vrsta troška** ima:
 
 | Polje | Značenje |
 |---|---|
-| Naziv | ispisuje se u objašnjenju i obračunu; moguć prijevod po jeziku |
+| Naziv | ispisuje se u objašnjenju i obračunu; s AI prijevodom automatski na svim jezicima (vidi [Jezici i tekstovi](sprachen.md#ai-prijevod)) |
 | Zgrada | jedna kuća ili **sve zgrade** |
 | Iznos neto po razdoblju + PDV | npr. godišnja premija osiguranja |
 | Razdoblje (mjeseci) | 12 = godišnji iznos, 6 = polugodišnje, 1 = mjesečno |

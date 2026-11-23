@@ -315,3 +315,98 @@ function hvApplyTerms($on)
 	}
 	return $n;
 }
+
+/**
+ * KI-Übersetzung von Datenfeldern (Kostenarten, Planpositionen) in die i18n-Spalte.
+ *
+ * @param string|null          $i18nJson  bisherige Übersetzungen
+ * @param array<string,string> $fields    Feld => Text in der Sprache $src
+ * @param string               $src       Sprache, in der geschrieben wurde
+ * @param string[]             $skipLangs Sprachen, die in diesem Speichervorgang von Hand geändert wurden
+ * @param string               $error     Fehlertext (Rückgabe)
+ * @return string|null neues i18n-JSON
+ */
+function hvAiTranslateI18n($i18nJson, array $fields, $src, array $skipLangs, &$error = '')
+{
+	dol_include_once('/hausverwaltung/class/hvtranslator.class.php');
+	$tr = !empty($i18nJson) ? (array) json_decode($i18nJson, true) : array();
+	foreach ($fields as $f => $v) {
+		if (trim((string) $v) !== '') {
+			$tr[$src][$f] = $v;
+		}
+	}
+	$targets = array_diff(hvDocLangs(), array($src), $skipLangs);
+	$t = new HvTranslator();
+	$res = $t->translate($fields, $src, $targets);
+	if ($res === false) {
+		$error = $t->error;
+	} else {
+		foreach ($res as $l => $vals) {
+			foreach ($vals as $f => $v) {
+				$tr[$l][$f] = $v;
+			}
+		}
+	}
+	return $tr ? json_encode($tr, JSON_UNESCAPED_UNICODE) : null;
+}
+
+/** Auswahl „geschrieben in“ (Sprache des Textes) – Standard: Sprache des Benutzers */
+function hvSrcLangSelect($name = 'hv_srclang')
+{
+	global $langs;
+	$cur = in_array($langs->defaultlang, hvDocLangs(), true) ? $langs->defaultlang : hvDocLangs()[0];
+	$h = '<select name="'.$name.'" class="flat">';
+	foreach (hvDocLangs() as $l) {
+		$h .= '<option value="'.$l.'"'.($l === $cur ? ' selected' : '').'>'.$l.'</option>';
+	}
+	return $h.'</select>';
+}
+
+/** Sprache, in der geschrieben wurde (aus Formular), geprüft */
+function hvSrcLang($name = 'hv_srclang')
+{
+	global $langs;
+	$l = preg_replace('/[^a-zA-Z_]/', '', (string) GETPOST($name, 'alpha'));
+	return in_array($l, hvDocLangs(), true) ? $l : (in_array($langs->defaultlang, hvDocLangs(), true) ? $langs->defaultlang : hvDocLangs()[0]);
+}
+
+/**
+ * Nachfrage beim Speichern: Wurde ein bestehender Text geändert, fragen, ob die anderen Sprachen die Änderung übernehmen.
+ * Formular: class="hv-ask-translate", data-hastr="1" wenn es schon Übersetzungen gibt; Quellfelder mit data-hvsrc und data-orig.
+ * Ergebnis im versteckten Feld hv_translate (1 = übersetzen, 0 = nur diese Sprache).
+ */
+function hvTranslateAskJs()
+{
+	global $langs;
+	dol_include_once('/hausverwaltung/class/hvtranslator.class.php');
+	if (!HvTranslator::enabled()) {
+		return '';
+	}
+	$q = dol_escape_js($langs->transnoentities('HvAiAskQuestion'));
+	$t = dol_escape_js($langs->transnoentities('HvAiAskTitle'));
+	$yes = dol_escape_js($langs->transnoentities('HvAiAskYes'));
+	$no = dol_escape_js($langs->transnoentities('HvAiAskNo'));
+	return '<script>
+jQuery(function ($) {
+	$("form.hv-ask-translate").each(function () {
+		var f = $(this);
+		if (!f.find("input[name=hv_translate]").length) { f.append(\'<input type="hidden" name="hv_translate" value="">\'); }
+		f.on("submit", function (e) {
+			var h = f.find("input[name=hv_translate]");
+			if (h.val() !== "") { return true; }
+			var diff = function () { return String($(this).val()) !== String($(this).attr("data-orig")); };
+			var changed = f.find("[data-hvsrc]").not("[data-hvnew]").filter(diff).length;
+			var added = f.find("[data-hvsrc][data-hvnew]").filter(diff).length;
+			if (!changed) { h.val(added ? "1" : "0"); return true; }
+			if (f.attr("data-hastr") !== "1") { h.val("1"); return true; }
+			e.preventDefault();
+			var go = function (v) { h.val(v); HTMLFormElement.prototype.submit.call(f[0]); };
+			$("<div>").text("'.$q.'").dialog({ title: "'.$t.'", modal: true, width: 460,
+				buttons: [{ text: "'.$yes.'", click: function () { $(this).dialog("close"); go("1"); } },
+				          { text: "'.$no.'", click: function () { $(this).dialog("close"); go("0"); } }] });
+			return false;
+		});
+	});
+});
+</script>';
+}

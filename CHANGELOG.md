@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.14.0
+- **KI-Übersetzung** (Claude-API, eigener API-Schlüssel, verschlüsselt gespeichert): neue Kostenarten, Planpositionen und Textbausteine werden beim Speichern in alle Dokumentsprachen übersetzt; jeder Bearbeiter schreibt in seiner Sprache („geschrieben in“)
+- Bei Änderung bestehender Texte Nachfrage: „Änderung auch in die anderen Sprachen übernehmen?“ – Ja, übersetzen / Nein, nur diese Sprache; von Hand korrigierte Übersetzungen bleiben erhalten
+- Sprachen-Seite: geänderte Textbausteine auf Wunsch in alle Sprachen; „Fehlende Texte automatisch übersetzen“ für neue Sprachen
+- Fester Wortschatz (pričuva, zaduženje …), Platzhalter bleiben erhalten; bei Ausfall des Dienstes wird trotzdem gespeichert
+- Einstellungen: API-Schlüssel, ein/aus, Verbindung testen
+- Listen zeigen Kostenarten und Planpositionen in der Sprache des Benutzers
+
 ## 1.13.0
 - Rücklagen-Planung: **Planpositionen direkt im Modul bearbeiten** – Knopf „Planpositionen bearbeiten“ (alle Positionen in einer Tabelle: Jahr, Bezeichnung, Gebäude/Schlüssel, Betrag, Schätzgrundlage, aktiv, löschen, bis zu 3 neue), Knopf „Neue Planposition“, Klick auf die Bezeichnung öffnet Details und Übersetzungen
 - Geänderte Texte ziehen die Übersetzung derselben Sprache automatisch mit

@@ -94,9 +94,13 @@ if ($action === 'addlang' && preg_match('/^[a-z]{2}_[A-Z]{2}$/', $lang)) {
 }
 if ($action === 'save' && preg_match('/^[a-z]{2}_[A-Z]{2}$/', $lang)) {
 	$cur = hvLangValues($lang);
+	$chgKeys = $chgData = array();
 	foreach ((array) GETPOST('k', 'array') as $k => $v) {
 		if (isset($keys[$k])) {
 			$v = trim(strip_tags((string) $v));
+			if ($v !== '' && ($cur[$k]['value'] ?? '') !== '' && $v !== $cur[$k]['value']) {
+				$chgKeys[$k] = $v; // bestehender Text geändert
+			}
 			$fileVal = (($cur[$k]['src'] ?? '') === 'file') ? $cur[$k]['value'] : null;
 			if ($v !== '' && $v !== $fileVal) {
 				hvSaveTrans($lang, $k, $v);
@@ -109,10 +113,93 @@ if ($action === 'save' && preg_match('/^[a-z]{2}_[A-Z]{2}$/', $lang)) {
 	foreach (hvDataRows($repo) as $r) {
 		$id = (int) $r['obj']->rowid;
 		if (isset($d[$r['table']][$id])) {
-			hvSetI18n($db, $r['table'], $r['obj'], $lang, array_intersect_key((array) $d[$r['table']][$id], array_flip($r['fields'])));
+			$vals = array_intersect_key((array) $d[$r['table']][$id], array_flip($r['fields']));
+			$otr = !empty($r['obj']->i18n) ? (array) json_decode($r['obj']->i18n, true) : array();
+			foreach ($vals as $f => $v) {
+				$v = trim(strip_tags((string) $v));
+				$was = (string) ($otr[$lang][$f] ?? '');
+				if ($v !== '' && $was !== '' && $v !== $was) {
+					$chgData[$r['table'].'|'.$id.'|'.$f] = $v;
+				}
+			}
+			hvSetI18n($db, $r['table'], $r['obj'], $lang, $vals);
 		}
 	}
-	setEventMessages($langs->trans('HvSaved'), null);
+	// Änderungen auf Wunsch in die anderen Sprachen übernehmen
+	$aiMsg = null;
+	if (($chgKeys || $chgData) && GETPOST('hv_translate', 'int') === '1') {
+		dol_include_once('/hausverwaltung/class/hvtranslator.class.php');
+		if (HvTranslator::enabled()) {
+			$tl = new HvTranslator();
+			$res = $tl->translate($chgKeys + $chgData, $lang, hvDocLangs());
+			if ($res === false) {
+				$aiMsg = array($langs->trans('HvAiFailed', $tl->error));
+			} else {
+				hvAiStore($db, $repo, $res, $keys);
+			}
+		}
+	}
+	setEventMessages($langs->trans('HvSaved'), $aiMsg, $aiMsg ? 'warnings' : 'mesgs');
+	header('Location: '.$_SERVER['PHP_SELF'].'?action=edit&lang='.$lang);
+	exit;
+}
+/** Übersetzungsergebnis speichern: Textbausteine (Schlüssel) und Datentexte (Tabelle|ID|Feld) */
+function hvAiStore($db, $repo, array $res, array $keys)
+{
+	$rows = array();
+	foreach (hvDataRows($repo) as $r) {
+		$rows[$r['table']][(int) $r['obj']->rowid] = $r['obj'];
+	}
+	$n = 0;
+	foreach ($res as $l => $vals) {
+		foreach ($vals as $key => $v) {
+			if (isset($keys[$key])) {
+				hvSaveTrans($l, $key, $v);
+				$n++;
+			} elseif (preg_match('/^(hv_costitem|hv_reserve_plan)\|(\d+)\|(label|basis|note)$/', $key, $m) && isset($rows[$m[1]][(int) $m[2]])) {
+				hvSetI18n($db, $m[1], $rows[$m[1]][(int) $m[2]], $l, array($m[3] => $v));
+				$rows[$m[1]][(int) $m[2]] = $db->getRow("SELECT * FROM ".$db->prefix().$m[1]." WHERE rowid = ".((int) $m[2]));
+				$n++;
+			}
+		}
+	}
+	return $n;
+}
+
+// Fehlende Texte einer Sprache automatisch übersetzen (z. B. neue Eigentümersprache)
+if ($action === 'aitranslate' && preg_match('/^[a-z]{2}_[A-Z]{2}$/', $lang)) {
+	dol_include_once('/hausverwaltung/class/hvtranslator.class.php');
+	$srcL = substr($lang, 0, 2) === 'de' ? $orig : 'de_DE';
+	$srcVals = hvLangValues($srcL);
+	$cur = hvLangValues($lang);
+	$todo = array();
+	foreach ($keys as $k => $deTxt) {
+		if (!isset($cur[$k]) && ($srcVals[$k]['value'] ?? '') !== '') {
+			$todo[$k] = $srcVals[$k]['value'];
+		}
+	}
+	foreach (hvDataRows($repo) as $r) {
+		$tr = !empty($r['obj']->i18n) ? (array) json_decode($r['obj']->i18n, true) : array();
+		foreach ($r['fields'] as $f) {
+			$sv = hvI18n($r['obj'], $f, $srcL);
+			if ($sv !== '' && empty($tr[$lang][$f])) {
+				$todo[$r['table'].'|'.((int) $r['obj']->rowid).'|'.$f] = $sv;
+			}
+		}
+	}
+	$n = 0;
+	$msg = null;
+	if ($todo && HvTranslator::enabled()) {
+		$tl = new HvTranslator();
+		$res = $tl->translate($todo, $srcL, array($lang));
+		if ($res === false) {
+			$msg = array($langs->trans('HvAiFailed', $tl->error));
+		}
+		if ($res) {
+			$n = hvAiStore($db, $repo, $res, $keys);
+		}
+	}
+	setEventMessages($langs->trans('HvAiTranslatedMissing', $n, $lang), $msg, $msg ? 'warnings' : 'mesgs');
 	header('Location: '.$_SERVER['PHP_SELF'].'?action=edit&lang='.$lang);
 	exit;
 }
@@ -255,14 +342,19 @@ if ($action === 'edit' && preg_match('/^[a-z]{2}_[A-Z]{2}$/', $lang)) {
 	$de = hvLangValues('de_DE');
 	$onlyMissing = GETPOSTINT('missing');
 	print load_fiche_titre($langs->trans('HvLangTranslate').' '.$lang, '<a href="'.$_SERVER['PHP_SELF'].'?action=edit&lang='.$lang.'&missing='.($onlyMissing ? 0 : 1).'">'.$langs->trans($onlyMissing ? 'HvLangShowAll' : 'HvLangShowMissing').'</a>', '');
-	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="save"><input type="hidden" name="lang" value="'.$lang.'">';
+	dol_include_once('/hausverwaltung/class/hvtranslator.class.php');
+	if (HvTranslator::enabled()) {
+		print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'" class="right"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="aitranslate"><input type="hidden" name="lang" value="'.$lang.'"><button class="butAction">'.img_picto('', 'language', 'class="pictofixedwidth"').$langs->trans('HvAiTranslateMissingBtn').'</button></form>';
+	}
+	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'" class="hv-ask-translate" data-hastr="1"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="save"><input type="hidden" name="lang" value="'.$lang.'">';
 	print '<table class="noborder centpercent"><tr class="liste_titre"><th>'.$langs->trans('HvLangKey').'</th><th>de_DE</th><th>'.$orig.'</th><th>'.$lang.'</th></tr>';
 	foreach ($keys as $k => $deTxt) {
 		if ($onlyMissing && isset($cur[$k])) {
 			continue;
 		}
 		print '<tr class="oddeven"><td class="small opacitymedium">'.$k.'</td><td class="small">'.dol_escape_htmltag($de[$k]['value'] ?? $deTxt).'</td><td class="small">'.dol_escape_htmltag($ref[$k]['value'] ?? '').'</td>';
-		print '<td><input name="k['.$k.']" class="centpercent'.(isset($cur[$k]) ? '' : ' error').'" value="'.dol_escape_htmltag($cur[$k]['value'] ?? '').'" placeholder="'.dol_escape_htmltag($deTxt).'"></td></tr>';
+		$cv = (string) ($cur[$k]['value'] ?? '');
+		print '<td><input name="k['.$k.']" class="centpercent'.(isset($cur[$k]) ? '' : ' error').'"'.($cv !== '' ? ' data-hvsrc="1" data-orig="'.dol_escape_htmltag($cv).'"' : '').' value="'.dol_escape_htmltag($cv).'" placeholder="'.dol_escape_htmltag($deTxt).'"></td></tr>';
 	}
 	print '<tr class="liste_titre"><th colspan="4">'.$langs->trans('HvLangDataTexts').'</th></tr>';
 	foreach ($dataRows as $r) {
@@ -276,10 +368,11 @@ if ($action === 'edit' && preg_match('/^[a-z]{2}_[A-Z]{2}$/', $lang)) {
 				continue;
 			}
 			print '<tr class="oddeven"><td class="small opacitymedium">'.($r['table'] === 'hv_costitem' ? $langs->trans('HvCostItem') : $langs->trans('HvReservePlan')).' · '.$f.'</td><td class="small">'.dol_escape_htmltag(hvI18n($r['obj'], $f, 'de_DE')).'</td><td class="small">'.dol_escape_htmltag(hvI18n($r['obj'], $f, $orig)).'</td>';
-			print '<td><input name="d['.$r['table'].']['.((int) $r['obj']->rowid).']['.$f.']" class="centpercent'.($val === '' && $lang !== getDolGlobalString('HAUSVERWALTUNG_DATA_LANG', 'de_DE') ? ' error' : '').'" value="'.dol_escape_htmltag($val).'"></td></tr>';
+			print '<td><input name="d['.$r['table'].']['.((int) $r['obj']->rowid).']['.$f.']" class="centpercent'.($val === '' && $lang !== getDolGlobalString('HAUSVERWALTUNG_DATA_LANG', 'de_DE') ? ' error' : '').'"'.($val !== '' ? ' data-hvsrc="1" data-orig="'.dol_escape_htmltag($val).'"' : '').' value="'.dol_escape_htmltag($val).'"></td></tr>';
 		}
 	}
 	print '</table><div class="center"><input type="submit" class="button button-save" value="'.$langs->trans('Save').'"></div></form>';
+	print hvTranslateAskJs();
 }
 
 llxFooter();

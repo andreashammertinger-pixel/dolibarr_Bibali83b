@@ -43,3 +43,18 @@ Dolibarr spricht allgemein von *Geschäftspartnern*, *Kunden* und *Kundenrechnun
 | Vertriebsmitarbeiter | Zuständig |
 
 *Interessenten* werden ausgeblendet. Die Begriffe bleiben bei Dolibarr-Updates erhalten; **Zurücksetzen** stellt die Dolibarr-Begriffe wieder her. Einzelne Begriffe lassen sich unter *Einstellungen → Übersetzung* anpassen.
+
+## KI-Übersetzung
+
+Mit einem API-Schlüssel (Einstellungen → *KI-Übersetzung*) übersetzt Dolibarr Texte für die Dokumente automatisch:
+
+- **Neue Texte** (neue Kostenart, neue Planposition, neue Zeile in *Planpositionen bearbeiten*) werden beim Speichern in alle Dokumentsprachen übersetzt.
+- **Geänderte bestehende Texte**: beim Speichern fragt Dolibarr **„Änderung auch in die anderen Sprachen übernehmen?“** – *Ja, übersetzen* oder *Nein, nur diese Sprache*.
+- **geschrieben in**: Sprache, in der Sie schreiben (vorbelegt mit Ihrer Sprache). Jeder Bearbeiter schreibt in seiner Sprache.
+- Von Hand korrigierte Übersetzungen werden beim selben Speichern nicht überschrieben.
+- **Sprachen-Seite → Übersetzen**: geänderte Textbausteine werden auf Wunsch ebenfalls in alle Sprachen übernommen; **Fehlende Texte automatisch übersetzen** füllt eine neue Sprache (z. B. Italienisch) mit einem Klick.
+
+!!! warning "Keine personenbezogenen Daten"
+    Übertragen werden nur die Texte selbst. Schreiben Sie in diese Felder keine Namen, OIB oder Kontodaten.
+
+Ist der Dienst nicht erreichbar, wird der Text trotzdem gespeichert; eine Meldung weist darauf hin.
