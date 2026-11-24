@@ -158,7 +158,7 @@ if ($action === 'save' && $canwrite) {
 				if (preg_match('/,\d*$/', $raw)) {
 					$raw = str_replace(array('.', ','), array('', '.'), $raw);
 				}
-				$pl[] = array('typ' => (int) ($pt[$pi] ?? 0), 'label' => $plab, 'modus' => (($pm[$pi] ?? '') === 'nobilia') ? 'nobilia' : 'vk', 'betrag' => (float) $raw);
+				$pl[] = array('typ' => (int) ($pt[$pi] ?? 0), 'label' => $plab, 'modus' => in_array($pm[$pi] ?? '', array('nobilia', 'ek'), true) ? $pm[$pi] : 'vk', 'betrag' => (float) $raw);
 			}
 			$p['positionen'] = $pl;
 		}
@@ -684,7 +684,7 @@ foreach ($rows as $pi => $pos) {
 	}
 	print '</select></td>';
 	print '<td><input name="pos_label['.$pi.']" class="minwidth300" value="'.dol_escape_htmltag($pos['label'] ?? '').'" placeholder="'.($pos ? '' : dol_escape_htmltag($langs->trans('KaPosPlaceholder'))).'"'.$disabled.'></td>';
-	print '<td><select name="pos_modus['.$pi.']"'.$disabled.'><option value="nobilia"'.(($pos['modus'] ?? '') === 'nobilia' ? ' selected' : '').'>'.$langs->trans('KaPosNobilia').'</option><option value="vk"'.(($pos['modus'] ?? 'vk') === 'vk' ? ' selected' : '').'>'.$langs->trans('KaPosDirect').'</option></select></td>';
+	print '<td><select name="pos_modus['.$pi.']"'.$disabled.'><option value="nobilia"'.(($pos['modus'] ?? '') === 'nobilia' ? ' selected' : '').'>'.$langs->trans('KaPosNobilia').'</option><option value="ek"'.(($pos['modus'] ?? '') === 'ek' ? ' selected' : '').'>'.$langs->trans('KaPosEk').'</option><option value="vk"'.(($pos['modus'] ?? 'vk') === 'vk' ? ' selected' : '').'>'.$langs->trans('KaPosDirect').'</option></select></td>';
 	print '<td class="right"><input name="pos_betrag['.$pi.']" class="width75 right" value="'.(isset($pos['betrag']) ? kaFmt($pos['betrag']) : '').'" placeholder="+/−"'.$disabled.'></td>';
 	$vkd = '';
 	if ($pos && isset($kalk->typen[(int) $pos['typ']])) {

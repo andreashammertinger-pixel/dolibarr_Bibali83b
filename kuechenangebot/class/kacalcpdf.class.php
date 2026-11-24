@@ -136,7 +136,7 @@ class KaCalcPdf
 					$tmp = clone $kalk;
 					$tmp->params['positionen'] = array($ps);
 					list($e1, $v1) = $tmp->positionDelta($k, $t);
-					$rows[] = array($ps['label'], $ps['modus'] === 'nobilia' ? 'Nobilia-Wert '.kaFmt($ps['betrag']) : 'Verkaufspreis', kaMoney($e1), kaMoney($v1));
+					$rows[] = array($ps['label'], $ps['modus'] === 'nobilia' ? 'Nobilia-Wert '.kaFmt($ps['betrag']) : ($ps['modus'] === 'ek' ? 'Einkauf Fremdbezug' : 'Verkaufspreis'), kaMoney($e1), kaMoney($v1));
 				}
 				$this->table(array(array('Zusatz-/Minderposition', 80, 'L'), array('Basis', 40, 'L'), array('Einkauf', 30, 'R'), array('Verkauf netto', 30, 'R')), $rows);
 			}

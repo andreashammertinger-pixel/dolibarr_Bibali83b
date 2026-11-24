@@ -1,5 +1,9 @@
 # Changelog Küchenangebot
 
+## 1.12.1
+- Mit AB: Steht in der AB keine Spüle (wird separat bestellt), wird die Spüle aus dem Nobilia-Angebot (AN) ins Angebot übernommen (Deckblatt, Geräteliste, Übersetzung)
+- Zusatz-/Minderpositionen: neue Preisbasis **„Einkauf netto (Fremdbezug)“** – Einkaufspreis eines anderen Lieferanten (z. B. Spüle) + Aufschlag des Angebots; erscheint auch in der internen Kalkulation
+
 ## 1.12.0
 - **AB ist maßgeblich**: Eine gültige nobilia-Auftragsbestätigung ersetzt alle Angaben aus dem Nobilia-Angebot (AN) – Ausführung (Front, Korpus, Griff, Sockel, Arbeitsplatte, **Nischenrückwand** aus der Position Nischenverkleidung/APL-Dekor), Geräte und Positionen. Geräte mit gleicher Artikelnummer im AN behalten die ausführlichere Bezeichnung und Energieklasse. Die AN-Daten bleiben intern gesichert; ein später erneut hochgeladenes AN überschreibt die AB nicht
 - Abweichungen AB ↔ AN werden nur noch als Hinweis angezeigt (kein „trotz Abweichung übernehmen“ mehr nötig); Storno-ABs und ABs ohne Preis werden weiterhin nicht übernommen

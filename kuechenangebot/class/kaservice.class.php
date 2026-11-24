@@ -560,6 +560,28 @@ class KaService
 				$dev[] = array('pos' => $p['pos'], 'kategorie' => $cat ?: 'sonstiges', 'marke' => '', 'name' => $name, 'eek' => '', 'preis' => 0, 'artikel' => $p['artikel']);
 			}
 		}
+		// Spüle wird separat bestellt (nicht bei nobilia) und steht dann nicht in der AB: aus dem AN übernehmen
+		$hasSink = false;
+		foreach ($dev as $d) {
+			if ($d['kategorie'] === 'spuele') {
+				$hasSink = true;
+			}
+		}
+		if (!$hasSink) {
+			foreach ((array) ($an['geraete'] ?? array()) as $d) {
+				if (($d['kategorie'] ?? '') === 'spuele') {
+					$d['fremd'] = 1; // nicht in der AB, separat bestellt
+					$dev[] = $d;
+					foreach ((array) ($an['positionen'] ?? array()) as $ap) {
+						if ($norm($ap['artikel']) === $norm($d['artikel'] ?? '')) {
+							$ap['wg'] = '';
+							$ap['fremd'] = 1;
+							$pos[] = $ap;
+						}
+					}
+				}
+			}
+		}
 		$typ->data['merkmale'] = $m;
 		$typ->data['positionen'] = $pos;
 		$typ->data['geraete'] = $dev;

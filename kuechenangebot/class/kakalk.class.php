@@ -307,8 +307,10 @@ class KaKalk
 				continue;
 			}
 			$b = (float) ($pos['betrag'] ?? 0);
-			if (($pos['modus'] ?? 'vk') === 'nobilia') {
-				$e = $b * ((float) $t->faktor ?: 1);
+			$mod = $pos['modus'] ?? 'vk';
+			if ($mod === 'nobilia' || $mod === 'ek') {
+				// Nobilia-Wert × Faktor bzw. Einkauf netto eines anderen Lieferanten (Fremdbezug), jeweils + Aufschlag
+				$e = ($mod === 'ek') ? $b : $b * ((float) $t->faktor ?: 1);
 				$ek += $e;
 				$vk += ($p['aufschlag_modus'] === 'pauschal') ? $e : $e * (1 + (float) $p['aufschlag_wert'] / 100);
 			} else {
