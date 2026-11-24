@@ -391,11 +391,13 @@ class KaNobiliaParser
 			return null;
 		}
 		$res = array('nr' => '', 'datum' => '', 'kommission' => '', 'kv' => '', 'liefertermin' => '', 'storno' => false,
-			'ausfuehrung' => array(), 'positionen' => array(), 'brutto' => 0.0, 'netto' => 0.0, 'gesamt' => null, 'zahlung' => '');
+			'ausfuehrung' => array(), 'positionen' => array(), 'brutto' => 0.0, 'netto' => 0.0, 'gesamt' => null, 'zahlung' => '',
+			'kalkulation' => array(), 'listenwert' => 0.0);
 		$col = array('brutto' => 462, 'netto' => 530, 'text' => 241, 'wg' => 437);
 		$cur = null;
 		$head = array('Programm' => 'programm', 'Frontausführung' => 'front', 'Griff' => 'griff', 'Korpusfarbe' => 'korpus',
-			'Korpusfarbe innen' => 'korpus_innen', 'Sockelfarbe' => 'sockel', 'Arbeitsplattendekor' => 'apl', 'Arbeitsplattenkante' => 'apl_kante', 'Preisgruppe' => 'preisgruppe', 'Kollektion' => 'kollektion');
+			'Korpusfarbe innen' => 'korpus_innen', 'Sockelfarbe' => 'sockel', 'Arbeitsplattendekor' => 'apl', 'Arbeitsplattenkante' => 'apl_kante', 'Preisgruppe' => 'preisgruppe', 'Kollektion' => 'kollektion',
+			'Sockelhöhe' => 'sockelhoehe', 'APL-Dekorgruppe' => 'apl_gruppe', 'Bohrbild' => 'bohrbild', 'Griffleiste' => 'griffleiste');
 		for ($p = 1; $p <= $r->getPageCount(); $p++) {
 			foreach ($r->getPageLines($p) as $line) {
 				$ch = $line['chunks'];
@@ -453,6 +455,19 @@ class KaNobiliaParser
 						}
 						$res['ausfuehrung'][$head[$k]] = array('code' => $code, 'text' => $txt);
 					}
+				}
+				// Kalkulationsblock unter den Positionen (Blockverrechnung, Auftragswerte, Rabatte, Zuschläge)
+				if (preg_match('/^(Blockvereinbarung|Auftragswert .+?|- Blockwert .+?|Zwischensumme|Gesamtsumme|(?:man\. )?\S*[Rr]abatt.*?|\S*-?Zuschlag.*?|Fracht.*?)\s+(?:(?:M|E|ZV|ZN|Z)\s+)?(-?[\d.]+,\d{2})$/u', $flat, $km)) {
+					$res['kalkulation'][] = array('text' => trim($km[1]), 'betrag' => self::num($km[2]));
+					if (strpos($km[1], 'Auftragswert') === 0) {
+						$res['listenwert'] += self::num($km[2]);
+					}
+					$cur = null;
+					continue;
+				}
+				if ($flat === 'Blockverrechnung:') {
+					$cur = null;
+					continue;
 				}
 				// Positionstabelle
 				if (preg_match('/^Pos\s+Stück\s+Kurzbezeichnung/u', $flat)) {

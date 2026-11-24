@@ -128,6 +128,7 @@ class KaService
 				return null;
 			}
 			$keep = isset($typ->data['plaene']) ? $typ->data['plaene'] : null;
+			$keepAb = isset($typ->data['ab']) ? $typ->data['ab'] : null;
 			$typ->data = $res;
 			if ($keep) {
 				$typ->data['plaene'] = $keep;
@@ -165,6 +166,14 @@ class KaService
 			$this->convertPlan($kalk, $typ);
 		}
 		$typ->save();
+		// Eine bereits übernommene AB bleibt maßgeblich: nach neuem AN erneut anwenden
+		if ($anTmp && !empty($keepAb['angewendet']) && !empty($keepAb['datei']) && is_readable($dir.'/'.$keepAb['datei'])) {
+			global $user;
+			$tmpAb = $dir.'/.ab_reapply.pdf';
+			@copy($dir.'/'.$keepAb['datei'], $tmpAb);
+			$this->importConfirmation($user, $kalk, $typ, $tmpAb, preg_replace('/^typ\d+_AB_/', '', $keepAb['datei']), false, (int) $keepAb['kuechen']);
+			@unlink($tmpAb);
+		}
 		// neue Kunden-Hinweise aus den Nobilia-Unterlagen vorauswählen, Bezeichnung übernehmen
 		foreach (array_merge((array) ($typ->data['hinweise'] ?? array()), (array) ($typ->data['plaene']['hinweise'] ?? array())) as $h) {
 			if (!kaIsInternalHint($h) && !in_array($h, (array) $kalk->hinweise['nobilia'])) {
@@ -393,14 +402,14 @@ class KaService
 
 	/**
 	 * nobilia-Auftragsbestätigung (AB) zu einem Küchentyp übernehmen.
-	 * Gültige AB (kein Storno, Gesamtpreis > 0, passt zum AN oder $force): Einkauf je Küche = AB-Gesamtpreis / Küchen,
-	 * der Faktor des Typs wird daraus berechnet (Einkauf / Katalogwert). Ist das Angebot schon unterschrieben,
-	 * wird der Verkaufspreis vorher festgeschrieben, damit sich nur der Einkauf ändert.
+	 * Eine gültige AB (kein Storno, Gesamtpreis > 0) ist maßgeblich: Ausführung, Geräte und Positionen im Angebot
+	 * kommen dann aus der AB (statt aus dem AN), Einkauf je Küche = AB-Gesamtpreis / Küchen, Faktor = Einkauf / Listenwert der AB.
+	 * Die AN-Daten bleiben intern unter data['an_original'] erhalten. Ist das Angebot schon unterschrieben,
+	 * wird der Verkaufspreis vorher festgeschrieben.
 	 * @return int 1 übernommen, 0 gespeichert aber nicht übernommen, <0 Fehler
 	 */
 	public function importConfirmation($user, $kalk, $typ, $tmp, $name, $force = false, $kuechen = 0)
 	{
-		global $langs;
 		$dir = $kalk->getDir();
 		dol_mkdir($dir);
 		$dest = $dir.'/typ'.$typ->id.'_AB_'.dol_sanitizeFileName($name ?: 'ab.pdf');
@@ -418,28 +427,42 @@ class KaService
 		if (!empty($typ->data['ab']['datei']) && $typ->data['ab']['datei'] !== basename($dest)) {
 			@unlink($dir.'/'.$typ->data['ab']['datei']);
 		}
-		$cmp = KaNobiliaParser::compareConfirmation($typ->data, $ab);
+		$an = isset($typ->data['an_original']) ? $typ->data['an_original'] : $typ->data;
+		$cmp = KaNobiliaParser::compareConfirmation($an, $ab);
 		$k = $kuechen > 0 ? (int) $kuechen : (int) $ab['kuechen'];
 		$info = array(
 			'datei' => basename($dest), 'nr' => $ab['nr'], 'datum' => $ab['datum'], 'kommission' => $ab['kommission'], 'kv' => $ab['kv'],
-			'liefertermin' => $ab['liefertermin'], 'storno' => $ab['storno'], 'gesamt' => $ab['gesamt'], 'brutto' => $ab['brutto'], 'netto' => $ab['netto'],
-			'kuechen' => max(1, $k), 'vergleich' => $cmp, 'ausfuehrung' => $ab['ausfuehrung'], 'npos' => count($ab['positionen']),
-			'angewendet' => 0, 'grund' => '',
+			'liefertermin' => $ab['liefertermin'], 'storno' => $ab['storno'], 'gesamt' => $ab['gesamt'], 'listenwert' => $ab['listenwert'],
+			'kalkulation' => $ab['kalkulation'], 'kuechen' => max(1, $k), 'vergleich' => $cmp, 'ausfuehrung' => $ab['ausfuehrung'],
+			'npos' => count($ab['positionen']), 'angewendet' => 0, 'grund' => '',
 		);
 		if ($ab['storno']) {
 			$info['grund'] = 'storno';
 		} elseif (!$ab['gesamt'] || $ab['gesamt'] <= 0) {
 			$info['grund'] = 'ohnepreis';
-		} elseif ((float) $typ->katalog <= 0) {
-			$info['grund'] = 'ohnekatalog';
-		} elseif (!$cmp['passt'] && !$force) {
-			$info['grund'] = 'abweichung';
 		}
 		if ($info['grund'] === '') {
 			$this->freezePrices($kalk);
 			$typ->fetchFresh();
 			$ek = $ab['gesamt'] / $info['kuechen'];
 			$info['faktor_vorher'] = (float) $typ->faktor;
+			if (!isset($typ->data['an_original'])) {
+				$typ->data['an_original'] = array('katalog' => (float) $typ->katalog, 'preis_modus' => $typ->preis_modus);
+			}
+			$info['katalog_an'] = (float) ($typ->data['an_original']['katalog'] ?? $typ->katalog);
+			// Inhalte aus der AB übernehmen, AN-Daten sichern
+			if (!isset($typ->data['an_original']['merkmale'])) {
+				$typ->data['an_original'] = array_merge($typ->data['an_original'], array_intersect_key($typ->data, array_flip(array('meta', 'merkmale', 'positionen', 'summen', 'geraete', 'hinweise'))));
+			}
+			$this->applyConfirmationContent($typ, $ab, $typ->data['an_original']);
+			// Einkauf und Faktor: Bezug ist der Listenwert der AB (gleiche Planung), sonst der AN-Katalogwert
+			$liste = $ab['listenwert'] / $info['kuechen'];
+			if ($liste > 0) {
+				$typ->katalog = round($liste, 2);
+				$typ->preis_modus = 'eur';
+			} elseif ((float) $typ->katalog <= 0) {
+				$typ->katalog = round($ek, 2);
+			}
 			$typ->faktor = round($ek / (float) $typ->katalog, 6);
 			$info['faktor'] = $typ->faktor;
 			$info['ek'] = round($ek, 2);
@@ -450,6 +473,119 @@ class KaService
 		$kalk->fetch($kalk->id);
 		$kalk->save($user);
 		return $info['angewendet'] ? 1 : 0;
+	}
+
+	/**
+	 * Ausführung, Positionen und Geräte des Küchentyps aus der AB setzen (Format wie beim AN, damit das Angebots-PDF sie nutzt).
+	 * Geräte, die auch im AN stehen (gleiche Artikelnummer), übernehmen die ausführlichere AN-Bezeichnung und Energieklasse.
+	 */
+	protected function applyConfirmationContent($typ, $ab, $an)
+	{
+		$nb = function ($t) {
+			return trim(preg_replace('/\bNB$/u', 'Nachbildung', trim((string) $t)));
+		};
+		$a = $ab['ausfuehrung'];
+		$val = function ($k) use ($a) {
+			if (empty($a[$k])) {
+				return '';
+			}
+			return trim($a[$k]['text'] === 'mm' || preg_match('/^\d+$/', (string) $a[$k]['code']) && $k === 'sockelhoehe' ? $a[$k]['code'].' '.$a[$k]['text'] : $a[$k]['text']);
+		};
+		$m = array();
+		$add = function ($label, $code, $value) use (&$m) {
+			if (trim((string) $value) !== '') {
+				$m[] = array('label' => $label, 'code' => (string) $code, 'value' => trim((string) $value));
+			}
+		};
+		$prog = $val('programm');
+		if ($prog !== '' && !preg_match('/^\d+$/', $prog)) {
+			$add('Programm', '', $prog);
+		}
+		$add('Front-Kombination', $a['front']['code'] ?? '', $val('front'));
+		$add('Korpusfarbe außen', $a['korpus']['code'] ?? '', $val('korpus'));
+		$add('Korpusfarbe innen', $a['korpus_innen']['code'] ?? '', $val('korpus_innen'));
+		$add('Griff-Kombination', $a['griff']['code'] ?? '', $val('griff'));
+		$add('Sockelfarbe', $a['sockel']['code'] ?? '', $val('sockel'));
+		$add('Sockelhöhe', '', $val('sockelhoehe'));
+		$apl = $nb($val('apl'));
+		$add('Arbeitsplatten-Farbe', $a['apl']['code'] ?? '', $apl);
+		$aplA = trim(implode(', ', array_filter(array($val('apl_gruppe'), $val('apl_kante')))));
+		$add('Arbeitsplatten-Ausführung', '', $aplA);
+		// Positionen im AN-Format
+		$pos = array();
+		$niche = '';
+		foreach ($ab['positionen'] as $p) {
+			if (strpos($p['kbz'], 'Block') === 0) {
+				continue;
+			}
+			$text = trim(preg_replace('/\s+/u', ' ', $p['text']));
+			if (preg_match('/^Nischenverkleidung/u', $text) && preg_match('/\*APL-DEKOR\*\s*\d+\s+(.+?)(?:\s+\*|$)/u', $text, $mm)) {
+				$niche = $nb($mm[1]);
+			}
+			$pos[] = array('pos' => (string) $p['pos'], 'menge' => (float) $p['stueck'], 'artikel' => $p['kbz'], 'lr' => '', 'text' => $text, 'preis' => null, 'level' => 0, 'wg' => $p['wg']);
+		}
+		if ($niche !== '') {
+			$add('Nischenfarbe', '', $niche);
+		}
+		// Geräte: AB-Artikel der Warengruppe E bzw. mit Gerätebegriff; Bezeichnung aus dem AN, wenn dort vorhanden
+		$norm = function ($x) {
+			return strtoupper(preg_replace('/\s+/', '', (string) $x));
+		};
+		$anDev = array();
+		foreach ((array) ($an['geraete'] ?? array()) as $d) {
+			$anDev[$norm($d['artikel'] ?? '')] = $d;
+		}
+		$dev = array();
+		foreach ($pos as $p) {
+			$key = $norm($p['artikel']);
+			if (isset($anDev[$key])) {
+				$d = $anDev[$key];
+				$d['pos'] = $p['pos'];
+				$dev[] = $d;
+				continue;
+			}
+			$cat = '';
+			foreach (self::abCategories() as $c => $words) {
+				foreach ($words as $w) {
+					if (mb_stripos($p['text'], $w) !== false) {
+						$cat = $c;
+						break 2;
+					}
+				}
+			}
+			if ($p['wg'] === 'E' || (in_array($p['wg'], array('ZN', 'ZV'), true) && in_array($cat, array('licht', 'dunst'), true))) {
+				$name = trim(preg_replace('/\s*\*.*$/u', '', $p['text']));
+				$name = preg_replace('/^GSP\s+/u', 'Geschirrspüler ', $name);
+				$name = preg_replace('/^HD-/u', 'Hochdruck-', $name);
+				$dev[] = array('pos' => $p['pos'], 'kategorie' => $cat ?: 'sonstiges', 'marke' => '', 'name' => $name, 'eek' => '', 'preis' => 0, 'artikel' => $p['artikel']);
+			}
+		}
+		$typ->data['merkmale'] = $m;
+		$typ->data['positionen'] = $pos;
+		$typ->data['geraete'] = $dev;
+		$typ->data['summen'] = array();
+		foreach ($ab['kalkulation'] as $k) {
+			if (strpos($k['text'], 'Auftragswert') === 0) {
+				$typ->data['summen'][$k['text']] = $k['betrag'];
+			}
+		}
+		$typ->data['meta'] = array_merge((array) ($an['meta'] ?? array()), array('angebot' => 'AB '.$ab['nr'], 'datum' => $ab['datum'], 'quelle' => 'AB', 'kommission' => $ab['kommission'], 'kv' => $ab['kv']));
+	}
+
+	/** Gerätekategorien für die Kurztexte der AB */
+	protected static function abCategories()
+	{
+		return array(
+			'geschirrspueler' => array('Geschirrsp', 'GSP '),
+			'kuehlen' => array('Kühlautomat', 'Kühlschrank', 'Gefrier', 'Kühl-'),
+			'kochfeld' => array('Kochfeld', 'Induktion'),
+			'backofen' => array('Einbauherd', 'Backofen', 'Herd ', 'Dampfgarer'),
+			'mikrowelle' => array('Mikrowelle'),
+			'dunst' => array('Dunstabzug', 'Haube', 'Aktivkohlefilter', 'Muldenlüfter'),
+			'spuele' => array('Spüle', 'Einbauspüle'),
+			'armatur' => array('Mischer', 'Armatur', 'Mischbatterie'),
+			'licht' => array('Leuchte', 'LED '),
+		);
 	}
 
 	/** Bei unterschriebenem Angebot die Verkaufspreise festschreiben (Endpreis je Küche), bevor sich der Einkauf ändert */

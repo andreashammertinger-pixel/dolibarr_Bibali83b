@@ -561,7 +561,8 @@ foreach ($kalk->typen as $t) {
 			print ' · '.$langs->trans('KaAbDelivery').' '.dol_escape_htmltag($ab['liefertermin']);
 		}
 		if (!empty($ab['angewendet'])) {
-			print '<br><span class="ok">'.$langs->trans('KaAbUsed', kaMoney($ab['ek']), (int) $ab['kuechen'], kaFmt($ab['faktor'], 4), kaFmt($ab['faktor_vorher'] ?? 1, 4)).'</span>';
+			print '<br><span class="ok">'.$langs->trans('KaAbUsed', kaMoney($ab['ek']), (int) $ab['kuechen'], kaFmt($ab['faktor'], 4), kaMoney($ab['listenwert'] ?? 0)).'</span>';
+			print '<br><span class="opacitymedium">'.$langs->trans('KaAbContent').'</span>';
 			if ($user->hasRight('kuechenangebot', 'setup')) {
 				print ' <a class="reposition" href="'.$_SERVER['PHP_SELF'].'?id='.$kalk->id.'&action=setfactor&typid='.$t->id.'&token='.newToken().'">'.$langs->trans('KaAbSetDefault', $langs->transnoentities($t->preis_modus === 'punkte' ? 'KaPricePoints' : 'KaPriceEur')).'</a>';
 			}
@@ -570,7 +571,7 @@ foreach ($kalk->typen as $t) {
 		}
 		$cmp = $ab['vergleich'] ?? array();
 		if ($cmp) {
-			print '<br><span class="opacitymedium">'.$langs->trans('KaAbCompare', (int) $cmp['gleich'], (int) $cmp['artikel_an']);
+			print '<br><span class="'.($cmp['passt'] ? 'opacitymedium' : 'warning').'">'.$langs->trans('KaAbCompare', (int) $cmp['gleich'], (int) $cmp['artikel_an']);
 			$diff = array();
 			foreach ((array) ($cmp['farben'] ?? array()) as $k => $f) {
 				if (!$f['gleich']) {
@@ -597,7 +598,7 @@ foreach ($kalk->typen as $t) {
 		print $langs->trans('KaImageReplace').' <input type="file" name="img_'.$t->id.'" accept="image/jpeg,image/png"> ';
 		print '<br>'.$langs->trans('KaAbUpload').' <input type="file" name="ab_'.$t->id.'" accept=".pdf,application/pdf"> ';
 		print $langs->trans('KaAbKitchens').' <input name="ab_kuechen_'.$t->id.'" class="width50 right" placeholder="auto"> ';
-		print '<label><input type="checkbox" name="ab_force_'.$t->id.'" value="1"> '.$langs->trans('KaAbForce').'</label> ';
+
 		print '<a class="reposition marginleftonly" href="'.$_SERVER['PHP_SELF'].'?id='.$kalk->id.'&action=deltyp&typid='.$t->id.'&token='.newToken().'">'.img_delete().' '.$langs->trans('KaDeleteKitchen').'</a></div>';
 	}
 	print '</td></tr>';

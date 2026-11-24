@@ -1,5 +1,10 @@
 # Changelog Küchenangebot
 
+## 1.12.0
+- **AB ist maßgeblich**: Eine gültige nobilia-Auftragsbestätigung ersetzt alle Angaben aus dem Nobilia-Angebot (AN) – Ausführung (Front, Korpus, Griff, Sockel, Arbeitsplatte, **Nischenrückwand** aus der Position Nischenverkleidung/APL-Dekor), Geräte und Positionen. Geräte mit gleicher Artikelnummer im AN behalten die ausführlichere Bezeichnung und Energieklasse. Die AN-Daten bleiben intern gesichert; ein später erneut hochgeladenes AN überschreibt die AB nicht
+- Abweichungen AB ↔ AN werden nur noch als Hinweis angezeigt (kein „trotz Abweichung übernehmen“ mehr nötig); Storno-ABs und ABs ohne Preis werden weiterhin nicht übernommen
+- **Blockverrechnung** der AB wird gelesen (Blockvereinbarung, Auftragswerte Möbel/Geräte/Zubehör, Rabatte, Sonderrabatt, Teuerungszuschlag); Faktor = AB-Gesamtpreis / Listenwert der AB (Summe der Auftragswerte)
+
 ## 1.11.1
 - Fußzeile: österreichische Bezeichnungen statt „Prof Id 1/2/3“ – St.-Nr., FN, Firmenbuchgericht, Geschäftsführer (hr/en übersetzt)
 - Seite 1: Bezeichnung des Küchentyps (z. B. „Stan B, D, F“) in eigener Zeile unter „Darstellung unverbindlich …“

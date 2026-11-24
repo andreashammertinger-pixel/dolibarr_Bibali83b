@@ -550,7 +550,7 @@ class KaPdf
 			$aa = $typ->merkmal('Arbeitsplatten-Ausführung');
 			$r[$this->t('KaPdfWorktop')] = $this->tr($a).($aa ? ', '.$this->tr($aa) : '');
 		}
-		if ($this->hasPosition($typ, '/^Nischenwandverkleidung|^Nischenrückwand/u')) {
+		if ($this->hasPosition($typ, '/^Nischenwandverkleidung|^Nischenrückwand|^Nischenverkleidung/u')) {
 			$nf = $typ->merkmal('Nischenfarbe');
 			if ($nf) {
 				$r[$this->t('KaPdfNiche')] = $this->tr($nf);
