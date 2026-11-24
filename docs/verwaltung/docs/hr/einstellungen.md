@@ -17,6 +17,7 @@
 | Adresa pomoći | osnovna adresa ovog priručnika |
 | AI prijevod | API ključ (Anthropic, sprema se šifrirano), uklj./isklj., *Testiraj vezu* – vidi [Jezici i tekstovi](sprachen.md#ai-prijevod) |
 | Rast troškova gradnje / razdoblje planiranja | za plan pričuve |
+| Zakonska minimalna pričuva | postotak (0,54 %) i *etalonska cijena građenja* (€/m²) – provjeravati godišnje |
 
 ## Novi objekt
 

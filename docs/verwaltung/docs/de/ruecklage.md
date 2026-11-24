@@ -25,6 +25,26 @@ Ergebnis je Haus: niedrigster Stand, Jahr einer Unterdeckung und **Mindestsatz l
 
 **Druckansicht** (Knöpfe *Druckansicht HR, DE, …*) in jeder Sprache – als Beilage für die Eigentümerversammlung.
 
+### Rücklagen-Satz je Haus festlegen
+
+Unter der Zusammenfassung steht **Festlegung der Rücklagen-Sätze je Haus**. Je Haus sehen Sie:
+
+| Spalte | Bedeutung |
+|---|---|
+| gesetzl. Minimum | 0,54 % der *etalonska cijena građenja* ÷ 12 (Werte in den Einstellungen) |
+| Mindestsatz lt. Plan | kleinster gleichbleibender Satz, mit dem die Rücklage im Planungszeitraum nie negativ wird |
+| Festlegung | **Mindestsatz lt. Plan**, **Mindestsatz lt. Plan × Faktor** (z. B. 1,2 = 20 % Puffer), **manuell** oder **gesetzliches Minimum** |
+| Satz | Ergebnis, auf 2 Nachkommastellen **aufgerundet**; nie unter dem gesetzlichen Minimum (außer manuell – dann rote Warnung) |
+| Begründung / Beschluss | z. B. „Beschluss Eigentümerversammlung 12.12.2026“ |
+
+**Sätze festlegen** speichert den neuen Satz und protokolliert im **Verlauf** Datum, Benutzer, alten und neuen Satz, gesetzliches Minimum, Mindestsatz lt. Plan, Planvolumen des Hauses, Kontostand und Begründung. Der Satz gilt für **neue Vorschreibungen**; bereits erstellte bleiben unverändert.
+
+!!! tip "Für die Eigentümerversammlung"
+    Die **Druckansicht** (in jeder Sprache) enthält die Festlegung je Haus mit allen Grundlagen und den Verlauf – als Beilage zum Beschluss.
+
+!!! note "Satz bleibt fest"
+    Ändert sich der Plan später, ändert sich der Satz **nicht** automatisch. Die Tabelle zeigt den neuen Mindestsatz; erst *Sätze festlegen* übernimmt ihn – nachvollziehbar mit neuem Eintrag im Verlauf.
+
 ### Planpositionen bearbeiten
 
 - **Planpositionen bearbeiten** (Knopf über der Liste): alle Positionen direkt in der Tabelle ändern – Jahr, Bezeichnung, Gebäude und Verteilschlüssel, Betrag zu heutigen Preisen, Schätzgrundlage, aktiv. Unten bis zu 3 neue Positionen eintragen, mit *Löschen* entfernen, dann *Speichern*.

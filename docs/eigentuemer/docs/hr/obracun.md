@@ -15,5 +15,6 @@ Obračunski list prikazuje svaku vrstu troška s ukupnim iznosom, Vašim udjelom
 
 - Propisana zakonom (Zakon o upravljanju i održavanju zgrada).
 - **Ne obračunava se** – ostaje na računu pričuve **Vaše kuće**.
+- Visinu utvrđuje zajednica za svaku kuću – najmanje zakonski minimum, na temelju plana pričuve. Objašnjenje uz Vaše zaduženje navodi obje vrijednosti.
 - Koristi se za održavanje i obnovu prema **planu pričuve**; sljedeće planirane mjere navedene su u objašnjenju.
 - Zgrade se pregledavaju jednom godišnje; vrijeme i opseg mjera prilagođavaju se stanju.

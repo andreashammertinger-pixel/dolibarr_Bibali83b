@@ -99,7 +99,7 @@ if ($canwrite && in_array($action, array('create', 'edit'))) {
 	print '<tr><td>'.$langs->trans('HvOwner').'</td><td>'.$form->select_company($u->fk_soc, 'fk_soc', '', 1, 0, 0, array(), 0, 'minwidth300').'</td></tr>';
 	print '<tr><td class="fieldrequired">'.$langs->trans('HvArea').'</td><td><input name="area" class="width75" value="'.dol_escape_htmltag(price2num($u->area_module ?? $u->area)).'">'.(!empty($u->area_from_soc) ? ' <span class="opacitymedium">'.$langs->trans('HvAreaFromThirdpartyHelp', price($u->area)).'</span>' : '').'</td></tr>';
 	print '<tr><td>'.$langs->trans('HvShare').'</td><td><input name="share" class="width75" value="'.dol_escape_htmltag(price2num($u->share_module ?? $u->share)).'"> <span class="opacitymedium">'.$langs->trans('HvShareHelp').'</span></td></tr>';
-	print '<tr><td>'.$langs->trans('HvReserveRate').'</td><td><input name="reserve_rate" class="width75" value="'.dol_escape_htmltag(price2num($u->reserve_rate)).'"> € / m² / Monat</td></tr>';
+	print '<tr><td>'.$langs->trans('HvReserveRate').'</td><td><input name="reserve_rate" class="width75" value="'.dol_escape_htmltag(price2num($u->reserve_rate)).'"> € / m² / Monat <span class="opacitymedium small">'.$langs->trans('HvUnitRateOverridden').'</span></td></tr>';
 	print '<tr><td>'.$langs->trans('HvAdminRate').'</td><td><input name="admin_rate" class="width75" value="'.dol_escape_htmltag(price2num($u->admin_rate)).'"> € / m² / Monat</td></tr>';
 	print '<tr><td>'.$langs->trans('Position').'</td><td><input name="position" class="width50" value="'.((int) $u->position).'"></td></tr>';
 	print '<tr><td>'.$langs->trans('Active').'</td><td><input type="checkbox" name="active" value="1"'.($u->active ? ' checked' : '').'></td></tr>';

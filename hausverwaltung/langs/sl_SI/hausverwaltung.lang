@@ -159,3 +159,22 @@ HvInfoContact = Za vprašanja se obrnite na upravnika: %s
 HvMailInfoAttached = V prilogi je tudi pojasnilo, kako je znesek sestavljen.
 HvHelp = Pomoč
 HvInfoHelp = Navodila in odgovori na pogosta vprašanja: %s
+HvRateTitle = Določitev stopenj rezervnega sklada po hišah
+HvRateLegal = zakonski minimum €/m²
+HvRatePlanMin = minimalna stopnja po načrtu €/m²
+HvRateMode = Način določitve
+HvRateMode_plan = minimalna stopnja po načrtu
+HvRateMode_factor = minimalna stopnja po načrtu × faktor
+HvRateMode_manual = ročno določeno
+HvRateMode_legal = zakonski minimum
+HvRateNew = stopnja €/m² na mesec
+HvRateMonthly = vplačilo hiše / mesec
+HvRateNote = utemeljitev / sklep
+HvRateHistory = zgodovina določitev
+HvRateDate = datum
+HvRateChange = stopnja staro → novo €/m²
+HvRatePlanVolume = obseg načrta
+HvRateBalance = stanje računa
+HvRateLegalSource = Zakonski minimum po Zakon o upravljanju i održavanju zgrada (NN 152/24): %s %% etalonske gradbene cene %s €/m² na leto = %s €/m² na mesec.
+HvRateExplain = Minimalna stopnja po načrtu = najnižja stalna stopnja, pri kateri rezervni sklad hiše v obdobju načrtovanja nikoli ni negativen (upoštevana rast gradbenih stroškov). Določene stopnje se zaokrožijo navzgor na 2 decimalki in veljajo za nove obremenitve.
+HvInfoReserveLegal = Zakonska minimalna stopnja: %s €/m².

@@ -15,5 +15,6 @@ Das Abrechnungsblatt zeigt jede Kostenart mit Gesamtbetrag, Ihrem Anteil in % un
 
 - Gesetzlich vorgeschrieben (Zakon o upravljanju i održavanju zgrada).
 - Wird **nicht abgerechnet** – sie bleibt auf dem Rücklagenkonto **Ihres Hauses**.
+- Die Höhe legt die Gemeinschaft je Haus fest – mindestens den gesetzlichen Mindestsatz, auf Grundlage des Rücklagen-Plans. Die Erläuterung zu Ihrer Vorschreibung nennt beide Werte.
 - Verwendet für Instandhaltung und Erneuerung nach dem **Rücklagen-Plan**; die nächsten geplanten Maßnahmen stehen in der Erläuterung.
 - Die Gebäude werden jährlich begangen; Zeitpunkt und Umfang der Maßnahmen werden nach dem Zustand angepasst.

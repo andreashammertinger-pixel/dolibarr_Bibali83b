@@ -297,6 +297,7 @@ class HvInfoPdf extends HvStatementPdf
 		$pb = $d['proj'];
 		if ($pb) {
 			$txt .= "\n".$T->transnoentities('HvInfoReserveFacts', $fm($pb['start']), $fm($pb['monthly']), $num($pb['current_rate']), $num($pb['required_rate']));
+			$txt .= ' '.$T->transnoentities('HvInfoReserveLegal', $num(HvReserveRate::legalMin()));
 		}
 		$pdf->MultiCell($W, 4.6, $txt, 0, 'L');
 		if ($d['next']) {

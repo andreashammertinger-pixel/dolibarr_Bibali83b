@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.15.0
+- **Rücklagen-Satz je Haus festlegen** (Rücklagen-Planung): Mindestsatz lt. Plan, Plan × Faktor, manuell oder gesetzliches Minimum; Vorschau mit Zuführung je Monat und Warnung unter Minimum; Satz auf 2 Nachkommastellen aufgerundet
+- **Gesetzliches Minimum** angezeigt (0,54 % der etalonska cijena građenja ÷ 12, Werte in den Einstellungen)
+- **Verlauf** jeder Festlegung mit Datum, Benutzer, alt → neu, gesetzl. Minimum, Mindestsatz lt. Plan, Planvolumen, Kontostand, Begründung/Beschluss; in der Druckansicht für die Eigentümerversammlung (alle Sprachen)
+- Vorschreibung verwendet den Satz des Hauses (Satz je Apartment nur noch als Rückfall); bisherige Sätze werden beim Aktivieren übernommen
+- Erläuterung nennt zusätzlich den gesetzlichen Mindestsatz
+
 ## 1.14.0
 - **KI-Übersetzung** (Claude-API, eigener API-Schlüssel, verschlüsselt gespeichert): neue Kostenarten, Planpositionen und Textbausteine werden beim Speichern in alle Dokumentsprachen übersetzt; jeder Bearbeiter schreibt in seiner Sprache („geschrieben in“)
 - Bei Änderung bestehender Texte Nachfrage: „Änderung auch in die anderen Sprachen übernehmen?“ – Ja, übersetzen / Nein, nur diese Sprache; von Hand korrigierte Übersetzungen bleiben erhalten

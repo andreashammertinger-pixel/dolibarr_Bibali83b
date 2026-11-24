@@ -15,5 +15,6 @@ The statement shows each cost type with the total amount and your share in % and
 
 - Required by law (Zakon o upravljanju i održavanju zgrada).
 - **Not settled** – it remains in the reserve account of **your house**.
+- The community sets the amount per house – at least the legal minimum, based on the reserve plan. The explanation with your service charge states both values.
 - Used for maintenance and renewal according to the **reserve plan**; the next planned measures are listed in the explanation.
 - The buildings are inspected annually; timing and scope of measures are adjusted to their condition.

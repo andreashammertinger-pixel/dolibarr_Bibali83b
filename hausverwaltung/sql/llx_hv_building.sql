@@ -9,6 +9,10 @@ CREATE TABLE llx_hv_building (
   position           integer DEFAULT 0,
   active             smallint DEFAULT 1 NOT NULL,
   note               text,
+  reserve_mode       varchar(16) DEFAULT 'manual',  -- Rücklagen-Satz: manual | plan | factor | legal
+  reserve_factor     double(24,4) DEFAULT 1,        -- Faktor auf den Mindestsatz laut Plan
+  reserve_rate       double(24,4) DEFAULT 0,        -- festgelegter Rücklagen-Satz €/m²/Monat (0 = Satz je Apartment)
+  reserve_note       text,                          -- Begründung / Beschluss
   datec              datetime,
   tms                timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=innodb;

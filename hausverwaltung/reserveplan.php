@@ -249,6 +249,37 @@ if ($canwrite && $action === 'confirm_delete' && GETPOST('confirm') === 'yes') {
 	header('Location: '.$_SERVER['PHP_SELF']);
 	exit;
 }
+// Rücklagen-Satz je Haus festlegen (protokolliert)
+if ($canwrite && $action === 'setrates') {
+	$projNow = (new HvReservePlan($db))->projection();
+	$rr = new HvReserveRate($db);
+	$rows = (array) GETPOST('rate', 'array');
+	$n = 0;
+	foreach ($buildings as $bid => $b) {
+		if (!isset($rows[$bid])) {
+			continue;
+		}
+		$r = (array) $rows[$bid];
+		$mode = in_array($r['mode'] ?? '', HvReserveRate::modes(), true) ? $r['mode'] : 'manual';
+		$factor = (float) price2num((string) ($r['factor'] ?? '1'));
+		$manual = (float) price2num((string) ($r['manual'] ?? '0'));
+		$note = trim(strip_tags((string) ($r['note'] ?? '')));
+		$pb = $projNow['buildings'][$bid] ?? null;
+		$newRate = HvReserveRate::compute($mode, $factor, $manual, $pb ? (float) $pb['required_rate'] : 0, HvReserveRate::legalMin());
+		$same = $mode === (string) ($b->reserve_mode ?? '') && abs($newRate - (float) ($b->reserve_rate ?? 0)) < 0.00001 && $note === (string) ($b->reserve_note ?? '') && ($mode !== 'factor' || abs($factor - (float) ($b->reserve_factor ?? 1)) < 0.00001);
+		if ($same) {
+			continue;
+		}
+		if ($rr->setRate($user, $bid, $mode, $factor, $manual, $note, $projNow) !== false) {
+			$n++;
+		} else {
+			setEventMessages($rr->error, null, 'errors');
+		}
+	}
+	setEventMessages($langs->trans('HvRateApplied', $n), null);
+	header('Location: '.$_SERVER['PHP_SELF'].'#rates');
+	exit;
+}
 if ($canwrite && $action === 'import') {
 	// JSON: {"reserveplan":[{label, basis, note (Text oder {"hr_HR": "...", "de_DE": "..."}), building (Kürzel oder leer), key, year, amount, active}]}
 	$data = (!empty($_FILES['planfile']['tmp_name']) && is_uploaded_file($_FILES['planfile']['tmp_name'])) ? json_decode(file_get_contents($_FILES['planfile']['tmp_name']), true) : null;
@@ -416,6 +447,80 @@ foreach ($proj['buildings'] as $o) {
 	print '<td>'.($ok ? '<span class="badge badge-status4">'.$T->trans('HvPlanOk').'</span>' : '<span class="badge badge-status8 error">'.$T->trans('HvPlanShortfall', $o['shortfall_year']).'</span>').'</td></tr>';
 }
 print '</table></div><div class="opacitymedium" style="font-size:11px">'.$T->trans('HvPlanRequiredHelp').'</div><br>';
+
+// Festlegung des Rücklagen-Satzes je Haus (gesetzliches Minimum, Plan, Faktor, manuell) – nachvollziehbar mit Verlauf
+$legal = HvReserveRate::legalMin();
+$modeTxt = function ($m, $f) use ($T) {
+	return $m === 'factor' ? $T->trans('HvRateMode_plan').' × '.price($f, 0, $T, 1, 0, 2) : $T->trans('HvRateMode_'.($m ?: 'manual'));
+};
+print '<a id="rates"></a>';
+print $print ? '<h3>'.$T->trans('HvRateTitle').'</h3>' : load_fiche_titre($T->trans('HvRateTitle'), '', '');
+print '<div class="opacitymedium small">'.$T->trans('HvRateLegalSource', price(getDolGlobalString('HAUSVERWALTUNG_RESERVE_LEGAL_PCT', '0.54'), 0, $T, 1, 0, 2), price(getDolGlobalString('HAUSVERWALTUNG_ETALON_PRICE', '796.34'), 0, $T, 1, 2, 2), price($legal, 0, $T, 1, 4, 4)).'</div>';
+if (!$print && $canwrite) {
+	print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'#rates"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="setrates">';
+}
+print '<div class="div-table-responsive"><table class="noborder centpercent hvrates"><tr class="liste_titre"><th>'.$T->trans('HvBuilding').'</th><th class="right">m²</th><th class="right">'.$T->trans('HvRateLegal').'</th><th class="right">'.$T->trans('HvRatePlanMin').'</th><th>'.$T->trans('HvRateMode').'</th><th class="right">'.$T->trans('HvRateNew').'</th><th class="right">'.$T->trans('HvRateMonthly').'</th><th>'.$T->trans('HvRateNote').'</th></tr>';
+foreach ($proj['buildings'] as $bid => $o) {
+	$b = $buildings[$bid] ?? $o['building'];
+	$planMin = (float) $o['required_rate'];
+	$cur = (float) ($b->reserve_rate ?? 0) > 0 ? (float) $b->reserve_rate : (float) $o['current_rate'];
+	$m = (string) ($b->reserve_mode ?? 'manual');
+	$fac = (float) ($b->reserve_factor ?? 1);
+	print '<tr class="oddeven" data-plan="'.price2num($planMin).'" data-legal="'.price2num($legal).'" data-area="'.price2num($o['area']).'"><td>'.dol_escape_htmltag($bname($b)).'</td><td class="right">'.price($o['area'], 0, $T, 1, 2, 2).'</td>';
+	print '<td class="right">'.price($legal, 0, $T, 1, 2, 2).' €</td><td class="right">'.price($planMin, 0, $T, 1, 2, 2).' €</td>';
+	if (!$print && $canwrite) {
+		$sel = '<select name="rate['.$bid.'][mode]" class="flat hvmode">';
+		foreach (HvReserveRate::modes() as $mm) {
+			$sel .= '<option value="'.$mm.'"'.($mm === $m ? ' selected' : '').'>'.$langs->trans('HvRateMode_'.$mm).'</option>';
+		}
+		$sel .= '</select>';
+		print '<td class="nowraponall">'.$sel.' <span class="hvfac"'.($m === 'factor' ? '' : ' style="display:none"').'>× <input name="rate['.$bid.'][factor]" class="width50 right hvfacin" value="'.price2num($fac).'"></span><span class="hvman"'.($m === 'manual' ? '' : ' style="display:none"').'> <input name="rate['.$bid.'][manual]" class="width50 right hvmanin" value="'.price2num($cur).'"> €</span></td>';
+		print '<td class="right"><strong class="hvnew">'.price($cur, 0, $T, 1, 2, 2).' €</strong><br><span class="opacitymedium small">'.$langs->trans('HvRateCurrent').': '.price($cur, 0, $T, 1, 2, 2).' €</span><div class="hvwarn small" style="color:#a00;font-weight:bold"></div></td>';
+		print '<td class="right hvmon">'.$fm($cur * $o['area']).'</td>';
+		print '<td><input name="rate['.$bid.'][note]" class="minwidth200 widthcentpercentminusx" value="'.dol_escape_htmltag((string) ($b->reserve_note ?? '')).'" placeholder="'.dol_escape_htmltag($langs->trans('HvRateNotePlaceholder')).'"></td></tr>';
+	} else {
+		print '<td>'.dol_escape_htmltag($modeTxt($m, $fac)).'</td><td class="right"><strong>'.price($cur, 0, $T, 1, 2, 2).' €</strong></td><td class="right">'.$fm($cur * $o['area']).'</td><td class="small">'.dol_escape_htmltag((string) ($b->reserve_note ?? '')).'</td></tr>';
+	}
+}
+print '</table></div>';
+print '<div class="opacitymedium small">'.$T->trans('HvRateExplain').'</div>';
+if (!$print && $canwrite) {
+	print '<div class="center"><input type="submit" class="button button-save" value="'.$langs->trans('HvRateApply').'"> <span class="opacitymedium small">'.$langs->trans('HvRateApplyHelp').'</span></div></form>';
+	$jsT = array('below_legal' => dol_escape_js($langs->transnoentities('HvRateBelowLegal')), 'below_plan' => dol_escape_js($langs->transnoentities('HvRateBelowPlan')));
+	print '<script>
+jQuery(function ($) {
+	var fmt = function (v) { return v.toFixed(2).replace(".", ","); };
+	var ceil2 = function (x) { return Math.ceil(Math.round(x * 1e6) / 1e4) / 100; };
+	$("table.hvrates tr[data-plan]").each(function () {
+		var tr = $(this), plan = parseFloat(tr.data("plan")), legal = parseFloat(tr.data("legal")), area = parseFloat(tr.data("area"));
+		var upd = function () {
+			var m = tr.find(".hvmode").val(), f = parseFloat(String(tr.find(".hvfacin").val()).replace(",", ".")) || 0, man = parseFloat(String(tr.find(".hvmanin").val()).replace(",", ".")) || 0, r;
+			tr.find(".hvfac").toggle(m === "factor"); tr.find(".hvman").toggle(m === "manual");
+			if (m === "legal") r = ceil2(legal); else if (m === "plan") r = ceil2(Math.max(plan, legal)); else if (m === "factor") r = ceil2(Math.max(plan * f, legal)); else r = man;
+			tr.find(".hvnew").text(fmt(r) + " €");
+			tr.find(".hvmon").text(fmt(r * area) + " €");
+			var w = []; if (r < legal - 1e-9) w.push("'.$jsT['below_legal'].'"); if (r < plan - 1e-9) w.push("'.$jsT['below_plan'].'");
+			tr.find(".hvwarn").text(w.join(" "));
+		};
+		tr.find("select, input").on("change keyup", upd); upd();
+	});
+});
+</script>';
+}
+// Verlauf
+$hist = (new HvReserveRate($db))->history($print ? 20 : 50);
+if ($hist) {
+	print $print ? '<h4>'.$T->trans('HvRateHistory').'</h4>' : '<br><details'.(GETPOST('history', 'int') ? ' open' : '').'><summary class="opacitymedium" style="cursor:pointer">'.$T->trans('HvRateHistory').' ('.count($hist).')</summary>';
+	print '<div class="div-table-responsive"><table class="noborder centpercent"><tr class="liste_titre"><th>'.$T->trans('HvRateDate').'</th><th>'.$T->trans('HvBuilding').'</th><th>'.$T->trans('HvRateMode').'</th><th class="right">'.$T->trans('HvRateChange').'</th><th class="right">'.$T->trans('HvRateLegal').'</th><th class="right">'.$T->trans('HvRatePlanMin').'</th><th class="right">'.$T->trans('HvRatePlanVolume').'</th><th class="right">'.$T->trans('HvRateBalance').'</th><th>'.$T->trans('HvRateNote').'</th>'.($print ? '' : '<th>'.$langs->trans('User').'</th>').'</tr>';
+	foreach ($hist as $h) {
+		$hb = $buildings[(int) $h->fk_building] ?? null;
+		print '<tr class="oddeven"><td class="nowraponall">'.dol_print_date($db->jdate($h->datec), 'day', false, $T).'</td><td>'.dol_escape_htmltag($hb ? $bname($hb) : '#'.$h->fk_building).'</td><td>'.dol_escape_htmltag($modeTxt($h->mode, (float) $h->factor)).'</td>';
+		print '<td class="right nowraponall">'.price($h->rate_old, 0, $T, 1, 2, 2).' → <strong>'.price($h->rate_new, 0, $T, 1, 2, 2).'</strong> €</td><td class="right">'.($h->legal_min !== null ? price($h->legal_min, 0, $T, 1, 2, 2) : '').'</td><td class="right">'.($h->plan_min !== null ? price($h->plan_min, 0, $T, 1, 2, 2) : '').'</td>';
+		print '<td class="right">'.($h->plan_total !== null ? $fm($h->plan_total) : '').'</td><td class="right">'.($h->balance !== null ? $fm($h->balance) : '').'</td><td class="small">'.dol_escape_htmltag((string) $h->note).'</td>'.($print ? '' : '<td class="small">'.dol_escape_htmltag((string) $h->login).'</td>').'</tr>';
+	}
+	print '</table></div>'.($print ? '' : '</details>');
+}
+print '<br>';
 
 // Prognose je Gebäude und Jahr
 print $print ? '<h3>'.$T->trans('HvPlanProjection').'</h3>' : load_fiche_titre($T->trans('HvPlanProjection'), '', '');

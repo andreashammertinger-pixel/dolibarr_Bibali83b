@@ -114,7 +114,9 @@ function hvDocKeys()
 	$out = array();
 	$extra = array('HvBuildingNo', 'HvUnit', 'HvAllBuildings', 'HvReservePlan', 'HvBuilding', 'HvReserveAccount', 'HvBalance', 'HvMovesIn', 'HvMovesOut',
 		'HvPlanAssumptions', 'HvPlanMonthly', 'HvPlanCurrentRate', 'HvPlanRequiredRate', 'HvPlanMinBalance', 'HvPlanOk', 'HvPlanShortfall', 'HvPlanRequiredHelp', 'HvPlanProjection',
-		'HvPlanEndBalance', 'HvPlanMeasures', 'HvPlanItems', 'HvPlanYear', 'HvPlanAmount', 'HvPlanBasis', 'HvPlanTodayPrices', 'HvPlanDisclaimer');
+		'HvPlanEndBalance', 'HvPlanMeasures', 'HvPlanItems', 'HvPlanYear', 'HvPlanAmount', 'HvPlanBasis', 'HvPlanTodayPrices', 'HvPlanDisclaimer',
+		'HvRateTitle', 'HvRateLegal', 'HvRatePlanMin', 'HvRateMode', 'HvRateMode_plan', 'HvRateMode_factor', 'HvRateMode_manual', 'HvRateMode_legal', 'HvRateNew', 'HvRateMonthly', 'HvRateNote',
+		'HvRateHistory', 'HvRateDate', 'HvRateChange', 'HvRatePlanVolume', 'HvRateBalance', 'HvRateLegalSource', 'HvRateExplain');
 	foreach (file($file) ?: array() as $line) {
 		if (!preg_match('/^\s*([A-Za-z0-9_]+)\s*=\s*(.*)$/', $line, $m)) {
 			continue;

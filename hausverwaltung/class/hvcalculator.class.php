@@ -134,7 +134,9 @@ class HvCalculator
 			$area = (float) $u->area;
 			// Je m²-Sätze (Vorschreibung: Einzelpreis = €/m² und Monat, Menge = m²)
 			$bkRate = $area > 0 ? round((($bkAll[$id] ?? 0) + ($bkB[$id] ?? 0)) / $area, $dec) : 0;
-			$reserveRate = round((float) $u->reserve_rate, $dec);
+			// Rücklagen-Satz: festgelegter Satz des Hauses, sonst Satz des Apartments
+			$bRate = isset($this->buildings[$b]) ? (float) ($this->buildings[$b]->reserve_rate ?? 0) : 0;
+			$reserveRate = round($bRate > 0 ? $bRate : (float) $u->reserve_rate, $dec);
 			$adminRate = round((float) $u->admin_rate * (1 + self::adminVatRate() / 100), $dec);
 			$bk = round($bkRate * $area, 2);
 			$reserve = round($reserveRate * $area, 2);
