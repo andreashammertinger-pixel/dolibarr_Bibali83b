@@ -177,3 +177,5 @@ HvRateExplain = Minimalna stopnja po načrtu = najnižja stalna stopnja, pri kat
 HvInfoReserveLegal = Zakonska minimalna stopnja: %s €/m².
 HvDocStamp = Upravljanje stavb %s · %s
 HvDocAiNote = Z UI prevedeno v ustrezni jezik – v primeru nejasnosti nas prosim vprašajte
+HvPdfCopy = KOPIJA – Prevod
+HvPdfCopyNote = Ta prevod je zgolj informativen. Pravno zavezujoč je hrvaški izvirnik.

@@ -13,6 +13,9 @@ Die Vorschreibung ist die Rechnung der Gemeinschaft an das Apartment. Sie enthä
 2. **Vorschau aktualisieren** klicken und die Tabelle prüfen: Betrag je Apartment, Warnungen (OIB fehlt, kein Eigentümer-Kontakt, KPD fehlt).
 3. In der Spalte **PDF-Vorschau** einzelne PDFs öffnen (Original und Übersetzung, mit Wasserzeichen *Entwurf*).
 
+!!! info "Kroatisches Original ist maßgeblich (Finanz)"
+    Die Übersetzung der Vorschreibung trägt oben links den Kasten **„KOPIE – Übersetzung“** mit dem Satz *„Diese Übersetzung dient nur zur Information. Rechtlich maßgeblich ist das kroatische Original.“* (in der Sprache des Eigentümers und auf Kroatisch). Das gilt nur für Vorschreibungen/Rechnungen; alle anderen Dokumente tragen nur den KI-Hinweis in der Fußzeile.
+
 ## 2. Entwürfe erzeugen
 
 1. Häkchen **„Rechnungen direkt freigeben“ nicht setzen** – so entstehen Entwürfe, die man noch löschen kann.

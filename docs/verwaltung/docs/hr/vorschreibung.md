@@ -13,6 +13,9 @@ Zaduženje je račun zajednice apartmanu. Sadrži tri stavke: **zajedničke tro�
 2. Kliknuti **Osvježi pregled** i provjeriti tablicu: iznos po apartmanu, upozorenja (nedostaje OIB, nema kontakta vlasnika, nedostaje KPD).
 3. U stupcu **PDF pregled** otvoriti pojedine PDF-ove (izvornik i prijevod, s vodenim žigom *Nacrt*).
 
+!!! info "Mjerodavan je hrvatski izvornik (porezna uprava)"
+    Prijevod zaduženja gore lijevo ima okvir **„KOPIJA – Prijevod“** s rečenicom *„Ovaj prijevod služi samo za informaciju. Pravno je mjerodavan hrvatski izvornik.“* (na jeziku vlasnika i na hrvatskom). To vrijedi samo za zaduženja/račune; svi ostali dokumenti imaju samo AI napomenu u podnožju.
+
 ## 2. Izrada nacrta
 
 1. Kvačicu **„Odmah potvrdi račune“ ne stavljati** – nastaju nacrti koje je moguće obrisati.

@@ -462,3 +462,5 @@ HvMlGenInfo = Croatian original and version in the owner's language; for the tes
 HvMlGenMissing = %s not available – apartment is not sent
 HvMlTestFirst = Please send a test first and check the test e-mails – only then can you send.
 HvMlTestedAt = Test sent successfully on %s – ready to send.
+HvPdfCopy = COPY – Translation
+HvPdfCopyNote = This translation is for information only. The Croatian original is legally binding.

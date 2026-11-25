@@ -462,3 +462,5 @@ HvMlGenInfo = Hrvatski izvornik i verzija na jeziku vlasnika; pri testu dokument
 HvMlGenMissing = %s ne postoji – apartman se ne šalje
 HvMlTestFirst = Molimo prvo pošaljite test i provjerite testne poruke – tek tada je slanje moguće.
 HvMlTestedAt = Test uspješno poslan %s – slanje je moguće.
+HvPdfCopy = KOPIJA – Prijevod
+HvPdfCopyNote = Ovaj prijevod služi samo za informaciju. Pravno je mjerodavan hrvatski izvornik.

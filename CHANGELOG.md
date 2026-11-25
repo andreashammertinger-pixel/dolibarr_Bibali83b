@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.17.1
+- Vorschreibung/Rechnung: Kasten **„KOPIE – Übersetzung … Rechtlich maßgeblich ist das kroatische Original“** auf der übersetzten Fassung wieder eingebaut (für die Finanz); andere Dokumente unverändert nur mit KI-Hinweis
+- Doku (Vorschreibung de/hr) und Eigentümerhilfe (Meine Rechnungen) ergänzt
+
 ## 1.17.0
 - **Einheitlicher KI-Hinweis** auf allen Dokumenten und E-Mails, in jeder Sprache gleich (auch Kroatisch): „Mittels KI in die jeweilige Sprache übersetzt – bei Unklarheiten bitte rückfragen.“ Keine Unterscheidung nach Ausgangssprache mehr; Einstellung „Ausgangssprache“ entfällt (Hinweis weiterhin ein/aus)
 - **Rundschreiben: Dokumente der Hausverwaltung anhängen** – Rücklagen-Plan (neues PDF), Abrechnungsblatt eines Jahres und Vorschreibung eines Monats mit Erläuterung; werden beim Versand je Apartment neu erzeugt (kroatisches Original + Sprache des Eigentümers). Fehlt ein Dokument, wird das Apartment nicht versendet (Fehler im Protokoll)
