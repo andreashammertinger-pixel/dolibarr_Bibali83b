@@ -58,3 +58,7 @@ Mit einem API-Schlüssel (Einstellungen → *KI-Übersetzung*) übersetzt Doliba
     Übertragen werden nur die Texte selbst. Schreiben Sie in diese Felder keine Namen, OIB oder Kontodaten.
 
 Ist der Dienst nicht erreichbar, wird der Text trotzdem gespeichert; eine Meldung weist darauf hin.
+
+## Herkunftszeile auf Dokumenten
+
+Jedes Dokument (Vorschreibung, Erläuterung, Abrechnung, Druckansicht Rücklagen-Plan, KI-übersetzte Anhänge) und jede E-Mail trägt unten klein: **erstellt mit Hausverwaltung, Version und Zeitpunkt**, die **Ausgangssprache** und den Hinweis, dass **Fassungen in anderen Sprachen mittels KI übersetzt** wurden. Ausgangssprache und Hinweis: *Einstellungen*.

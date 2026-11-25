@@ -59,6 +59,11 @@ if ($action === 'save') {
 			dolibarr_set_const($db, $cn, $cv, 'chaine', 0, '', $conf->entity);
 		}
 	}
+	$sl = preg_replace('/[^a-zA-Z_]/', '', GETPOST('HAUSVERWALTUNG_SOURCE_LANG', 'alpha'));
+	if (preg_match('/^[a-z]{2}_[A-Z]{2}$/', $sl)) {
+		dolibarr_set_const($db, 'HAUSVERWALTUNG_SOURCE_LANG', $sl, 'chaine', 0, '', $conf->entity);
+	}
+	dolibarr_set_const($db, 'HAUSVERWALTUNG_AI_DOC_NOTE', GETPOSTINT('HAUSVERWALTUNG_AI_DOC_NOTE') ? '1' : '0', 'chaine', 0, '', $conf->entity);
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_INFO_ATTACH', GETPOSTINT('HAUSVERWALTUNG_INFO_ATTACH') ? '1' : '0', 'chaine', 0, '', $conf->entity);
 	$hurl = trim(GETPOST('HAUSVERWALTUNG_HELP_URL', 'alphanohtml'));
 	dolibarr_set_const($db, 'HAUSVERWALTUNG_HELP_URL', preg_match('#^https?://#i', $hurl) ? $hurl : '', 'chaine', 0, '', $conf->entity);
@@ -228,6 +233,12 @@ print '<tr class="oddeven"><td>'.$langs->trans('HvDigitalNoteSetting').'</td><td
 print '<tr class="oddeven"><td>'.$langs->trans('HvMailFromSetting').'</td><td><input name="HAUSVERWALTUNG_MAIL_FROM" class="minwidth250" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_MAIL_FROM')).'" placeholder="'.dol_escape_htmltag($mysoc->email).'"></td></tr>';
 dol_include_once('/hausverwaltung/class/hvreserveplan.class.php');
 print '<tr class="oddeven"><td>'.$langs->trans('HvRateLegalSetting').'</td><td><input name="HAUSVERWALTUNG_RESERVE_LEGAL_PCT" class="width50 right" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_RESERVE_LEGAL_PCT', '0.54')).'"> % '.$langs->trans('HvRateOfEtalon').' <input name="HAUSVERWALTUNG_ETALON_PRICE" class="width75 right" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_ETALON_PRICE', '796.34')).'"> €/m² → <strong>'.price(HvReserveRate::legalMin(), 0, $langs, 1, 4, 4).' €/m²/'.$langs->trans('Month').'</strong> <span class="opacitymedium small">'.$langs->trans('HvRateLegalSettingHelp').'</span></td></tr>';
+$slSel = '<select name="HAUSVERWALTUNG_SOURCE_LANG" class="flat">';
+foreach (hvDocLangs() as $l) {
+	$slSel .= '<option value="'.$l.'"'.($l === hvSourceLang() ? ' selected' : '').'>'.$l.'</option>';
+}
+$slSel .= '</select>';
+print '<tr class="oddeven"><td>'.$langs->trans('HvSourceLangSetting').'</td><td>'.$slSel.' <label><input type="checkbox" name="HAUSVERWALTUNG_AI_DOC_NOTE" value="1"'.(getDolGlobalString('HAUSVERWALTUNG_AI_DOC_NOTE', '1') === '1' ? ' checked' : '').'> '.$langs->trans('HvAiDocNoteSetting').'</label><br><span class="opacitymedium small">'.dol_escape_htmltag(hvDocStamp($langs)).'</span></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvSentArchiveSetting').'</td><td><input type="checkbox" name="HAUSVERWALTUNG_SENT_TO_THIRDPARTY" value="1"'.(getDolGlobalString('HAUSVERWALTUNG_SENT_TO_THIRDPARTY', '1') === '1' ? ' checked' : '').'> <span class="opacitymedium">'.$langs->trans('HvSentArchiveHelp').'</span></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvInfoAttachSetting').'</td><td><input type="checkbox" name="HAUSVERWALTUNG_INFO_ATTACH" value="1"'.(getDolGlobalString('HAUSVERWALTUNG_INFO_ATTACH', '1') === '1' ? ' checked' : '').'> <span class="opacitymedium">'.$langs->trans('HvInfoAttachHelp').'</span></td></tr>';
 print '<tr class="oddeven"><td>'.$langs->trans('HvHelpUrlSetting').'</td><td><input name="HAUSVERWALTUNG_HELP_URL" class="minwidth300" placeholder="https://…" value="'.dol_escape_htmltag(getDolGlobalString('HAUSVERWALTUNG_HELP_URL')).'"> <span class="opacitymedium">'.$langs->trans('HvHelpUrlHelp').'</span></td></tr>';

@@ -15,6 +15,9 @@
 ??? question "Moji podatki (naslov, e-pošta, OIB) so se spremenili."
     Sporočite nam – podatke bomo posodobili, da bodo dokumenti pravilno izdani.
 
+??? question "Prejel/a sem okrožnico v svojem jeziku – katera različica velja?"
+    Okrožnice in dokumenti so napisani v izvirnem jeziku in za vas prevedeni z umetno inteligenco; to je drobno navedeno na koncu vsakega sporočila in dokumenta. Pri prilogah prejmete tudi izvirnik. Velja izvirnik.
+
 ## Kontakt upravnika
 
 **Green Villa and Apartment Resorts d.o.o.**  

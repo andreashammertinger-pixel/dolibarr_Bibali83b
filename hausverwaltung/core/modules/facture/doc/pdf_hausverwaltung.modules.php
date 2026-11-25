@@ -461,6 +461,10 @@ class pdf_hausverwaltung extends ModelePDFFactures
 		$pdf->SetTextColor(90, 90, 90);
 		$pdf->SetXY($L, $this->page_hauteur - $this->marge_basse - 6);
 		$pdf->Cell($W, 4, $outputlangs->convToOutputCharset(implode('  |  ', $parts)), 0, 0, 'C');
+		// Herkunft: Modulversion, Erstellzeit, Ausgangssprache / KI-Übersetzung
+		$pdf->SetFont('', '', $fs - 4);
+		$pdf->SetXY($L, $this->page_hauteur - $this->marge_basse - 2);
+		$pdf->Cell($W, 3, $outputlangs->convToOutputCharset(hvDocStamp($outputlangs)), 0, 0, 'C');
 		$pdf->SetTextColor(0, 0, 0);
 
 		if ($object->statut == Facture::STATUS_DRAFT) {

@@ -32,6 +32,7 @@ Die **Gemeinschaft** (z. B. *Zgrada Bibali 83B*) schreibt jedem Apartment monatl
 | Kostenplan | Kostenarten mit Betrag, Zeitraum, Gebäude und Verteilschlüssel |
 | Vorschreibung erstellen | Vorschreibungen für einen Monat oder Zeitraum erzeugen |
 | Vorschreibungen versenden | E-Mail an die Eigentümer mit allen Anhängen |
+| Rundschreiben | Mitteilung an alle oder ausgewählte Eigentümer, übersetzt, mit Anhängen |
 | Zahlungsstand | Wer hat was bezahlt, Rückstände |
 | Rücklagen / Rücklagen-Planung | Kontostände, Bewegungen, Mehrjahresplan |
 | Jahresabrechnung | Ist-Kosten gegen Vorauszahlungen, Abrechnungsblätter |

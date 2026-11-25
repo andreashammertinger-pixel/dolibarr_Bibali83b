@@ -627,7 +627,8 @@ foreach ($items as $p) {
 print '<tr class="liste_total"><td colspan="3">'.$T->trans('Total').' ('.$T->trans('HvPlanTodayPrices').')</td><td class="right">'.$fm($sum).'</td><td colspan="'.($print ? 1 : 3).'"></td></tr></table></div>';
 
 if ($print) {
-	print '<p style="font-size:10px;color:#666;margin-top:12px">'.$T->trans('HvPlanDisclaimer').'</p></body></html>';
+	print '<p style="font-size:10px;color:#666;margin-top:12px">'.$T->trans('HvPlanDisclaimer').'</p>';
+	print '<p style="font-size:9px;color:#999">'.dol_escape_htmltag(hvDocStamp($T)).'</p></body></html>';
 	$db->close();
 	exit;
 }

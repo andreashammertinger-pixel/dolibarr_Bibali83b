@@ -222,7 +222,7 @@ class HvTranslator
 	}
 
 	/** @return array{0:int,1:string|false,2:string} */
-	protected function post($key, array $body, $withFallback)
+	protected function post($key, array $body, $withFallback, $timeout = 120)
 	{
 		$headers = array(
 			'Content-Type: application/json',
@@ -236,7 +236,7 @@ class HvTranslator
 		curl_setopt_array($ch, array(
 			CURLOPT_POST => true,
 			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_TIMEOUT => 120,
+			CURLOPT_TIMEOUT => (int) $timeout,
 			CURLOPT_CONNECTTIMEOUT => 15,
 			CURLOPT_HTTPHEADER => $headers,
 			CURLOPT_POSTFIELDS => json_encode($body, JSON_UNESCAPED_UNICODE),
@@ -246,5 +246,64 @@ class HvTranslator
 		$cerr = curl_error($ch);
 		curl_close($ch);
 		return array($code, $raw, $cerr);
+	}
+
+	/**
+	 * PDF-Dokument übersetzen. Ergebnis: einfaches HTML (Überschriften, Absätze, Listen, Tabellen) für die Ausgabe als PDF.
+	 *
+	 * @return array{title:string,html:string}|false
+	 */
+	public function translatePdf($path, $src, $target)
+	{
+		$this->error = '';
+		$key = self::apiKey();
+		if ($key === '') {
+			$this->error = 'Kein API-Schlüssel hinterlegt';
+			return false;
+		}
+		if (!is_readable($path) || filesize($path) > 20 * 1024 * 1024) {
+			$this->error = 'Datei nicht lesbar oder zu groß (max. 20 MB)';
+			return false;
+		}
+		$schema = array('type' => 'object', 'properties' => array('title' => array('type' => 'string'), 'html' => array('type' => 'string')), 'required' => array('title', 'html'), 'additionalProperties' => false);
+		$body = array(
+			'model' => getDolGlobalString('HAUSVERWALTUNG_AI_MODEL', self::DEFAULT_MODEL),
+			'max_tokens' => 16000,
+			'system' => array(array('type' => 'text', 'text' => self::systemPrompt(), 'cache_control' => array('type' => 'ephemeral'))),
+			'messages' => array(array('role' => 'user', 'content' => array(
+				array('type' => 'document', 'source' => array('type' => 'base64', 'media_type' => 'application/pdf', 'data' => base64_encode((string) file_get_contents($path)))),
+				array('type' => 'text', 'text' => "Translate this complete document from ".self::langName($src)." into ".self::langName($target).". "
+					."Keep the structure: headings, paragraphs, lists, tables, dates, amounts, names, signatures and addresses. Do not summarize and do not omit anything. "
+					."Return 'title' (the document title in the target language, or a short descriptive title) and 'html' using only these tags: h1, h2, h3, p, br, strong, em, ul, ol, li, table, tr, th, td."),
+			))),
+			'output_config' => array('effort' => 'low', 'format' => array('type' => 'json_schema', 'schema' => $schema)),
+			'fallbacks' => 'default',
+		);
+		list($code, $raw, $cerr) = $this->post($key, $body, true, 300);
+		if ($code === 400 && stripos((string) $raw, 'fallback') !== false) {
+			unset($body['fallbacks']);
+			list($code, $raw, $cerr) = $this->post($key, $body, false, 300);
+		}
+		$res = json_decode((string) $raw, true);
+		if ($raw === false || $code !== 200 || !is_array($res)) {
+			$this->error = $raw === false ? $cerr : ('HTTP '.$code.': '.(is_array($res) && isset($res['error']['message']) ? $res['error']['message'] : substr((string) $raw, 0, 200)));
+			return false;
+		}
+		$this->usage = (array) ($res['usage'] ?? array());
+		if (in_array($res['stop_reason'] ?? '', array('refusal', 'max_tokens'), true)) {
+			$this->error = ($res['stop_reason'] === 'max_tokens') ? 'Dokument zu lang für eine Übersetzung' : 'Übersetzung abgelehnt';
+			return false;
+		}
+		foreach ((array) ($res['content'] ?? array()) as $block) {
+			if (($block['type'] ?? '') === 'text') {
+				$j = json_decode((string) $block['text'], true);
+				if (is_array($j) && !empty($j['html'])) {
+					$allowed = '<h1><h2><h3><p><br><strong><em><b><i><ul><ol><li><table><tr><th><td><thead><tbody>';
+					return array('title' => trim(strip_tags((string) ($j['title'] ?? ''))), 'html' => strip_tags((string) $j['html'], $allowed));
+				}
+			}
+		}
+		$this->error = 'Antwort nicht lesbar';
+		return false;
 	}
 }

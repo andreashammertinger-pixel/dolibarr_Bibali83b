@@ -38,14 +38,14 @@ if (!$user->hasRight('hausverwaltung', 'read') || !empty($user->socid)) {
 	accessforbidden();
 }
 $rel = (string) GETPOST('file', 'alphanohtml');
-if (!preg_match('#^statements/\d{4}/ABR-[A-Za-z0-9._-]+\.pdf$#', $rel) || strpos($rel, '..') !== false) {
+if ((!preg_match('#^statements/\d{4}/ABR-[A-Za-z0-9._-]+\.pdf$#', $rel) && !preg_match('#^mailing/\d+/[A-Za-z0-9._ ()-]+$#', $rel)) || strpos($rel, '..') !== false) {
 	httponly_accessforbidden('Bad file');
 }
 $path = $conf->hausverwaltung->dir_output.'/'.$rel;
 if (!is_readable($path)) {
 	httponly_accessforbidden('Not found', 404);
 }
-top_httphead('application/pdf');
+top_httphead(dol_mimetype($path));
 header('Content-Disposition: inline; filename="'.basename($path).'"');
 header('Content-Length: '.filesize($path));
 readfile($path);

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.16.0
+- **Rundschreiben an Eigentümer** (neuer Menüpunkt): Text in der eigenen Sprache, KI-Übersetzung in die Sprachen der Empfänger (bearbeitbar, Nachfrage bei Änderungen), Anhänge hochladen oder aus Dolibarr (Dokumente/ECM), je Dokument „alle Sprachen“ oder Fassungen je Sprache, fehlende PDF-Fassungen per KI übersetzen (gekennzeichnet „KI-Übersetzung – maßgeblich ist das Original“), Empfänger alle/keine/je Haus, Testversand je Sprache, Versand je Apartment in der Sprache des Eigentümers, Protokoll, Ablage beim Apartment
+- **Herkunftszeile** auf allen Dokumenten und E-Mails: Modulversion, Erstellzeitpunkt, Ausgangssprache und Hinweis „Fassungen in anderen Sprachen mittels KI übersetzt“ (Einstellungen: Ausgangssprache, Hinweis ein/aus)
+- Doku: Kapitel Rundschreiben (de/hr), Herkunftszeile, Eigentümer-FAQ
+
 ## 1.15.0
 - **Rücklagen-Satz je Haus festlegen** (Rücklagen-Planung): Mindestsatz lt. Plan, Plan × Faktor, manuell oder gesetzliches Minimum; Vorschau mit Zuführung je Monat und Warnung unter Minimum; Satz auf 2 Nachkommastellen aufgerundet
 - **Gesetzliches Minimum** angezeigt (0,54 % der etalonska cijena građenja ÷ 12, Werte in den Einstellungen)

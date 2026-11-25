@@ -178,3 +178,6 @@ HvRateBalance = stanje računa
 HvRateLegalSource = Zakonski minimum po Zakon o upravljanju i održavanju zgrada (NN 152/24): %s %% etalonske gradbene cene %s €/m² na leto = %s €/m² na mesec.
 HvRateExplain = Minimalna stopnja po načrtu = najnižja stalna stopnja, pri kateri rezervni sklad hiše v obdobju načrtovanja nikoli ni negativen (upoštevana rast gradbenih stroškov). Določene stopnje se zaokrožijo navzgor na 2 decimalki in veljajo za nove obremenitve.
 HvInfoReserveLegal = Zakonska minimalna stopnja: %s €/m².
+HvDocStamp = Ustvarjeno z modulom Upravljanje stavb %s, %s
+HvDocAiNote = Izvirni jezik: %s – različice v drugih jezikih so bile prevedene z umetno inteligenco (UI)
+HvMlAiDocBanner = PREVOD Z UI izvirnika (%s, datoteka %s) – samo v informacijo; velja izvirnik.

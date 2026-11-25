@@ -15,6 +15,9 @@
 ??? question "My details (address, e-mail, OIB) have changed."
     Please let us know – we will update them so that documents are issued correctly.
 
+??? question "I received a circular in my language – which version is valid?"
+    Circulars and documents are written in a source language and translated for you using AI; this is stated in small print at the end of every e-mail and document. With attachments you also receive the original. The original prevails.
+
 ## Contact property manager
 
 **Green Villa and Apartment Resorts d.o.o.**  

@@ -1,4 +1,5 @@
 <?php
+dol_include_once('/hausverwaltung/lib/hausverwaltung.lib.php');
 /* Copyright (C) 2026 Green Villa and Apartment Resorts d.o.o. — GPL v3+ */
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
@@ -246,6 +247,7 @@ class HvMailer
 			}
 		}
 		$body .= $ol->transnoentities('HvMailRegards')."\n".($mgr ? $mgr->name."\n".$ol->transnoentities('HvMailOnBehalf', $mysoc->name) : $mysoc->name)."\n";
+		$body .= "\n--\n".hvDocStamp($ol)."\n";
 
 		$fromMail = getDolGlobalString('HAUSVERWALTUNG_MAIL_FROM', $mysoc->email);
 		if (!isValidEmail($fromMail)) {
@@ -376,6 +378,7 @@ class HvMailer
 			}
 		}
 		$body .= $ol->transnoentities('HvMailRegards')."\n".($mgr ? $mgr->name."\n".$ol->transnoentities('HvMailOnBehalf', $mysoc->name) : $mysoc->name)."\n";
+		$body .= "\n--\n".hvDocStamp($ol)."\n";
 		$fromMail = getDolGlobalString('HAUSVERWALTUNG_MAIL_FROM', $mysoc->email);
 		if (!isValidEmail($fromMail)) {
 			$this->error = 'Absenderadresse fehlt';

@@ -15,6 +15,9 @@
 ??? question "Moji podaci (adresa, e-pošta, OIB) su se promijenili."
     Molimo javite nam – ažurirat ćemo podatke kako bi dokumenti bili ispravno izdani.
 
+??? question "Dobio/la sam okružnicu na svom jeziku – koja verzija vrijedi?"
+    Okružnice i dokumenti pišu se na izvornom jeziku i za Vas se prevode pomoću AI; to sitno piše na kraju svake poruke i dokumenta. Uz priloge dobivate i izvornik. Mjerodavan je izvornik.
+
 ## Kontakt upravitelja
 
 **Green Villa and Apartment Resorts d.o.o.**  

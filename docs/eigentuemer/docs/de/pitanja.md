@@ -15,6 +15,9 @@
 ??? question "Meine Daten (Adresse, E-Mail, OIB) haben sich geändert."
     Bitte schreiben Sie uns – wir ändern die Daten, damit Dokumente richtig ausgestellt werden.
 
+??? question "Ich habe ein Rundschreiben in meiner Sprache bekommen – welche Fassung gilt?"
+    Rundschreiben und Dokumente werden in einer Ausgangssprache verfasst und für Sie mittels KI übersetzt; das steht klein am Ende jeder E-Mail und jedes Dokuments. Bei Anhängen erhalten Sie zusätzlich das Original. Maßgeblich ist das Original.
+
 ## Kontakt Hausverwaltung
 
 **Green Villa and Apartment Resorts d.o.o.**  

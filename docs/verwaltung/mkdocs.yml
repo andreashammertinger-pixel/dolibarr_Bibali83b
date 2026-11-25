@@ -60,6 +60,7 @@ plugins:
           nav_translations:
             Start: Početak
             Vorschreibung: Zaduženje
+            Rundschreiben: Okružnice
             Zahlungen: Uplate
             Kosten und Eingangsrechnungen: Troškovi i ulazni računi
             Jahresabrechnung: Godišnji obračun
@@ -71,6 +72,7 @@ plugins:
 nav:
   - Start: index.md
   - Vorschreibung: vorschreibung.md
+  - Rundschreiben: rundschreiben.md
   - Zahlungen: zahlungen.md
   - Kosten und Eingangsrechnungen: kosten.md
   - Jahresabrechnung: jahresabrechnung.md

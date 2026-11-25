@@ -32,6 +32,7 @@ Ovaj priručnik objašnjava rad s Dolibarr modulom **Hausverwaltung (upravljanje
 | Plan troškova | vrste troškova s iznosom, razdobljem, zgradom i ključem raspodjele |
 | Izradi zaduženja | zaduženja za jedan mjesec ili razdoblje |
 | Slanje zaduženja | e-pošta vlasnicima sa svim privicima |
+| Okružnice | obavijest svim ili odabranim vlasnicima, prevedena, s prilozima |
 | Stanje plaćanja | tko je što platio, zaostaci |
 | Pričuva / Plan pričuve | stanja računa, promjene, višegodišnji plan |
 | Godišnji obračun | stvarni troškovi naspram akontacija, obračunski listovi |

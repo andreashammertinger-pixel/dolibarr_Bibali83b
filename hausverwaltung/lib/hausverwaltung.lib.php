@@ -116,7 +116,7 @@ function hvDocKeys()
 		'HvPlanAssumptions', 'HvPlanMonthly', 'HvPlanCurrentRate', 'HvPlanRequiredRate', 'HvPlanMinBalance', 'HvPlanOk', 'HvPlanShortfall', 'HvPlanRequiredHelp', 'HvPlanProjection',
 		'HvPlanEndBalance', 'HvPlanMeasures', 'HvPlanItems', 'HvPlanYear', 'HvPlanAmount', 'HvPlanBasis', 'HvPlanTodayPrices', 'HvPlanDisclaimer',
 		'HvRateTitle', 'HvRateLegal', 'HvRatePlanMin', 'HvRateMode', 'HvRateMode_plan', 'HvRateMode_factor', 'HvRateMode_manual', 'HvRateMode_legal', 'HvRateNew', 'HvRateMonthly', 'HvRateNote',
-		'HvRateHistory', 'HvRateDate', 'HvRateChange', 'HvRatePlanVolume', 'HvRateBalance', 'HvRateLegalSource', 'HvRateExplain');
+		'HvRateHistory', 'HvRateDate', 'HvRateChange', 'HvRatePlanVolume', 'HvRateBalance', 'HvRateLegalSource', 'HvRateExplain', 'HvDocStamp', 'HvDocAiNote', 'HvMlAiDocBanner');
 	foreach (file($file) ?: array() as $line) {
 		if (!preg_match('/^\s*([A-Za-z0-9_]+)\s*=\s*(.*)$/', $line, $m)) {
 			continue;
@@ -353,10 +353,12 @@ function hvAiTranslateI18n($i18nJson, array $fields, $src, array $skipLangs, &$e
 }
 
 /** Auswahl „geschrieben in“ (Sprache des Textes) – Standard: Sprache des Benutzers */
-function hvSrcLangSelect($name = 'hv_srclang')
+function hvSrcLangSelect($name = 'hv_srclang', $cur = '')
 {
 	global $langs;
-	$cur = in_array($langs->defaultlang, hvDocLangs(), true) ? $langs->defaultlang : hvDocLangs()[0];
+	if (!in_array($cur, hvDocLangs(), true)) {
+		$cur = in_array($langs->defaultlang, hvDocLangs(), true) ? $langs->defaultlang : hvDocLangs()[0];
+	}
 	$h = '<select name="'.$name.'" class="flat">';
 	foreach (hvDocLangs() as $l) {
 		$h .= '<option value="'.$l.'"'.($l === $cur ? ' selected' : '').'>'.$l.'</option>';
@@ -411,4 +413,39 @@ jQuery(function ($) {
 	});
 });
 </script>';
+}
+
+/** Version des Moduls (aus dem Modul-Deskriptor) */
+function hvModuleVersion()
+{
+	static $v = null;
+	if ($v === null) {
+		global $db;
+		dol_include_once('/hausverwaltung/core/modules/modHausverwaltung.class.php');
+		$m = class_exists('modHausverwaltung') ? new modHausverwaltung($db) : null;
+		$v = $m ? (string) $m->version : '';
+	}
+	return $v;
+}
+
+/** Ausgangssprache, in der die Texte verfasst werden (Einstellung, Standard Deutsch) */
+function hvSourceLang()
+{
+	return getDolGlobalString('HAUSVERWALTUNG_SOURCE_LANG', 'de_DE');
+}
+
+/**
+ * Kleine Herkunftszeile für Dokumente und E-Mails in der Ausgabesprache:
+ * „Erstellt mit Hausverwaltung 1.16.0 am 25.11.2026 14:32 · Ausgangssprache: Deutsch · andere Sprachfassungen mittels KI übersetzt“
+ */
+function hvDocStamp($T, $withAiNote = true, $src = '')
+{
+	$T->load('languages');
+	$parts = array($T->transnoentities('HvDocStamp', hvModuleVersion(), dol_print_date(dol_now(), 'dayhour', 'tzuserrel', $T)));
+	if ($withAiNote && getDolGlobalString('HAUSVERWALTUNG_AI_DOC_NOTE', '1') === '1') {
+		$src = $src !== '' ? $src : hvSourceLang();
+		$name = $T->transnoentities('Language_'.$src);
+		$parts[] = $T->transnoentities('HvDocAiNote', $name !== 'Language_'.$src ? $name : $src);
+	}
+	return implode(' · ', $parts);
 }

@@ -243,6 +243,9 @@ class HvStatementPdf
 		$pdf->SetTextColor(90, 90, 90);
 		$pdf->SetXY($L, $ph - 12 - 6);
 		$pdf->Cell($W, 4, implode('  |  ', $parts), 0, 0, 'C');
+		$pdf->SetFont('', '', $fs - 4);
+		$pdf->SetXY($L, $ph - 12 - 2);
+		$pdf->Cell($W, 3, hvDocStamp($T), 0, 0, 'C');
 		$pdf->Close();
 		$pdf->Output($file, 'F');
 		dolChmod($file);

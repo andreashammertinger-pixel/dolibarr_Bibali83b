@@ -58,3 +58,7 @@ S API ključem (Postavke → *AI prijevod*) Dolibarr automatski prevodi tekstove
     Šalju se samo sami tekstovi. U ta polja ne upisujte imena, OIB ili bankovne podatke.
 
 Ako usluga nije dostupna, tekst se ipak sprema; poruka na to upozorava.
+
+## Napomena o podrijetlu na dokumentima
+
+Svaki dokument (zaduženje, objašnjenje, obračun, prikaz za ispis plana pričuve, prilozi prevedeni pomoću AI) i svaka poruka dolje sitno sadrži: **izrađeno modulom, verziju i vrijeme**, **izvorni jezik** i napomenu da su **verzije na drugim jezicima prevedene pomoću AI**. Izvorni jezik i napomena: *Postavke*.
