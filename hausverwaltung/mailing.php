@@ -201,6 +201,12 @@ if ($ml->id) {
 		}
 		$back('docs');
 	}
+	if ($action === 'saveopts') {
+		$ml->ownlang_only = GETPOSTINT('ownlang_only') ? 1 : 0;
+		$ml->update(true);
+		setEventMessages($langs->trans('HvSaved'), null);
+		$back('docs');
+	}
 	if ($action === 'mergedoc') {
 		if ($ml->mergeDoc((string) GETPOST('doc', 'aZ09'), (string) GETPOST('into', 'aZ09')) > 0) {
 			$ml->update(true);
@@ -364,6 +370,8 @@ if (!$others) {
 // 3. Anhänge
 print '<a id="docs"></a>'.load_fiche_titre('3. '.$langs->trans('HvMlDocs'), $ai && $ml->docs ? '<form method="POST" action="'.$self.'?id='.$ml->id.'" class="inline-block"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="aidocs"><button class="butAction">'.img_picto('', 'language', 'class="pictofixedwidth"').$langs->trans('HvMlDocsAi').'</button></form>' : '', '');
 print '<div class="opacitymedium">'.$langs->trans('HvMlDocsHelp').'</div>';
+print '<form method="POST" action="'.$self.'?id='.$ml->id.'#docs" class="paddingtop paddingbottom"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="saveopts">';
+print '<label><input type="checkbox" name="ownlang_only" value="1"'.($ml->ownlang_only ? ' checked' : '').' onchange="this.form.submit()"> <strong>'.$langs->trans('HvMlOwnLangOnly').'</strong></label> <span class="opacitymedium small">'.$langs->trans('HvMlOwnLangOnlyHelp').'</span></form>';
 $langOpts = function ($withAll = true) {
 	global $langs;
 	$h = $withAll ? '<option value="all">'.$langs->trans('HvMlAllLangs').'</option>' : '';

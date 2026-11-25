@@ -16,7 +16,7 @@
     Sporočite nam – podatke bomo posodobili, da bodo dokumenti pravilno izdani.
 
 ??? question "Prejel/a sem okrožnico v svojem jeziku – katera različica velja?"
-    Okrožnice in dokumenti so za vas prevedeni z umetno inteligenco; to je drobno navedeno na koncu vsakega sporočila in dokumenta. Pri prilogah prejmete tudi hrvaško različico.
+    Okrožnice in dokumenti so za vas prevedeni z umetno inteligenco; to je drobno navedeno na koncu vsakega sporočila in dokumenta. Priloge prejmete v svojem jeziku; obremenitve in obračune dodatno kot hrvaški izvirnik.
 
 ## Kontakt upravnika
 

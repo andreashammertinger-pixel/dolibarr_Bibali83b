@@ -16,7 +16,7 @@
     Please let us know – we will update them so that documents are issued correctly.
 
 ??? question "I received a circular in my language – which version is valid?"
-    Circulars and documents are translated for you using AI; this is stated in small print at the end of every e-mail and document. With attachments you also receive the Croatian version.
+    Circulars and documents are translated for you using AI; this is stated in small print at the end of every e-mail and document. You receive attachments in your language; levy notices and statements also as the Croatian original.
 
 ## Contact property manager
 

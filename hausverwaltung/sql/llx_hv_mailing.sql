@@ -11,7 +11,8 @@ CREATE TABLE llx_hv_mailing (
   status      varchar(8) DEFAULT 'draft' NOT NULL,   -- draft | sent
   datec       datetime,
   date_sent   datetime,
-  date_test   datetime,             -- letzter erfolgreicher Testversand (wird bei jeder Änderung gelöscht)
+  date_test   datetime,
+  ownlang_only integer DEFAULT 1,     -- Anhänge nur in der Sprache des Eigentümers (Vorschreibung/Abrechnung immer mit kroatischem Original)             -- letzter erfolgreicher Testversand (wird bei jeder Änderung gelöscht)
   fk_user     integer DEFAULT NULL,
   tms         timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=innodb;

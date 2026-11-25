@@ -16,7 +16,7 @@
     Bitte schreiben Sie uns – wir ändern die Daten, damit Dokumente richtig ausgestellt werden.
 
 ??? question "Ich habe ein Rundschreiben in meiner Sprache bekommen – welche Fassung gilt?"
-    Rundschreiben und Dokumente werden für Sie mittels KI übersetzt; das steht klein am Ende jeder E-Mail und jedes Dokuments. Bei Anhängen erhalten Sie zusätzlich die kroatische Fassung.
+    Rundschreiben und Dokumente werden für Sie mittels KI übersetzt; das steht klein am Ende jeder E-Mail und jedes Dokuments. Anhänge erhalten Sie in Ihrer Sprache; Vorschreibungen und Abrechnungen zusätzlich als kroatisches Original.
 
 ## Kontakt Hausverwaltung
 

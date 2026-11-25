@@ -14,6 +14,7 @@
     - Već preneseno zasebno? Kod dokumenta *Isti dopis kao … → Spoji*. Stranica upozorava ako postoji više dokumenata sa samo po jednim jezikom.
     - **Prevedi nedostajuće jezične verzije pomoću AI (PDF)**: za svaki jezik izrađuje PDF; dolje sitno piše „Pomoću AI prevedeno na odgovarajući jezik – u slučaju nejasnoća molimo javite se.“
     - **Dokument upravitelja** – odaberite *Plan pričuve*, *Obračunski list (po apartmanu)* s godinom ili *Zaduženje s objašnjenjem (po apartmanu)* s obračunskim mjesecom, *Dodaj*. Ti se dokumenti **izrađuju iznova pri slanju** (trenutno stanje), za svaki apartman s njegovim brojkama, kao hrvatski izvornik i na jeziku vlasnika. Ako za neki apartman dokument ne postoji (npr. nema zaduženja za taj mjesec), taj se apartman **ne** šalje i u zapisniku se prikazuje kao pogreška.
+    - **Prilozi samo na jeziku vlasnika** (zadano: uključeno): svaki vlasnik dobiva dopise, obavijesti i plan pričuve samo na svom jeziku – bez dodatne hrvatske datoteke (manje podataka). Ako nema verzije na njegovom jeziku, dobiva izvornik. **Zaduženje s objašnjenjem i obračunski list uvijek se šalju kao hrvatski izvornik i na jeziku vlasnika** (porezna uprava). Isključite ako uz okružnicu treba poslati i hrvatsku verziju.
     - Tablica *bit će priloženo* prikazuje po jeziku što svaki vlasnik dobiva: **izvornik** (hrvatsku verziju, inače prenesenu izvornu verziju) i **verziju na svom jeziku**.
 5. **Primatelji**: svi, nijedan ili po kući (H1, H2 …), *Spremi*. Apartmani bez e-pošte vlasnika su zaključani.
 6. **Slanje**:

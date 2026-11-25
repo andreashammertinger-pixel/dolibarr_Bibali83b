@@ -16,7 +16,7 @@
     Molimo javite nam – ažurirat ćemo podatke kako bi dokumenti bili ispravno izdani.
 
 ??? question "Dobio/la sam okružnicu na svom jeziku – koja verzija vrijedi?"
-    Okružnice i dokumenti za Vas se prevode pomoću AI; to sitno piše na kraju svake poruke i dokumenta. Uz priloge dobivate i hrvatsku verziju.
+    Okružnice i dokumenti za Vas se prevode pomoću AI; to sitno piše na kraju svake poruke i dokumenta. Priloge dobivate na svom jeziku; zaduženja i obračune dodatno kao hrvatski izvornik.
 
 ## Kontakt upravitelja
 

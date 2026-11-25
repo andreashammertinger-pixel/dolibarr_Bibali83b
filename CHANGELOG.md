@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.18.0
+- Rundschreiben: Auswahl **„Anhänge nur in der Sprache des Eigentümers“** (Standard an) – hochgeladene Schreiben und Rücklagen-Plan ohne zusätzliche kroatische Datei; Vorschreibung mit Erläuterung und Abrechnungsblatt weiterhin immer mit kroatischem Original
+- Neue Spalte `ownlang_only` (Modul einmal deaktivieren/aktivieren)
+
 ## 1.17.3
 - Rundschreiben-Anhänge: **Sprachfassung direkt beim Dokument hinzufügen**; **Zusammenführen** von getrennt hochgeladenen Fassungen desselben Schreibens („Ist dasselbe Schreiben wie …“); Warnung, wenn mehrere Dokumente mit je nur einer Sprache vorhanden sind
 - Eine echte Sprachfassung ersetzt eine vorhandene KI-Übersetzung derselben Sprache (wird gelöscht); es wird nur noch übersetzt, was in keiner Sprache vorliegt

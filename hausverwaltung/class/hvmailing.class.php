@@ -32,6 +32,8 @@ class HvMailing
 	public $datec;
 	public $date_sent;
 	public $date_test;
+	/** Anhänge nur in der Sprache des Eigentümers (Vorschreibung und Abrechnungsblatt immer zusätzlich mit kroatischem Original) */
+	public $ownlang_only = 1;
 	/** Fehler beim Erzeugen von Modul-Dokumenten im letzten filesFor() */
 	public $genError = '';
 
@@ -78,6 +80,7 @@ class HvMailing
 		$this->datec = $this->db->jdate($o->datec);
 		$this->date_sent = $this->db->jdate($o->date_sent);
 		$this->date_test = isset($o->date_test) ? $this->db->jdate($o->date_test) : null;
+		$this->ownlang_only = isset($o->ownlang_only) ? (int) $o->ownlang_only : 1;
 		return 1;
 	}
 
@@ -105,6 +108,7 @@ class HvMailing
 		$sql .= ", i18n = ".($this->i18n ? "'".$this->db->escape(json_encode($this->i18n, JSON_UNESCAPED_UNICODE))."'" : 'NULL');
 		$sql .= ", docs = ".($this->docs ? "'".$this->db->escape(json_encode(array_values($this->docs), JSON_UNESCAPED_UNICODE))."'" : 'NULL');
 		$sql .= ", recipients = '".$this->db->escape(json_encode(array_values(array_unique(array_map('intval', $this->recipients)))))."'";
+		$sql .= ", ownlang_only = ".((int) $this->ownlang_only);
 		$sql .= ", date_test = ".($this->date_test ? "'".$this->db->idate($this->date_test)."'" : 'NULL');
 		$sql .= ", status = '".$this->db->escape($this->status)."'".($this->status === 'sent' ? ", date_sent = '".$this->db->idate($this->date_sent ?: dol_now())."'" : '');
 		$sql .= " WHERE rowid = ".((int) $this->id);
@@ -285,8 +289,9 @@ class HvMailing
 		if ($kind === 'plan') {
 			dol_include_once('/hausverwaltung/class/hvplanpdf.class.php');
 			$out = array();
-			foreach (array_unique(array($orig, $lang)) as $l) {
-				if ($l !== $orig && substr($l, 0, 2) === substr($orig, 0, 2)) {
+			$planLangs = $this->ownlang_only ? array($lang) : array_unique(array($orig, $lang));
+			foreach ($planLangs as $l) {
+				if (!$this->ownlang_only && $l !== $orig && substr($l, 0, 2) === substr($orig, 0, 2)) {
 					continue;
 				}
 				if (!isset($this->genCache['plan'][$l])) {
@@ -664,6 +669,12 @@ class HvMailing
 				continue;
 			}
 			$base = $d['versions'][$orig] ?? $this->docSource($d)[1];
+			if ($this->ownlang_only) {
+				// nur die Fassung in der Sprache des Eigentümers; fehlt sie, das Original
+				$mine = $d['versions'][$lang] ?? ($d['ai'][$lang] ?? '');
+				$out[] = $mine !== '' ? $mine : $base;
+				continue;
+			}
 			if ($base !== '') {
 				$out[] = $base;
 			}
