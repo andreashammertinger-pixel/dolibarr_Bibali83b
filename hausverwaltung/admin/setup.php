@@ -209,6 +209,7 @@ if ($action === 'importseed') {
 }
 
 llxHeader('', $langs->trans('HvSetupPage'), hvHelpUrl('einstellungen/'), '', 0, 0, '', '', '', 'mod-hausverwaltung page-admin');
+print hvOutdatedBanner();
 $linkback = '<a href="'.DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1">'.$langs->trans('BackToModuleList').'</a>';
 print load_fiche_titre($langs->trans('HvSetupPage'), $linkback, 'title_setup');
 print dol_get_fiche_head(hvAdminPrepareHead(), 'settings', '', -1, 'building');

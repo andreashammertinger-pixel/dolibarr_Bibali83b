@@ -76,6 +76,7 @@ foreach ($preview as $p) {
 }
 
 llxHeader('', $langs->trans('HvGenerate'), hvHelpUrl('vorschreibung/'), '', 0, 0, '', '', '', 'mod-hausverwaltung');
+print hvOutdatedBanner();
 print load_fiche_titre($langs->trans('HvGenerate'), '', 'bill');
 
 // Prüfung: KPD-Code bei allen Vorschreibungs-Leistungen hinterlegt?

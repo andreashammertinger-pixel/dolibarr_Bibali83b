@@ -253,6 +253,7 @@ if ($ml->id) {
 }
 
 llxHeader('', $langs->trans('HvMailing'), hvHelpUrl('rundschreiben/'), '', 0, 0, '', '', '', 'mod-hausverwaltung');
+print hvOutdatedBanner();
 
 // ---------- Liste ----------
 if (!$ml->id) {

@@ -276,8 +276,12 @@ class HvInvoicer
 		$unitId = (int) ($f->array_options['options_hv_unit'] ?? 0);
 		$period = (string) ($f->array_options['options_hv_period'] ?? '');
 		$periodTo = (string) ($f->array_options['options_hv_period_to'] ?? '') ?: $period;
-		$calc = new HvCalculator($this->db);
-		$rows = $calc->compute();
+		if (self::$calcCache === null) {
+			self::$calcCache = new HvCalculator($this->db);
+			self::$rowsCache = self::$calcCache->compute();
+		}
+		$calc = self::$calcCache;
+		$rows = self::$rowsCache;
 		if ($unitId <= 0 || empty($rows[$unitId]) || !preg_match('/^\d{4}-\d{2}$/', $period)) {
 			return array();
 		}
@@ -303,7 +307,17 @@ class HvInvoicer
 		$out = array();
 		foreach ($f->lines as $l) {
 			$pid = (int) $l->fk_product;
-			if (!isset($map[$pid]) || (float) $l->subprice < 0) {
+			if ($pid <= 0 || (float) $l->subprice < 0) {
+				continue; // freie Zeilen und Guthaben-Verrechnung
+			}
+			if (!isset($map[$pid])) {
+				// Position mit einem anderen Produkt (z. B. früheres Rücklage-Produkt) -> gehört nicht zur heutigen Berechnung
+				$mi = $multi ? (float) $l->subprice : (float) $l->subprice * (float) $l->qty;
+				$out[] = array('label' => 'HvOtherLine', 'inv' => $area > 0 ? $mi / $area : 0, 'cur' => 0.0);
+				continue;
+			}
+			if (isset($seen[$pid])) {
+				$out[] = array('label' => $map[$pid][0], 'inv' => 0.0, 'cur' => $map[$pid][1]); // doppelte Position
 				continue;
 			}
 			$seen[$pid] = true;
@@ -319,6 +333,228 @@ class HvInvoicer
 			}
 		}
 		return $out;
+	}
+
+	/** Berechnung je Seitenaufruf nur einmal (viele Vorschreibungen prüfen) */
+	protected static $calcCache = null;
+	protected static $rowsCache = null;
+
+	public static function resetCache()
+	{
+		self::$calcCache = null;
+		self::$rowsCache = null;
+	}
+
+	/**
+	 * Offene Vorschreibungen (Entwurf oder freigegeben, nicht bezahlt), die nicht mehr zu den aktuellen Sätzen passen.
+	 *
+	 * @return array<int,array{f:Facture,diffs:array,paid:float,new_total:float}>
+	 */
+	public function outdatedInvoices()
+	{
+		global $conf;
+		require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+		$out = array();
+		$sql = "SELECT f.rowid FROM ".$this->db->prefix()."facture f INNER JOIN ".$this->db->prefix()."facture_extrafields fe ON fe.fk_object = f.rowid";
+		$sql .= " WHERE f.entity = ".((int) $conf->entity)." AND f.type = 0 AND f.fk_statut IN (0, 1) AND f.paye = 0 AND fe.hv_unit > 0 AND fe.hv_period NOT LIKE '%-A'";
+		$sql .= " ORDER BY fe.hv_period, f.ref";
+		$res = $this->db->query($sql);
+		$ids = array();
+		while ($res && ($o = $this->db->fetch_object($res))) {
+			$ids[] = (int) $o->rowid;
+		}
+		foreach ($ids as $id) {
+			$f = new Facture($this->db);
+			if ($f->fetch($id) <= 0) {
+				continue;
+			}
+			$diffs = $this->compareWithCurrent($f);
+			if ($diffs && !$this->isKept($id, self::diffText($diffs, $GLOBALS['langs']))) {
+				$out[$id] = array('f' => $f, 'diffs' => $diffs, 'paid' => (float) $f->getSommePaiement(), 'new_total' => $this->newTotal($f));
+			}
+		}
+		return $out;
+	}
+
+	/** Betrag der Vorschreibung nach Neuberechnung (Positionen neu, übrige Zeilen wie Guthaben unverändert) */
+	public function newTotal(Facture $f)
+	{
+		$plan = $this->recalcLines($f);
+		if (!$plan) {
+			return (float) $f->total_ttc;
+		}
+		$t = 0.0;
+		foreach ($f->lines as $l) {
+			if ((int) $l->fk_product <= 0 || (float) $l->subprice < 0) {
+				$t += (float) $l->total_ttc;
+			}
+		}
+		foreach ($plan['lines'] as $l) {
+			$t += round($l['price'] * $l['qty'], 2) * (1 + $plan['vat'] / 100);
+		}
+		return round($t, 2);
+	}
+
+	/** Neue Positionen einer Vorschreibung nach den aktuellen Sätzen (wie beim Erzeugen) */
+	protected function recalcLines(Facture $f)
+	{
+		global $conf;
+		require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+		$f->fetch_optionals();
+		$unitId = (int) ($f->array_options['options_hv_unit'] ?? 0);
+		$period = (string) ($f->array_options['options_hv_period'] ?? '');
+		$periodTo = (string) ($f->array_options['options_hv_period_to'] ?? '') ?: $period;
+		if (self::$calcCache === null) {
+			self::$calcCache = new HvCalculator($this->db);
+			self::$rowsCache = self::$calcCache->compute();
+		}
+		$r = self::$rowsCache[$unitId] ?? null;
+		if (!$r || !preg_match('/^(\d{4})-(\d{2})$/', $period, $m)) {
+			return null;
+		}
+		$n = self::months($period, $periodTo);
+		$building = self::$calcCache->buildings[(int) $r['unit']->fk_building] ?? null;
+		$pBk = new Product($this->db);
+		$pBk->fetch(0, self::REF_BK);
+		$pAd = new Product($this->db);
+		$pAd->fetch(0, self::REF_ADMIN);
+		$ol = new Translate('', $conf);
+		$ol->setDefaultLang(getDolGlobalString('HAUSVERWALTUNG_ORIGINAL_LANG', 'hr_HR'));
+		$ol->loadLangs(array('main', 'bills', 'hausverwaltung@hausverwaltung'));
+		$fkRes = $building ? (int) $building->fk_product_reserve : 0;
+		$lines = array();
+		foreach ($this->lineDefs($r, $building, $fkRes, (int) $pBk->id, (int) $pAd->id, $ol, self::periodLabel($period, $periodTo)) as $l) {
+			if ((float) $l[2] == 0) {
+				continue;
+			}
+			$lines[] = $n > 1 ? array('fk_product' => (int) $l[0], 'desc' => $l[1], 'price' => round($l[2] * (float) $r['area'], 2), 'qty' => $n)
+				: array('fk_product' => (int) $l[0], 'desc' => $l[1], 'price' => (float) $l[2], 'qty' => (float) $r['area']);
+		}
+		preg_match('/^(\d{4})-(\d{2})$/', $periodTo, $mt);
+		return array('lines' => $lines, 'products' => array_values(array_filter(array((int) $pBk->id, $fkRes, (int) $pAd->id))), 'vat' => self::vatRate(),
+			'date' => dol_mktime(12, 0, 0, (int) $m[2], 1, (int) $m[1]), 'dateEnd' => dol_get_last_day((int) $mt[1], (int) $mt[2]), 'building' => $building);
+	}
+
+	/**
+	 * Vorschreibung mit den aktuellen Sätzen neu berechnen – gleiche Nummer, ohne Gutschrift.
+	 * Nur wenn noch nichts bezahlt ist. Wird protokolliert (llx_hv_invoice_recalc) und als Ereignis beim Apartment vermerkt.
+	 *
+	 * @return int >0 ok, <0 Fehler ($this->error)
+	 */
+	public function recalculate(User $user, Facture $f)
+	{
+		global $conf, $langs;
+		if ((float) $f->getSommePaiement() > 0 || (int) $f->paye === 1) {
+			$this->error = $f->ref.': '.$langs->transnoentities('HvRecalcPaid');
+			return -1;
+		}
+		$diffs = $this->compareWithCurrent($f);
+		if (!$diffs) {
+			return 0;
+		}
+		if ($this->ensureBaseProducts($user) < 0) {
+			return -2;
+		}
+		$plan = $this->recalcLines($f);
+		if (!$plan) {
+			$this->error = $f->ref.': unit/period';
+			return -3;
+		}
+		if ($plan['building'] && empty($plan['building']->fk_product_reserve)) {
+			$this->ensureReserveProduct($user, $plan['building']);
+			$plan = $this->recalcLines($f);
+		}
+		$oldTotal = (float) $f->total_ttc;
+		$oldDue = $f->date_lim_reglement;
+		$wasValid = (int) $f->status === Facture::STATUS_VALIDATED;
+		$this->db->begin();
+		$err = false;
+		if ($wasValid && $f->setDraft($user) <= 0) {
+			$err = true;
+		}
+		if (!$err) {
+			$f->fetch($f->id);
+			foreach ($f->lines as $l) {
+				// alle Positionen der Vorschreibung (mit Produkt) ersetzen; Guthaben-Zeilen und freie Zeilen bleiben
+				if ((int) $l->fk_product > 0 && (float) $l->subprice >= 0) {
+					if ($f->deleteLine($l->id) <= 0) {
+						$err = true;
+						break;
+					}
+				}
+			}
+		}
+		if (!$err) {
+			foreach ($plan['lines'] as $l) {
+				if ($f->addline($l['desc'], $l['price'], $l['qty'], $plan['vat'], 0, 0, $l['fk_product'], 0, $plan['date'], $plan['dateEnd'], 0, 0, 0, 'HT', 0, 1) <= 0) {
+					$err = true;
+					break;
+				}
+			}
+		}
+		if (!$err && $wasValid) {
+			$f->fetch($f->id);
+			if ($f->validate($user) <= 0) {
+				$err = true;
+			}
+		}
+		if ($err) {
+			$this->db->rollback();
+			$this->error = $f->ref.': '.$f->error.' '.implode(', ', (array) $f->errors);
+			return -4;
+		}
+		// Fälligkeit wie bisher
+		$this->db->query("UPDATE ".$this->db->prefix()."facture SET date_lim_reglement = '".$this->db->idate($oldDue)."' WHERE rowid = ".((int) $f->id));
+		$f->fetch($f->id);
+		$this->db->query("INSERT INTO ".$this->db->prefix()."hv_invoice_recalc (entity, fk_invoice, old_total, new_total, diffs, datec, fk_user) VALUES (".((int) $conf->entity).", ".((int) $f->id).", ".((float) $oldTotal).", ".((float) $f->total_ttc).", '".$this->db->escape(self::diffText($diffs, $langs))."', '".$this->db->idate(dol_now())."', ".((int) $user->id).")");
+		$this->db->commit();
+		// PDFs neu (Original + Kopie), Erläuterung passend dazu
+		$ol = new Translate('', $conf);
+		$ol->setDefaultLang(getDolGlobalString('HAUSVERWALTUNG_ORIGINAL_LANG', 'hr_HR'));
+		$ol->loadLangs(array('main', 'bills', 'hausverwaltung@hausverwaltung'));
+		$f->fetch_thirdparty();
+		$f->generateDocument($f->model_pdf ?: getDolGlobalString('HAUSVERWALTUNG_PDF_MODEL', 'hausverwaltung'), $ol);
+		dol_include_once('/hausverwaltung/class/hvmailer.class.php');
+		if (HvMailer::infoEnabled()) {
+			dol_include_once('/hausverwaltung/class/hvinfopdf.class.php');
+			(new HvInfoPdf($this->db))->generateForInvoice($f);
+		}
+		HvMailer::addEvent($this->db, $user, (int) $f->socid, array(), $langs->transnoentities('HvRecalcEvent', $f->ref, price($oldTotal, 0, $langs, 1, 2, 2), price($f->total_ttc, 0, $langs, 1, 2, 2)), '', '', '', self::diffText($diffs, $langs), array(), 'hvrecalc-'.((int) $f->id).'-'.dol_now());
+		return 1;
+	}
+
+	/** Vorschreibung trotz Abweichung bewusst unverändert lassen (bis sich die Sätze erneut ändern) */
+	public function keep(User $user, Facture $f)
+	{
+		global $conf, $langs;
+		$diffs = $this->compareWithCurrent($f);
+		if (!$diffs) {
+			return 0;
+		}
+		return $this->db->query("INSERT INTO ".$this->db->prefix()."hv_invoice_recalc (entity, fk_invoice, old_total, new_total, action, diffs, datec, fk_user) VALUES (".((int) $conf->entity).", ".((int) $f->id).", ".((float) $f->total_ttc).", ".((float) $f->total_ttc).", 'keep', '".$this->db->escape(self::diffText($diffs, $langs))."', '".$this->db->idate(dol_now())."', ".((int) $user->id).")") ? 1 : -1;
+	}
+
+	protected function isKept($invoiceId, $diffText)
+	{
+		$res = $this->db->query("SELECT action, diffs FROM ".$this->db->prefix()."hv_invoice_recalc WHERE fk_invoice = ".((int) $invoiceId)." ORDER BY rowid DESC");
+		$o = $res ? $this->db->fetch_object($res) : null;
+		return $o && $o->action === 'keep' && (string) $o->diffs === $diffText;
+	}
+
+	/** Erste Neuberechnung nach einem Zeitpunkt (z. B. letzter Versand): Betrag der zuletzt verschickten Fassung in 'old' */
+	public function recalcSince($invoiceId, $since)
+	{
+		$res = $this->db->query("SELECT old_total, datec FROM ".$this->db->prefix()."hv_invoice_recalc WHERE fk_invoice = ".((int) $invoiceId)." AND action = 'recalc' AND datec > '".$this->db->idate($since)."' ORDER BY rowid ASC");
+		$o = $res ? $this->db->fetch_object($res) : null;
+		return $o ? array('old' => (float) $o->old_total, 'date' => $this->db->jdate($o->datec)) : null;
+	}
+
+	/** Letzte Neuberechnung einer Vorschreibung (oder null) */
+	public function lastRecalc($invoiceId)
+	{
+		$res = $this->db->query("SELECT old_total, new_total, datec FROM ".$this->db->prefix()."hv_invoice_recalc WHERE fk_invoice = ".((int) $invoiceId)." AND action = 'recalc' ORDER BY rowid DESC");
+		$o = $res ? $this->db->fetch_object($res) : null;
+		return $o ? array('old' => (float) $o->old_total, 'new' => (float) $o->new_total, 'date' => $this->db->jdate($o->datec)) : null;
 	}
 
 	/** Abweichungen als kurzer Text, z. B. „Rücklage 0,80 statt 0,49 €/m²“ */

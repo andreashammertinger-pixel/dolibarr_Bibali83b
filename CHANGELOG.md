@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.19.0
+- **Vorschreibungen prüfen** (neuer Menüpunkt): offene Vorschreibungen, die nach Änderungen an Kosten, Flächen oder Sätzen nicht mehr stimmen – mit Abweichung, bisher/neu/Differenz; **neu berechnen mit gleicher Rechnungsnummer ohne Gutschrift** (PDF und Erläuterung neu, Fälligkeit bleibt) oder bewusst beibehalten; anschließend Versand mit Vorauswahl
+- **Warnung mit Rückfrage** auf den Seiten der Hausverwaltung, sobald geänderte Werte offene Vorschreibungen betreffen
+- E-Mail zu einer neu berechneten Vorschreibung nennt bisherigen und neuen Betrag; Neuberechnung wird protokolliert (neue Tabelle `llx_hv_invoice_recalc`) und als Ereignis beim Apartment vermerkt
+- Prüfung erkennt auch Positionen mit früheren Produkten (z. B. altes Rücklage-Produkt)
+- Eigentümer-FAQ: geänderte Vorschreibung mit gleicher Nummer (5 Sprachen)
+
 ## 1.18.2
 - **Prüfung Vorschreibung ↔ aktuelle Sätze** vor jedem Versand (einzeln und im Rundschreiben): weicht eine Position ab (z. B. Rücklage 0,80 statt 0,49 €/m²), wird nicht versendet, keine Erläuterung erzeugt und eine bereits erzeugte, widersprüchliche Erläuterung entfernt – die Meldung nennt die Abweichung
 - Rücklagen-Plan (PDF): Planpositionen immer auf neuer Seite, dicke Trennlinie nach Haus 1, 2 und 3 in der Prognose, Kopfzeile der Planpositionen auf Folgeseiten, Zeilen werden nicht getrennt, einheitliche Fußzeile

@@ -18,6 +18,9 @@
 ??? question "Ich habe ein Rundschreiben in meiner Sprache bekommen – welche Fassung gilt?"
     Rundschreiben und Dokumente werden für Sie mittels KI übersetzt; das steht klein am Ende jeder E-Mail und jedes Dokuments. Anhänge erhalten Sie in Ihrer Sprache; Vorschreibungen und Abrechnungen zusätzlich als kroatisches Original.
 
+??? question "Ich habe eine geänderte Vorschreibung mit derselben Nummer bekommen."
+    Wenn sich Kosten oder Sätze ändern, passen wir offene Vorschreibungen an. Die neue Fassung hat dieselbe Rechnungsnummer und ersetzt die bisherige; in der E-Mail stehen der bisherige und der neue Betrag. Bitte überweisen Sie den neuen Betrag; haben Sie Ihren Dauerauftrag schon eingerichtet, passen Sie ihn bitte an.
+
 ## Kontakt Hausverwaltung
 
 **Green Villa and Apartment Resorts d.o.o.**  

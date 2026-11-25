@@ -18,6 +18,9 @@
 ??? question "I received a circular in my language – which version is valid?"
     Circulars and documents are translated for you using AI; this is stated in small print at the end of every e-mail and document. You receive attachments in your language; levy notices and statements also as the Croatian original.
 
+??? question "I received a changed levy notice with the same number."
+    If costs or rates change, we adjust open levy notices. The new version has the same invoice number and replaces the previous one; the e-mail shows the previous and the new amount. Please pay the new amount; if you have already set up a standing order, please adjust it.
+
 ## Contact property manager
 
 **Green Villa and Apartment Resorts d.o.o.**  

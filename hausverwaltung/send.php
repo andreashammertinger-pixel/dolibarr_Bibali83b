@@ -91,6 +91,7 @@ if (in_array($action, array('sendtest', 'confirm_send'), true) && ($action === '
 }
 
 llxHeader('', $langs->trans('HvSend'), hvHelpUrl('vorschreibung/'), '', 0, 0, '', '', '', 'mod-hausverwaltung');
+print hvOutdatedBanner();
 print load_fiche_titre($langs->trans('HvSend'), '', 'email');
 
 if ($action === 'send' && $sel) {

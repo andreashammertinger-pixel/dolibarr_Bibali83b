@@ -18,6 +18,9 @@
 ??? question "Dobio/la sam okružnicu na svom jeziku – koja verzija vrijedi?"
     Okružnice i dokumenti za Vas se prevode pomoću AI; to sitno piše na kraju svake poruke i dokumenta. Priloge dobivate na svom jeziku; zaduženja i obračune dodatno kao hrvatski izvornik.
 
+??? question "Dobio/la sam izmijenjeno zaduženje s istim brojem."
+    Ako se troškovi ili stope promijene, usklađujemo otvorena zaduženja. Nova verzija ima isti broj računa i zamjenjuje dosadašnju; u poruci su navedeni dosadašnji i novi iznos. Molimo uplatite novi iznos; ako ste već postavili trajni nalog, prilagodite ga.
+
 ## Kontakt upravitelja
 
 **Green Villa and Apartment Resorts d.o.o.**  

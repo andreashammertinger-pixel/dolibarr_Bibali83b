@@ -60,6 +60,15 @@ Svaka poruka sadrži:
 - Sve poslane datoteke dodatno se nalaze kod **apartmana → Povezane datoteke**, s datumom slanja na početku naziva (npr. `2026-11-18_IN2611-0001.pdf`). Testno slanje ništa ne sprema.
 - Vlasnici vide zaduženje i objašnjenje i u svom [pristupu](eigentuemer-zugang.md).
 
-!!! warning "Promijenjene stope? Zaduženje i objašnjenje moraju se podudarati"
-    Objašnjenje računa s **trenutnim** stopama (plan troškova, stopa pričuve po kući, upravljanje). Potvrđeno zaduženje zadržava iznose s dana izdavanja. Prije svakog slanja (pojedinačno i u okružnici) modul stoga uspoređuje svaku stavku zaduženja s trenutnim stopama. Ako nešto odstupa, **ne** šalje se i ne izrađuje se objašnjenje; poruka navodi odstupanje, npr. *Pričuva 0,80 umjesto 0,49 €/m²*. Tada ispravite zaduženje (odobrenje i novo zaduženje) – ili, ako se namjerno ponovno šalje starije zaduženje, privremeno isključite objašnjenje u postavkama.
-- Uplate: vidi [Uplate](zahlungen.md).
+## Promijenjene vrijednosti? Provjera i ponovna izrada zaduženja
+
+Ako promijenite troškove, površine, stopu pričuve kuće ili naknadu za upravljanje, modul provjerava sva **otvorena** zaduženja (još neplaćena). Ako neka više ne odgovaraju, na stranicama upravljanja zgradom gore se prikazuje upozorenje **„Pažnja: … otvorenih zaduženja više ne odgovara trenutnim vrijednostima (dosad …, novo …). Izraditi i poslati nova zaduženja?“**
+
+1. **Da – provjeri i izradi ponovo** otvara *Upravljanje zgradom → Provjera zaduženja*: po zaduženju odstupanje (npr. *Pričuva 0,80 umjesto 0,49 €/m²*), dosadašnji i novi iznos, razlika.
+2. Provjerite odabir, **Ponovno izračunaj odabrana** i potvrdite. Zaduženje se mijenja s trenutnim vrijednostima – **isti broj računa, bez odobrenja** –, PDF (izvornik i prijevod) i objašnjenje izrađuju se ponovo, dospijeće ostaje.
+3. **Pošalji** (gumb po obračunskom mjesecu) vodi na slanje s unaprijed odabranim ponovno izračunatim zaduženjima. U poruci piše: *„Ovo zaduženje usklađeno je s trenutnim stopama i zamjenjuje dosad poslanu verziju (dosad …, novo …).“*
+
+Ako zaduženje namjerno treba ostati nepromijenjeno, **Zadrži odabrana** – upozorenje se za njega ponovno pojavljuje tek kad se vrijednosti opet promijene. Već (djelomično) plaćena zaduženja se ne mijenjaju. Svaki ponovni izračun bilježi se i navodi kod apartmana pod **Događaji** (*Zaduženje … ponovno izračunato: staro → novo*).
+
+!!! warning "Zaduženje i objašnjenje moraju se podudarati"
+    Prije svakog slanja (pojedinačno i u okružnici) modul uspoređuje zaduženje s trenutnim vrijednostima. Ako nešto odstupa, **ne** šalje se i ne izrađuje se objašnjenje – najprije ponovno izračunajte kao gore.

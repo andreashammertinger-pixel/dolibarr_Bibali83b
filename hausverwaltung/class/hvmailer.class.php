@@ -80,7 +80,7 @@ class HvMailer
 		foreach ($files as $f) {
 			$names[] = $prefix.basename($f);
 		}
-		$note = 'Sent to: '.$to."\nSubject: ".$subject."\n\n".$body;
+		$note = $to !== '' ? 'Sent to: '.$to."\nSubject: ".$subject."\n\n".$body : $body;
 		if ($names) {
 			$note .= "\n\n".$GLOBALS['langs']->transnoentities('HvEventFiles').":\n- ".implode("\n- ", $names);
 		}
@@ -284,6 +284,12 @@ class HvMailer
 		}
 		$body = ($persons ? $ol->transnoentities('HvMailHello', implode(', ', $persons)) : $ol->transnoentities('HvMailHelloCompany'))."\n\n";
 		$body .= $ol->transnoentities($isSettlement ? 'HvMailIntroSettlement' : 'HvMailIntro', $unitRef, $plabel)."\n\n";
+		// neu berechnete Vorschreibung (gleiche Nummer) -> Hinweis, dass sie die bisherige Fassung ersetzt
+		$sentAt = $this->lastSent((int) $f->id);
+		$rc = $sentAt > 0 ? (new HvInvoicer($this->db))->recalcSince((int) $f->id, $sentAt) : null;
+		if ($rc && abs($rc['old'] - (float) $f->total_ttc) > 0.005) {
+			$body .= $ol->transnoentities('HvMailRecalcNote', price($rc['old'], 0, $ol, 1, 2, 2, $conf->currency), price($f->total_ttc, 0, $ol, 1, 2, 2, $conf->currency))."\n\n";
+		}
 		if ((float) $f->total_ttc > 0) {
 			$body .= $ol->transnoentities('HvMailLblTotal').': '.$amount."\n";
 			if ($nMonths > 1) {

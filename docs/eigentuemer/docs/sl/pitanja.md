@@ -18,6 +18,9 @@
 ??? question "Prejel/a sem okrožnico v svojem jeziku – katera različica velja?"
     Okrožnice in dokumenti so za vas prevedeni z umetno inteligenco; to je drobno navedeno na koncu vsakega sporočila in dokumenta. Priloge prejmete v svojem jeziku; obremenitve in obračune dodatno kot hrvaški izvirnik.
 
+??? question "Prejel/a sem spremenjeno obremenitev z isto številko."
+    Če se stroški ali postavke spremenijo, odprte obremenitve prilagodimo. Nova različica ima isto številko računa in nadomešča prejšnjo; v sporočilu sta navedena prejšnji in novi znesek. Prosimo, plačajte novi znesek; če ste že nastavili trajni nalog, ga prilagodite.
+
 ## Kontakt upravnika
 
 **Green Villa and Apartment Resorts d.o.o.**  

@@ -122,7 +122,7 @@ function hvDocKeys()
 			continue;
 		}
 		if (preg_match('/^(HvPdf|HvMail|HvStmt|HvLine|HvInvoice|HvKey_|HvInfo)/', $m[1]) || in_array($m[1], $extra, true)) {
-			if (!in_array($m[1], array('HvMailFromSetting', 'HvMailBccSetting', 'HvMailTo', 'HvMailFiles', 'HvMailLastSent', 'HvMailNoAddress', 'HvMailNoPdf', 'HvMailNoInvoices', 'HvMailTestTo', 'HvMailSendTest', 'HvMailSendReal', 'HvMailConfirm', 'HvMailTestSent', 'HvMailSent', 'HvMailTestAddressInvalid', 'HvMailHelp', 'HvPdfPreview', 'HvPdfOriginal', 'HvPdfCopyShort', 'HvInvoiceNumber', 'HvMailing', 'HvStmtSection', 'HvStmtHelp', 'HvStmtGenerate', 'HvStmtGenerated', 'HvStmtSend', 'HvStmtSendConfirm', 'HvInfoAttachSetting', 'HvInfoAttachHelp'), true)) {
+			if (!in_array($m[1], array('HvMailFromSetting', 'HvMailBccSetting', 'HvMailTo', 'HvMailFiles', 'HvMailLastSent', 'HvMailNoAddress', 'HvMailNoPdf', 'HvMailNoInvoices', 'HvMailTestTo', 'HvMailSendTest', 'HvMailSendReal', 'HvMailConfirm', 'HvMailTestSent', 'HvMailSent', 'HvMailTestAddressInvalid', 'HvMailHelp', 'HvPdfPreview', 'HvPdfOriginal', 'HvPdfCopyShort', 'HvInvoiceNumber', 'HvInvoiceCheck', 'HvInvoiceCheckHelp', 'HvInvoiceCheckNone', 'HvInvoiceOutdated', 'HvMailing', 'HvStmtSection', 'HvStmtHelp', 'HvStmtGenerate', 'HvStmtGenerated', 'HvStmtSend', 'HvStmtSendConfirm', 'HvInfoAttachSetting', 'HvInfoAttachHelp'), true)) {
 				$out[$m[1]] = trim($m[2]);
 			}
 		}
@@ -445,4 +445,28 @@ function hvDocStamp($T, $withAiNote = true, $src = '')
 		$parts[] = $T->transnoentities('HvDocAiNote');
 	}
 	return implode(' · ', $parts);
+}
+
+/**
+ * Warnung auf den Seiten der Hausverwaltung: offene Vorschreibungen passen nicht mehr zu den aktuellen Werten.
+ * Mit Rückfrage, ob neue Vorschreibungen erstellt und versendet werden sollen.
+ */
+function hvOutdatedBanner()
+{
+	global $db, $user, $langs;
+	if (empty($user->id) || !$user->hasRight('hausverwaltung', 'invoice') || !empty($user->socid)) {
+		return '';
+	}
+	dol_include_once('/hausverwaltung/class/hvinvoicer.class.php');
+	$list = (new HvInvoicer($db))->outdatedInvoices();
+	if (!$list) {
+		return '';
+	}
+	$old = $new = 0;
+	foreach ($list as $x) {
+		$old += (float) $x['f']->total_ttc;
+		$new += (float) $x['new_total'];
+	}
+	return '<div class="warning" style="margin:8px 0">'.img_warning('', '', 'pictofixedwidth').'<strong>'.$langs->trans('HvOutdatedBanner', count($list), price($old, 0, $langs, 1, 2, 2, 'EUR'), price($new, 0, $langs, 1, 2, 2, 'EUR')).'</strong> '
+		.$langs->trans('HvOutdatedQuestion').' <a class="butAction small" style="margin-left:8px" href="'.dol_buildpath('/hausverwaltung/invoicecheck.php', 1).'">'.$langs->trans('HvOutdatedYes').'</a></div>';
 }

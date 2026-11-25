@@ -60,6 +60,15 @@ Jede Mail enthält:
 - Alle versendeten Dateien liegen zusätzlich beim **Apartment → Verknüpfte Dokumente**, mit Versanddatum vorne im Dateinamen (z. B. `2026-11-18_IN2611-0001.pdf`). Der Testversand legt nichts ab.
 - Die Eigentümer sehen Vorschreibung und Erläuterung auch in ihrem [Zugang](eigentuemer-zugang.md).
 
-!!! warning "Sätze geändert? Vorschreibung und Erläuterung müssen zusammenpassen"
-    Die Erläuterung rechnet mit den **aktuellen** Sätzen (Kostenplan, Rücklagen-Satz je Haus, Verwaltung). Eine freigegebene Vorschreibung behält dagegen die Beträge vom Ausstellungstag. Vor jedem Versand (einzeln und im Rundschreiben) vergleicht das Modul deshalb jede Position der Vorschreibung mit den aktuellen Sätzen. Weicht etwas ab, wird **nicht** versendet und keine Erläuterung erzeugt; die Meldung nennt die Abweichung, z. B. *Rücklage 0,80 statt 0,49 €/m²*. Dann die Vorschreibung korrigieren (Gutschrift und neue Vorschreibung) – oder, wenn bewusst eine ältere Vorschreibung erneut verschickt werden soll, in den Einstellungen die Erläuterung vorübergehend ausschalten.
-- Zahlungen siehe [Zahlungen](zahlungen.md).
+## Werte geändert? Vorschreibungen prüfen und neu erstellen
+
+Ändern Sie Kosten, Flächen, den Rücklagen-Satz eines Hauses oder das Verwaltungshonorar, prüft das Modul alle **offenen** Vorschreibungen (noch nicht bezahlt). Passen welche nicht mehr, erscheint auf den Seiten der Hausverwaltung oben die Warnung **„Achtung: … offene Vorschreibungen passen nicht mehr zu den aktuellen Werten (bisher …, neu …). Sollen neue Vorschreibungen erstellt und versendet werden?“**
+
+1. **Ja – prüfen und neu erstellen** öffnet *Hausverwaltung → Vorschreibungen prüfen*: je Vorschreibung die Abweichung (z. B. *Rücklage 0,80 statt 0,49 €/m²*), bisheriger und neuer Betrag, Differenz.
+2. Auswahl prüfen, **Ausgewählte neu berechnen** und bestätigen. Die Vorschreibung wird mit den aktuellen Werten geändert – **gleiche Rechnungsnummer, keine Gutschrift** –, PDF (Original und Übersetzung) und Erläuterung werden neu erzeugt, die Fälligkeit bleibt.
+3. **Versenden** (Knopf je Abrechnungsmonat) führt zum Versand mit den neu berechneten Vorschreibungen vorausgewählt. In der E-Mail steht: *„Diese Vorschreibung wurde an die aktuellen Sätze angepasst und ersetzt die bisher zugesandte Fassung (bisher …, neu …).“*
+
+Soll eine Vorschreibung bewusst unverändert bleiben, **Ausgewählte beibehalten** – die Warnung erscheint dafür erst wieder, wenn sich die Werte erneut ändern. Bereits (teilweise) bezahlte Vorschreibungen werden nicht geändert. Jede Neuberechnung wird protokolliert und beim Apartment unter **Ereignisse** vermerkt (*Vorschreibung … neu berechnet: alt → neu*).
+
+!!! warning "Vorschreibung und Erläuterung müssen zusammenpassen"
+    Vor jedem Versand (einzeln und im Rundschreiben) vergleicht das Modul die Vorschreibung mit den aktuellen Werten. Weicht etwas ab, wird **nicht** versendet und keine Erläuterung erzeugt – zuerst wie oben neu berechnen.
