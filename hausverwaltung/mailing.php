@@ -342,7 +342,7 @@ jQuery(function ($) {
 
 // 1. Text
 print '<a id="text"></a>'.load_fiche_titre('1. '.$langs->trans('HvMlText'), '', '');
-print '<form method="POST" action="'.$self.'?id='.$ml->id.'" class="hv-ask-translate" data-hastr="'.($ml->i18n ? '1' : '0').'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="savetext">';
+print '<form method="POST" action="'.$self.'?id='.$ml->id.'" class="hv-ask-translate hvdirty" data-hastr="'.($ml->i18n ? '1' : '0').'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="savetext">';
 print '<table class="border centpercent tableforfieldedit">';
 print '<tr><td class="titlefield">'.$langs->trans('HvAiWrittenIn').'</td><td>'.hvSrcLangSelect('hv_srclang', $ml->srclang).'</td></tr>';
 print '<tr><td class="fieldrequired">'.$langs->trans('MailTopic').'</td><td><input name="subject" class="minwidth500 widthcentpercentminusx" data-hvsrc="1" data-orig="'.dol_escape_htmltag($ml->subject).'" value="'.dol_escape_htmltag($ml->subject).'"></td></tr>';
@@ -358,7 +358,7 @@ if (!$others) {
 	print '<div class="opacitymedium">'.$langs->trans('HvMlNoOtherLangs').'</div>';
 } else {
 	print '<div class="opacitymedium">'.$langs->trans('HvMlTranslationsHelp').'</div>';
-	print '<form method="POST" action="'.$self.'?id='.$ml->id.'"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="savetr">';
+	print '<form method="POST" action="'.$self.'?id='.$ml->id.'" class="hvdirty"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="savetr">';
 	print '<table class="noborder centpercent"><tr class="liste_titre"><th class="width100">'.$langs->trans('Language').'</th><th>'.$langs->trans('MailTopic').' / '.$langs->trans('MailText').'</th></tr>';
 	foreach ($others as $l) {
 		$t = $ml->i18n[$l] ?? array();
@@ -498,7 +498,11 @@ if ($ml->sentSocids()) {
 }
 print '<div class="'.($tested ? 'ok' : 'warning').'" style="margin:6px 0">'.($tested ? img_picto('', 'tick', 'class="pictofixedwidth"').$langs->trans('HvMlTestedAt', dol_print_date($ml->date_test, 'dayhour')) : img_warning('', '', 'pictofixedwidth').$langs->trans('HvMlTestFirst')).'</div>';
 print '<form method="POST" action="'.$self.'?id='.$ml->id.'#send"><input type="hidden" name="token" value="'.newToken().'">';
-print $langs->trans('HvMailTestTo').': <input name="testto" class="minwidth250" value="'.dol_escape_htmltag((string) $user->email).'"> <button class="button" name="action" value="sendtest">'.$langs->trans('HvMlTestBtn').'</button> ';
+$noText = trim($ml->subject) === '' || trim($ml->body) === '';
+if ($noText) {
+	print '<div class="warning">'.img_warning('', '', 'pictofixedwidth').$langs->trans('HvMlTextMissing').'</div>';
+}
+print $langs->trans('HvMailTestTo').': <input name="testto" class="minwidth250" value="'.dol_escape_htmltag((string) $user->email).'"> <button class="button" name="action" value="sendtest"'.($noText ? ' disabled title="'.dol_escape_htmltag($langs->trans('HvMlTextMissing')).'"' : '').'>'.$langs->trans('HvMlTestBtn').'</button> ';
 print '<button class="button button-save" name="action" value="send"'.(($ml->subject === '' || $ml->body === '' || !$ml->recipients || !$tested) ? ' disabled title="'.dol_escape_htmltag($langs->trans('HvMlTestFirst')).'"' : '').'>'.$langs->trans('HvMlSendBtn').' ('.count($ml->recipients).')</button></form>';
 $log = $ml->log();
 if ($log) {
@@ -509,5 +513,22 @@ if ($log) {
 	print '</table>';
 }
 
+print '<script>
+jQuery(function ($) {
+	var dirty = null;
+	$("form.hvdirty").on("input change", "input, textarea, select", function () { dirty = $(this).closest("form"); });
+	$("form.hvdirty").on("submit", function () { dirty = null; });
+	// Testversand/Versand/andere Aktionen nehmen immer den gespeicherten Text -> vorher speichern
+	$(document).on("click", "button[name=action], input[type=submit]", function (e) {
+		if (dirty && !$(this).closest("form").is(dirty)) {
+			e.preventDefault();
+			alert("'.dol_escape_js($langs->transnoentities('HvMlUnsaved')).'");
+			$("html, body").animate({ scrollTop: dirty.offset().top - 80 }, 200);
+			dirty.find("[type=submit]").first().focus();
+		}
+	});
+	window.addEventListener("beforeunload", function (e) { if (dirty && !window.hvRunning) { e.preventDefault(); e.returnValue = ""; } });
+});
+</script>';
 llxFooter();
 $db->close();

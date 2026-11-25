@@ -510,3 +510,5 @@ HvOutdatedQuestion = Create and send new levy notices?
 HvOutdatedYes = Yes – check and recreate
 HvMailRecalcNote = This levy notice has been adjusted to the current rates and replaces the version sent previously (previously %s, now %s).
 HvOtherLine = other item
+HvMlTextMissing = Subject or text not saved yet – please enter them under "1. Text" and click "Save". Test and sending always use the saved text.
+HvMlUnsaved = You changed the text but have not saved it yet. Please click "Save" first – test and sending always use the saved text.

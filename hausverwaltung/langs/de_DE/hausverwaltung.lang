@@ -511,3 +511,5 @@ HvOutdatedQuestion = Sollen neue Vorschreibungen erstellt und versendet werden?
 HvOutdatedYes = Ja – prüfen und neu erstellen
 HvMailRecalcNote = Diese Vorschreibung wurde an die aktuellen Sätze angepasst und ersetzt die bisher zugesandte Fassung (bisher %s, neu %s).
 HvOtherLine = weitere Position
+HvMlTextMissing = Betreff oder Text sind noch nicht gespeichert – bitte unter „1. Text“ eingeben und „Speichern“ drücken. Testversand und Versand verwenden immer den gespeicherten Text.
+HvMlUnsaved = Sie haben Text geändert, aber noch nicht gespeichert. Bitte zuerst „Speichern“ drücken – Testversand und Versand verwenden immer den gespeicherten Text.

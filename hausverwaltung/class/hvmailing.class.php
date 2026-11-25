@@ -769,6 +769,9 @@ class HvMailing
 		if ($mode !== 'prep' && !isValidEmail(getDolGlobalString('HAUSVERWALTUNG_MAIL_FROM', $mysoc->email))) {
 			return array('error' => 'Absenderadresse fehlt');
 		}
+		if ($mode !== 'prep' && (trim($this->subject) === '' || trim($this->body) === '')) {
+			return array('error' => $GLOBALS['langs']->transnoentities('HvMlTextMissing'));
+		}
 		if ($mode === 'test' && !isValidEmail($testto)) {
 			return array('error' => $GLOBALS['langs']->transnoentities('HvMailTestAddressInvalid'));
 		}

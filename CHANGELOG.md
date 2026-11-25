@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.19.1
+- Rundschreiben: Testversand und Versand gesperrt, solange Betreff oder Text nicht gespeichert sind; Hinweis bei ungespeicherten Änderungen (Klick auf Testversand/Senden, Verlassen der Seite) – verhindert E-Mails ohne Text
+- Fußzeile der Dokumente: Datum/Uhrzeit einheitlich im Format TT.MM.JJJJ HH:MM (bisher auf Kroatisch „25/11/2026 02:41 PM“)
+
 ## 1.19.0
 - **Vorschreibungen prüfen** (neuer Menüpunkt): offene Vorschreibungen, die nach Änderungen an Kosten, Flächen oder Sätzen nicht mehr stimmen – mit Abweichung, bisher/neu/Differenz; **neu berechnen mit gleicher Rechnungsnummer ohne Gutschrift** (PDF und Erläuterung neu, Fälligkeit bleibt) oder bewusst beibehalten; anschließend Versand mit Vorauswahl
 - **Warnung mit Rückfrage** auf den Seiten der Hausverwaltung, sobald geänderte Werte offene Vorschreibungen betreffen

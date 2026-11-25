@@ -510,3 +510,5 @@ HvOutdatedQuestion = Izraditi i poslati nova zaduženja?
 HvOutdatedYes = Da – provjeri i izradi ponovo
 HvMailRecalcNote = Ovo zaduženje usklađeno je s trenutnim stopama i zamjenjuje dosad poslanu verziju (dosad %s, novo %s).
 HvOtherLine = dodatna stavka
+HvMlTextMissing = Predmet ili tekst još nisu spremljeni – unesite ih pod „1. Tekst“ i kliknite „Spremi“. Test i slanje uvijek koriste spremljeni tekst.
+HvMlUnsaved = Promijenili ste tekst, ali ga još niste spremili. Najprije kliknite „Spremi“ – test i slanje uvijek koriste spremljeni tekst.

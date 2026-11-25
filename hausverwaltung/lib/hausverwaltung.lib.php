@@ -440,7 +440,7 @@ function hvSourceLang()
  */
 function hvDocStamp($T, $withAiNote = true, $src = '')
 {
-	$parts = array($T->transnoentities('HvDocStamp', hvModuleVersion(), dol_print_date(dol_now(), 'dayhour', 'tzuserrel', $T)));
+	$parts = array($T->transnoentities('HvDocStamp', hvModuleVersion(), dol_print_date(dol_now(), '%d.%m.%Y %H:%M', 'tzuserrel', $T)));
 	if ($withAiNote && getDolGlobalString('HAUSVERWALTUNG_AI_DOC_NOTE', '1') === '1') {
 		$parts[] = $T->transnoentities('HvDocAiNote');
 	}
