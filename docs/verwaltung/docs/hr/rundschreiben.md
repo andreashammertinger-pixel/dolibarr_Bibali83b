@@ -19,6 +19,9 @@
     - **Testno slanje** – po jedna poruka za svaki jezik primatelja na Vašu adresu, s točno onim tekstom i prilozima koje bi dobio primjerni apartman tog jezika (na vrhu testa piše koji apartman i koji primatelji).
     - **Pošalji odabranim vlasnicima** – po jedna poruka po apartmanu njegovim vlasnicima.
 
+!!! info "Slanje korak po korak"
+    Test, slanje i *Prevedi nedostajuće jezične verzije pomoću AI* odvijaju se u pojedinačnim koracima s prikazom napretka (prijevod teksta, AI prijevod po datoteci i jeziku, testna poruka po jeziku, po jedna poruka po apartmanu). Ostavite stranicu otvorenom dok se sama ne osvježi. Ako poslužitelju treba dulje (npr. kod AI prijevoda), piše *uskoro ponovna provjera* – korak se nastavlja u pozadini. Ako se postupak prekine: ponovno učitajte stranicu i pokrenite ponovo – obavljeno se ne ponavlja, **već poslani apartmani nikada ne dobivaju okružnicu dvaput**.
+
 !!! warning "Test je obavezan"
     *Slanje* je moguće tek nakon uspješnog testa (zelena napomena *Test uspješno poslan …*). Svaka promjena teksta, prijevoda, priloga ili primatelja zahtijeva novi test.
 

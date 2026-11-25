@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.17.2
+- Rundschreiben: Testversand, Versand und KI-Übersetzung der Anhänge laufen **in Teilschritten mit Fortschrittsanzeige** – behebt „Gateway Timeout“ bei IONOS, wenn KI-Übersetzungen und Dokumente in einer Anfrage zu lange dauerten
+- Lange Schritte laufen nach einer Zeitüberschreitung im Hintergrund weiter und werden nicht doppelt gestartet; die Anmeldung wird währenddessen nicht mehr blockiert
+- Bereits erfolgreich versendete Apartments werden bei erneutem Versand übersprungen (kein Doppelversand)
+
 ## 1.17.1
 - Vorschreibung/Rechnung: Kasten **„KOPIE – Übersetzung … Rechtlich maßgeblich ist das kroatische Original“** auf der übersetzten Fassung wieder eingebaut (für die Finanz); andere Dokumente unverändert nur mit KI-Hinweis
 - Doku (Vorschreibung de/hr) und Eigentümerhilfe (Meine Rechnungen) ergänzt

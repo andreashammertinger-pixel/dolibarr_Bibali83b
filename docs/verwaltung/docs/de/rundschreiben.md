@@ -19,6 +19,9 @@
     - **Testversand** – je Sprache der Empfänger eine E-Mail an Ihre Adresse, mit genau dem Text und den Anhängen, die ein Beispiel-Apartment dieser Sprache bekäme (oben im Test steht, welches Apartment und welche Empfänger).
     - **An ausgewählte Eigentümer senden** – je Apartment eine E-Mail an dessen Eigentümer.
 
+!!! info "Versand Schritt für Schritt"
+    Testversand, Versand und *Fehlende Sprachfassungen per KI übersetzen* laufen in einzelnen Schritten mit Fortschrittsanzeige (Text übersetzen, KI-Übersetzung je Datei und Sprache, Testmail je Sprache, je Apartment eine E-Mail). Bitte die Seite offen lassen, bis sie sich selbst aktualisiert. Braucht der Server länger (z. B. bei einer KI-Übersetzung), steht *wird gleich erneut geprüft* – der Schritt läuft im Hintergrund weiter. Wird der Ablauf abgebrochen: Seite neu laden und erneut starten – Erledigtes wird nicht wiederholt, **bereits versendete Apartments bekommen das Rundschreiben nie doppelt**.
+
 !!! warning "Testversand ist Pflicht"
     *Senden* ist erst nach einem erfolgreichen Testversand möglich (grüner Hinweis *Testversand erfolgreich am …*). Jede Änderung an Text, Übersetzungen, Anhängen oder Empfängern verlangt einen neuen Testversand.
 

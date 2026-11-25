@@ -1,6 +1,12 @@
 <?php
 /* Copyright (C) 2026 Green Villa and Apartment Resorts d.o.o. — GPL v3+ */
 /** Rundschreiben an Eigentümer: Text, Übersetzungen, Anhänge je Sprache, Empfänger, Versand */
+// Teilschritte des Versands (AJAX): Token nicht erneuern
+if (isset($_POST['action']) && in_array($_POST['action'], array('mljobs', 'mlstep'), true)) {
+	define('NOTOKENRENEWAL', 1);
+	define('NOREQUIREMENU', 1);
+	define('NOREQUIREHTML', 1);
+}
 // Load Dolibarr environment
 $res = 0;
 if (!$res && !empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
@@ -65,7 +71,57 @@ if ($action === 'create') {
 if ($id > 0 && $ml->fetch($id) <= 0) {
 	accessforbidden('Not found');
 }
+$runMode = '';
+$runTo = '';
 if ($ml->id) {
+	// Versand/Übersetzung in Teilschritten: Plan des Laufs und einzelne Schritte (JSON)
+	if ($action === 'mljobs' || $action === 'mlstep') {
+		// Sitzung freigeben: sonst blockiert ein langer Schritt alle anderen Seiten dieses Benutzers
+		session_write_close();
+		top_httphead('application/json');
+		if ($action === 'mljobs') {
+			$r = $ml->startRun((string) GETPOST('mode', 'aZ09'), trim((string) GETPOST('testto', 'alphanohtml')));
+			if (empty($r['error'])) {
+				$units = HvMailing::units($db);
+				$r['labels'] = array();
+				foreach ($r['jobs'] as $j) {
+					$lb = '';
+					switch ($j['t']) {
+						case 'text':
+							$lb = $langs->transnoentities('HvMlStepText', $j['lang']);
+							break;
+						case 'doc':
+							$lb = $langs->transnoentities('HvMlStepDoc', $ml->docs[$j['doc']]['title'] ?? $j['doc'], $j['lang']);
+							break;
+						case 'test':
+							$lb = $langs->transnoentities('HvMlStepTest', $j['lang']);
+							break;
+						case 'send':
+							$lb = $langs->transnoentities('HvMlStepSend', isset($units[$j['sid']]) ? $units[$j['sid']]['unit']->ref.' '.$units[$j['sid']]['socname'] : '#'.$j['sid']);
+							break;
+						default:
+							$lb = $langs->transnoentities('HvMlStepFinish');
+					}
+					$r['labels'][] = $lb;
+				}
+			}
+			print json_encode($r, JSON_UNESCAPED_UNICODE);
+		} else {
+			$job = json_decode((string) GETPOST('job', 'restricthtml'), true);
+			print json_encode(is_array($job) ? $ml->step($user, (string) GETPOST('run', 'alphanohtml'), $job) : array('error' => 'job'), JSON_UNESCAPED_UNICODE);
+		}
+		$db->close();
+		exit;
+	}
+	if ($action === 'runresult') {
+		$st = $ml->runState((string) GETPOST('run', 'alphanohtml'));
+		if ($st) {
+			$sum = $ml->runSummary($st);
+			$msg = $st['mode'] === 'test' ? $langs->trans('HvMlTestSent', $sum['ok'], $st['testto']) : ($st['mode'] === 'send' ? $langs->trans('HvMlSent', $sum['ok'], $sum['ok'] + $sum['err']) : $langs->trans('HvMlDocsTranslated', count($st['jobs']) - 1 - count($sum['errors'])));
+			setEventMessages($msg, $sum['errors'] ?: null, $sum['errors'] ? 'warnings' : 'mesgs');
+		}
+		$back($st && $st['mode'] === 'prep' ? 'docs' : 'send');
+	}
 	if ($action === 'savetext') {
 		$oldSubject = $ml->subject;
 		$oldBody = $ml->body;
@@ -151,10 +207,8 @@ if ($ml->id) {
 		$back('docs');
 	}
 	if ($action === 'aidocs') {
-		$n = $ml->translateDocs($ml->recipientLangs());
 		$ml->update(true);
-		setEventMessages($langs->trans('HvMlDocsTranslated', $n), $ml->error ? array($langs->trans('HvAiFailed', $ml->error)) : null, $ml->error ? 'warnings' : 'mesgs');
-		$back('docs');
+		$runMode = 'prep';
 	}
 	if ($action === 'saverec') {
 		$ml->recipients = array_map('intval', (array) GETPOST('rec', 'array'));
@@ -166,16 +220,17 @@ if ($ml->id) {
 		$to = trim((string) GETPOST('testto', 'alphanohtml'));
 		if (!isValidEmail($to)) {
 			setEventMessages($langs->trans('HvMailTestAddressInvalid'), null, 'errors');
-		} else {
-			$r = $ml->send($user, $to);
-			setEventMessages($langs->trans('HvMlTestSent', $r['ok'], $to), $r['errors'] ?: null, $r['err'] || $r['errors'] ? 'warnings' : 'mesgs');
+			$back('send');
 		}
-		$back('send');
+		$runMode = 'test';
+		$runTo = $to;
 	}
 	if ($action === 'confirm_send' && GETPOST('confirm') === 'yes') {
-		$r = $ml->send($user, '');
-		setEventMessages($langs->trans('HvMlSent', $r['ok'], $r['ok'] + $r['err']), $r['errors'] ?: null, $r['err'] ? 'warnings' : 'mesgs');
-		$back('send');
+		if (!$ml->date_test) {
+			setEventMessages($langs->trans('HvMlTestFirst'), null, 'errors');
+			$back('send');
+		}
+		$runMode = 'send';
 	}
 	if ($action === 'confirm_delete' && GETPOST('confirm') === 'yes') {
 		$ml->delete();
@@ -221,6 +276,54 @@ if ($action === 'delete') {
 }
 if ($action === 'send') {
 	print $form->formconfirm($self.'?id='.$ml->id, $langs->trans('HvMlSendBtn'), $langs->trans('HvMlSendConfirm', count($ml->recipients)), 'confirm_send', '', 0, 1);
+}
+
+// Laufender Versand/Übersetzung: Schritte nacheinander abarbeiten (vermeidet Gateway Timeout)
+if ($runMode !== '') {
+	$titles = array('test' => 'HvMlTestBtn', 'send' => 'HvMlSendBtn', 'prep' => 'HvMlDocsAi');
+	print '<div id="hvrun" class="info" style="margin:10px 0" data-mode="'.$runMode.'" data-testto="'.dol_escape_htmltag($runTo).'" data-token="'.newToken().'" data-url="'.dol_escape_htmltag($self.'?id='.$ml->id).'">';
+	print '<strong>'.$langs->trans($titles[$runMode]).'</strong> – '.$langs->trans('HvMlRunHelp').'<div class="hvbar" style="height:8px;background:#ddd;margin:8px 0;border-radius:4px"><div style="height:8px;width:0;background:#2e5a3f;border-radius:4px"></div></div><ol class="hvsteps small" style="margin:0"></ol><div class="hvrunmsg"></div></div>';
+	$jsT = array_map(function ($k) use ($langs) {
+		return dol_escape_js($langs->transnoentities($k));
+	}, array('wait' => 'HvMlRunWait', 'retry' => 'HvMlRunRetry', 'fail' => 'HvMlRunFail', 'done' => 'HvMlRunDone'));
+	print '<script>
+jQuery(function ($) {
+	var box = $("#hvrun"), url = box.data("url"), token = box.data("token"), list = box.find(".hvsteps"), bar = box.find(".hvbar div");
+	var post = function (d) { d.token = token; return $.ajax({ url: url, method: "POST", data: d, dataType: "json" }); };
+	var fail = function (m) { box.removeClass("info").addClass("error"); box.find(".hvrunmsg").text("'.$jsT['fail'].' " + (m || "")); };
+	window.onbeforeunload = function () { return "…"; };
+	post({ action: "mljobs", mode: box.data("mode"), testto: box.data("testto") }).done(function (r) {
+		if (!r || r.error) { window.onbeforeunload = null; return fail(r ? r.error : ""); }
+		$.each(r.labels, function (i, l) { list.append($("<li>").text(l)); });
+		var tries = 0;
+		var run = function (i) {
+			if (i >= r.jobs.length) {
+				window.onbeforeunload = null;
+				box.find(".hvrunmsg").text("'.$jsT['done'].'");
+				window.location.href = url + "&action=runresult&run=" + encodeURIComponent(r.run);
+				return;
+			}
+			var li = list.children().eq(i);
+			li.find(".st").remove(); li.append($("<span class=\"st opacitymedium\">").text(" …"));
+			post({ action: "mlstep", run: r.run, job: JSON.stringify(r.jobs[i]) }).done(function (x) {
+				if (x && x.wait) { li.find(".st").text(" '.$jsT['wait'].'"); setTimeout(function () { run(i); }, 10000); return; }
+				if (!x || x.error) { window.onbeforeunload = null; return fail(x ? x.error : ""); }
+				tries = 0;
+				li.find(".st").remove();
+				li.append($("<span>").attr("class", x.ok ? "ok" : "error").text(" " + (x.ok ? "✔" : "✘") + (x.msg ? " " + x.msg : "")));
+				bar.css("width", Math.round(100 * (i + 1) / r.jobs.length) + "%");
+				run(i + 1);
+			}).fail(function () {
+				// Zeitüberschreitung des Webservers: der Schritt läuft auf dem Server weiter -> später nachfragen
+				if (++tries > 60) { window.onbeforeunload = null; return fail(""); }
+				li.find(".st").text(" '.$jsT['retry'].'");
+				setTimeout(function () { run(i); }, 15000);
+			});
+		};
+		run(0);
+	}).fail(function () { window.onbeforeunload = null; fail(""); });
+});
+</script>';
 }
 
 // 1. Text
@@ -357,6 +460,9 @@ print '<script>jQuery(function($){$(".hvsel").on("click",function(e){e.preventDe
 print '<a id="send"></a>'.load_fiche_titre('5. '.$langs->trans('HvMlSend'), '', '');
 print '<div class="opacitymedium">'.$langs->trans('HvMlSendHelp').'</div>';
 $tested = (bool) $ml->date_test;
+if ($ml->sentSocids()) {
+	print '<div class="opacitymedium small">'.$langs->trans('HvMlAlreadySentInfo').'</div>';
+}
 print '<div class="'.($tested ? 'ok' : 'warning').'" style="margin:6px 0">'.($tested ? img_picto('', 'tick', 'class="pictofixedwidth"').$langs->trans('HvMlTestedAt', dol_print_date($ml->date_test, 'dayhour')) : img_warning('', '', 'pictofixedwidth').$langs->trans('HvMlTestFirst')).'</div>';
 print '<form method="POST" action="'.$self.'?id='.$ml->id.'#send"><input type="hidden" name="token" value="'.newToken().'">';
 print $langs->trans('HvMailTestTo').': <input name="testto" class="minwidth250" value="'.dol_escape_htmltag((string) $user->email).'"> <button class="button" name="action" value="sendtest">'.$langs->trans('HvMlTestBtn').'</button> ';

@@ -37,6 +37,8 @@ class HvMailing
 
 	/** @var array Modul-Dokumente, die während eines Versandlaufs bereits erzeugt wurden */
 	protected $genCache = array();
+	/** Beginn des laufenden Versandlaufs (Zeitstempel) */
+	protected $runStart = 0;
 
 	/** Arten von Modul-Dokumenten (werden beim Versand neu erzeugt) */
 	const GEN_KINDS = array('plan', 'statement', 'invoice');
@@ -290,7 +292,13 @@ class HvMailing
 				if (!isset($this->genCache['plan'][$l])) {
 					dol_mkdir($this->dir().'/gen');
 					$f = $this->dir().'/gen/'.'Plan_pricuve_'.$l.'.pdf';
-					$this->genCache['plan'][$l] = (new HvPlanPdf($this->db))->write($l, $f) ? $f : '';
+					// in diesem Versandlauf schon erzeugt (frühere Teilschritte) -> wiederverwenden
+					clearstatcache(true, $f);
+					if ($this->runStart > 0 && is_readable($f) && filemtime($f) >= $this->runStart) {
+						$this->genCache['plan'][$l] = $f;
+					} else {
+						$this->genCache['plan'][$l] = (new HvPlanPdf($this->db))->write($l, $f) ? $f : '';
+					}
 				}
 				if ($this->genCache['plan'][$l] !== '') {
 					$out[] = $this->genCache['plan'][$l];
@@ -467,12 +475,11 @@ class HvMailing
 	}
 
 	/** Fehlende Sprachfassungen (nur PDF) per KI übersetzen */
-	public function translateDocs(array $langsList)
+	/** Fehlende KI-Übersetzungen von PDF-Anhängen: [[docId, lang], …] */
+	public function missingDocTranslations(array $langsList)
 	{
-		global $conf, $mysoc;
 		$this->docIndex();
-		$n = 0;
-		$errs = array();
+		$out = array();
 		foreach ($this->docs as $id => $d) {
 			if (!empty($d['versions']['all']) || !empty($d['gen'])) {
 				continue; // sprachneutral bzw. Modul-Dokument (wird je Sprache erzeugt)
@@ -482,21 +489,51 @@ class HvMailing
 				continue;
 			}
 			foreach ($langsList as $l) {
-				if (!empty($d['versions'][$l]) || !empty($d['ai'][$l]) || $l === $sl) {
-					continue;
-				}
-				$t = new HvTranslator();
-				$r = $t->translatePdf($this->dir().'/'.$sf, $sl, $l);
-				if ($r === false) {
-					$errs[] = $d['title'].' ('.$l.'): '.$t->error;
-					continue;
-				}
-				$fname = $this->uniqueName(dol_sanitizeFileName(pathinfo($sf, PATHINFO_FILENAME).'_'.$l.'_KI.pdf'));
-				if ($this->writeTranslatedPdf($this->dir().'/'.$fname, $r, $sl, $l, $sf)) {
-					$this->docs[$id]['ai'][$l] = $fname;
-					$n++;
+				if (empty($d['versions'][$l]) && empty($d['ai'][$l]) && $l !== $sl) {
+					$out[] = array($id, $l);
 				}
 			}
+		}
+		return $out;
+	}
+
+	/** Ein PDF in eine Sprache übersetzen. @return int 1 übersetzt, 0 nichts zu tun, -1 Fehler */
+	public function translateDocOne($id, $l)
+	{
+		$this->docIndex();
+		if (!isset($this->docs[$id]) || !empty($this->docs[$id]['ai'][$l]) || !empty($this->docs[$id]['versions'][$l])) {
+			return 0;
+		}
+		$d = $this->docs[$id];
+		list($sl, $sf) = $this->docSource($d);
+		if ($sf === '' || $l === $sl) {
+			return 0;
+		}
+		$t = new HvTranslator();
+		$r = $t->translatePdf($this->dir().'/'.$sf, $sl, $l);
+		if ($r === false) {
+			$this->error = $d['title'].' ('.$l.'): '.$t->error;
+			return -1;
+		}
+		$fname = $this->uniqueName(dol_sanitizeFileName(pathinfo($sf, PATHINFO_FILENAME).'_'.$l.'_KI.pdf'));
+		if (!$this->writeTranslatedPdf($this->dir().'/'.$fname, $r, $sl, $l, $sf)) {
+			$this->error = $d['title'].' ('.$l.'): PDF';
+			return -1;
+		}
+		$this->docs[$id]['ai'][$l] = $fname;
+		return 1;
+	}
+
+	public function translateDocs(array $langsList)
+	{
+		$n = 0;
+		$errs = array();
+		foreach ($this->missingDocTranslations($langsList) as $p) {
+			$r = $this->translateDocOne($p[0], $p[1]);
+			if ($r < 0) {
+				$errs[] = $this->error;
+			}
+			$n += max(0, $r);
 		}
 		$this->error = implode('; ', $errs);
 		return $n;
@@ -607,91 +644,204 @@ class HvMailing
 		return array('subject' => $mysoc->name.' – '.$tx['subject'], 'body' => $body, 'replyto' => ($mgr && isValidEmail($mgr->email)) ? $mgr->email : '');
 	}
 
-	/**
-	 * Versenden. Testversand: je Sprache der Empfänger eine E-Mail an $testto.
-	 *
-	 * @return array{ok:int,err:int,errors:string[]}
+	/* ---------------- Versand in Teilschritten ----------------
+	 * Webserver (z. B. IONOS) brechen lange Anfragen nach ca. 1 Minute ab (Gateway Timeout).
+	 * Deshalb läuft Übersetzen, Erzeugen und Versenden in kleinen Schritten, die die Seite nacheinander aufruft.
+	 * Zustand eines Laufs: <mailing>/.run_<id>.json; laufende Schritte sind gesperrt (.lock_*), erledigte werden nicht wiederholt.
 	 */
-	public function send(User $user, $testto = '')
+
+	protected function runFile($run)
 	{
-		global $conf, $mysoc;
-		$units = self::units($this->db);
-		$fromMail = getDolGlobalString('HAUSVERWALTUNG_MAIL_FROM', $mysoc->email);
-		$from = dol_string_nospecial($mysoc->name, ' ', array(',')).' <'.$fromMail.'>';
-		$out = array('ok' => 0, 'err' => 0, 'errors' => array());
-		if (!isValidEmail($fromMail)) {
-			$out['errors'][] = 'Absenderadresse fehlt';
-			return $out;
+		return $this->dir().'/.run_'.preg_replace('/[^a-z0-9]/', '', (string) $run).'.json';
+	}
+
+	public function runState($run)
+	{
+		$f = $this->runFile($run);
+		clearstatcache(true, $f);
+		$st = is_readable($f) ? json_decode((string) file_get_contents($f), true) : null;
+		return is_array($st) ? $st : null;
+	}
+
+	protected function saveRun($run, array $st)
+	{
+		dol_mkdir($this->dir());
+		file_put_contents($this->runFile($run), json_encode($st, JSON_UNESCAPED_UNICODE), LOCK_EX);
+	}
+
+	/**
+	 * Lauf anlegen. $mode: test | send | prep (nur Übersetzungen)
+	 *
+	 * @return array{run:string,jobs:array}|array{error:string}
+	 */
+	public function startRun($mode, $testto = '')
+	{
+		global $mysoc;
+		if (!in_array($mode, array('test', 'send', 'prep'), true)) {
+			return array('error' => 'mode');
 		}
-		if ($testto === '' && !$this->date_test) {
-			$out['errors'][] = $GLOBALS['langs']->transnoentities('HvMlTestFirst');
-			return $out;
+		if ($mode !== 'prep' && !isValidEmail(getDolGlobalString('HAUSVERWALTUNG_MAIL_FROM', $mysoc->email))) {
+			return array('error' => 'Absenderadresse fehlt');
 		}
-		// fehlende Übersetzungen (Text und PDF) vor dem Versand ergänzen
+		if ($mode === 'test' && !isValidEmail($testto)) {
+			return array('error' => $GLOBALS['langs']->transnoentities('HvMailTestAddressInvalid'));
+		}
+		if ($mode === 'send' && !$this->date_test) {
+			return array('error' => $GLOBALS['langs']->transnoentities('HvMlTestFirst'));
+		}
+		dol_mkdir($this->dir());
+		foreach (glob($this->dir().'/.run_*.json') ?: array() as $old) {
+			if (filemtime($old) < dol_now() - 7 * 86400) {
+				@unlink($old);
+			}
+		}
 		$langsList = $this->recipientLangs();
+		$jobs = array();
 		if (HvTranslator::enabled()) {
-			$missing = array();
 			foreach ($langsList as $l) {
 				if ($l !== $this->srclang && empty($this->i18n[$l]['body'])) {
-					$missing[] = $l;
+					$jobs[] = array('t' => 'text', 'lang' => $l);
 				}
 			}
-			if ($missing && $this->translateText($missing) < 0) {
-				$out['errors'][] = $this->error;
+			foreach ($this->missingDocTranslations($langsList) as $p) {
+				$jobs[] = array('t' => 'doc', 'doc' => $p[0], 'lang' => $p[1]);
 			}
-			$this->translateDocs($langsList);
-			$this->update();
 		}
-		$this->genCache = array();
-		if ($testto !== '') {
+		if ($mode === 'test') {
 			foreach ($langsList as $l) {
-				$sample = null;
-				$sampleSid = 0;
-				foreach ($this->recipients as $sid) {
-					if (isset($units[$sid]) && $units[$sid]['lang'] === $l) {
-						$sample = $units[$sid];
-						$sampleSid = (int) $sid;
-						break;
-					}
-				}
-				$m = $this->buildMail($l, $sample);
-				$files = $this->filesFor($l, $sampleSid, $sample);
-				if ($this->genError !== '') {
-					$out['errors'][] = $l.': '.$this->genError;
-				}
-				$info = '[TEST '.$l.' – '.($sample ? $sample['unit']->ref.' '.$sample['socname'] : '').': '.implode(', ', array_column((array) ($sample['rcpt'] ?? array()), 'email')).']';
-				$mail = new CMailFile('[TEST '.$l.'] '.$m['subject'], $testto, $from, $info."\n\n".$m['body'], $files, array_map('dol_mimetype', $files), array_map('basename', $files), '', '', 0, 0, '', '', 'hvml'.$this->id, '', 'standard', $m['replyto']);
-				if (!empty($mail->error) || !$mail->sendfile()) {
-					$out['err']++;
-					$out['errors'][] = $l.': '.($mail->error ?: 'Versand fehlgeschlagen');
-				} else {
-					$out['ok']++;
+				$jobs[] = array('t' => 'test', 'lang' => $l);
+			}
+		} elseif ($mode === 'send') {
+			$units = self::units($this->db);
+			$sent = $this->sentSocids();
+			foreach ($this->recipients as $sid) {
+				if (isset($units[$sid]) && !isset($sent[(int) $sid])) {
+					$jobs[] = array('t' => 'send', 'sid' => (int) $sid); // bereits erfolgreich versendete Apartments nie doppelt
 				}
 			}
-			if ($out['ok'] > 0 && $out['err'] === 0 && !$out['errors']) {
-				$this->date_test = dol_now();
-				$this->update();
-			}
-			return $out;
 		}
-		foreach ($this->recipients as $sid) {
-			if (!isset($units[$sid])) {
-				continue;
+		$jobs[] = array('t' => 'finish');
+		$run = dol_print_date(dol_now(), '%Y%m%d%H%M%S').substr(md5(uniqid('', true)), 0, 6);
+		$this->saveRun($run, array('mode' => $mode, 'testto' => $testto, 'started' => dol_now(), 'jobs' => $jobs, 'done' => array()));
+		return array('run' => $run, 'jobs' => $jobs);
+	}
+
+	protected static function jobKey(array $job)
+	{
+		return implode('|', array((string) ($job['t'] ?? ''), (string) ($job['lang'] ?? ''), (string) ($job['doc'] ?? ''), (string) ($job['sid'] ?? '')));
+	}
+
+	/**
+	 * Einen Schritt ausführen.
+	 *
+	 * @return array{ok?:bool,msg?:string,wait?:int,error?:string}
+	 */
+	public function step(User $user, $run, array $job)
+	{
+		$st = $this->runState($run);
+		if (!$st) {
+			return array('error' => 'run');
+		}
+		$key = self::jobKey($job);
+		$valid = false;
+		foreach ($st['jobs'] as $j) {
+			if (self::jobKey($j) === $key) {
+				$job = $j; // nur Schritte aus dem Plan des Laufs
+				$valid = true;
 			}
-			$u = $units[$sid];
+		}
+		if (!$valid) {
+			return array('error' => 'job');
+		}
+		if (isset($st['done'][$key])) {
+			return $st['done'][$key];
+		}
+		$lock = $this->dir().'/.lock_'.md5($run.'|'.$key);
+		clearstatcache(true, $lock);
+		if (file_exists($lock) && filemtime($lock) > dol_now() - 900) {
+			return array('wait' => 1); // läuft noch (z. B. nach Zeitüberschreitung der vorigen Anfrage)
+		}
+		touch($lock);
+		ignore_user_abort(true);
+		@set_time_limit(900);
+		$this->runStart = (int) $st['started'];
+		try {
+			$res = $this->runJob($user, $job, $st, $run);
+		} catch (Throwable $e) {
+			$res = array('ok' => false, 'msg' => $e->getMessage());
+		}
+		@unlink($lock);
+		$st = $this->runState($run) ?: $st;
+		$st['done'][$key] = $res;
+		$this->saveRun($run, $st);
+		return $res;
+	}
+
+	protected function runJob(User $user, array $job, array $st, $run)
+	{
+		global $mysoc;
+		$t = (string) $job['t'];
+		if ($t === 'text') {
+			$r = $this->translateText(array((string) $job['lang']));
+			if ($r < 0) {
+				return array('ok' => false, 'msg' => $this->error);
+			}
+			$this->update();
+			return array('ok' => true, 'msg' => '');
+		}
+		if ($t === 'doc') {
+			$r = $this->translateDocOne((string) $job['doc'], (string) $job['lang']);
+			if ($r < 0) {
+				return array('ok' => false, 'msg' => $this->error);
+			}
+			$this->update();
+			return array('ok' => true, 'msg' => '');
+		}
+		$fromMail = getDolGlobalString('HAUSVERWALTUNG_MAIL_FROM', $mysoc->email);
+		$from = dol_string_nospecial($mysoc->name, ' ', array(',')).' <'.$fromMail.'>';
+		if ($t === 'test') {
+			$l = (string) $job['lang'];
+			$units = self::units($this->db);
+			$sample = null;
+			$sampleSid = 0;
+			foreach ($this->recipients as $sid) {
+				if (isset($units[$sid]) && $units[$sid]['lang'] === $l) {
+					$sample = $units[$sid];
+					$sampleSid = (int) $sid;
+					break;
+				}
+			}
+			$m = $this->buildMail($l, $sample);
+			$files = $this->filesFor($l, $sampleSid, $sample);
+			$warn = $this->genError;
+			$info = '[TEST '.$l.' – '.($sample ? $sample['unit']->ref.' '.$sample['socname'] : '').': '.implode(', ', array_column((array) ($sample['rcpt'] ?? array()), 'email')).']';
+			$mail = new CMailFile('[TEST '.$l.'] '.$m['subject'], $st['testto'], $from, $info."\n\n".$m['body'], $files, array_map('dol_mimetype', $files), array_map('basename', $files), '', '', 0, 0, '', '', 'hvml'.$this->id, '', 'standard', $m['replyto']);
+			if (!empty($mail->error) || !$mail->sendfile()) {
+				return array('ok' => false, 'msg' => $mail->error ?: 'Versand fehlgeschlagen');
+			}
+			return array('ok' => $warn === '', 'msg' => $warn !== '' ? $warn : count($files).' '.$GLOBALS['langs']->transnoentities('HvMailFiles'));
+		}
+		if ($t === 'send') {
+			$sid = (int) $job['sid'];
+			$units = self::units($this->db);
+			$u = $units[$sid] ?? null;
+			if (!$u) {
+				return array('ok' => false, 'msg' => '#'.$sid);
+			}
+			// Sicherheitsnetz: schon erfolgreich versendet -> nicht doppelt
+			if (isset($this->sentSocids()[$sid])) {
+				return array('ok' => true, 'msg' => $u['unit']->ref);
+			}
 			if (!$u['rcpt']) {
 				$this->logRcpt($sid, '', $u['lang'], array(), 'error', 'keine E-Mail');
-				$out['err']++;
-				continue;
+				return array('ok' => false, 'msg' => $u['unit']->ref.': '.$GLOBALS['langs']->transnoentities('HvMailNoAddress'));
 			}
 			$m = $this->buildMail($u['lang'], $u);
 			$files = $this->filesFor($u['lang'], $sid, $u);
 			if ($this->genError !== '') {
 				// Dokument der Hausverwaltung fehlt -> dieses Apartment nicht unvollständig versenden
 				$this->logRcpt($sid, '', $u['lang'], $files, 'error', $this->genError);
-				$out['err']++;
-				$out['errors'][] = $this->genError;
-				continue;
+				return array('ok' => false, 'msg' => $this->genError);
 			}
 			$to = array();
 			foreach ($u['rcpt'] as $r) {
@@ -700,23 +850,84 @@ class HvMailing
 			$mail = new CMailFile($m['subject'], implode(', ', $to), $from, $m['body'], $files, array_map('dol_mimetype', $files), array_map('basename', $files), '', getDolGlobalString('HAUSVERWALTUNG_MAIL_BCC'), 0, 0, '', '', 'hvml'.$this->id.'-'.$sid, '', 'standard', $m['replyto']);
 			if (!empty($mail->error) || !$mail->sendfile()) {
 				$this->logRcpt($sid, implode(', ', $to), $u['lang'], $files, 'error', $mail->error ?: 'Versand fehlgeschlagen');
-				$out['err']++;
-				$out['errors'][] = $u['socname'].': '.($mail->error ?: 'Versand fehlgeschlagen');
-				continue;
+				return array('ok' => false, 'msg' => $u['socname'].': '.($mail->error ?: 'Versand fehlgeschlagen'));
 			}
 			$this->logRcpt($sid, implode(', ', $to), $u['lang'], $files, 'ok', '');
-			$out['ok']++;
-			// beim Apartment ablegen: Text als PDF-freie Textdatei + Anhänge
 			if (HvMailer::archiveEnabled()) {
 				$txt = $this->dir().'/Rundschreiben-'.((int) $this->id).'_'.$u['lang'].'.txt';
 				file_put_contents($txt, $m['subject']."\n\n".$m['body']);
 				HvMailer::archiveSent($sid, array_merge(array($txt), $files));
 			}
-		}
-		if ($out['ok'] > 0) {
 			$this->status = 'sent';
 			$this->date_sent = dol_now();
 			$this->update();
+			return array('ok' => true, 'msg' => $u['unit']->ref.' → '.implode(', ', array_column($u['rcpt'], 'email')));
+		}
+		if ($t === 'finish') {
+			$sum = $this->runSummary($st);
+			if ($st['mode'] === 'test' && $sum['ok'] > 0 && $sum['err'] === 0 && !$sum['errors']) {
+				$this->date_test = dol_now();
+				$this->update();
+			}
+			$L = $GLOBALS['langs'];
+			$msg = $st['mode'] === 'test' ? $L->transnoentities('HvMlTestSent', $sum['ok'], $st['testto']) : ($st['mode'] === 'send' ? $L->transnoentities('HvMlSent', $sum['ok'], $sum['ok'] + $sum['err']) : $L->transnoentities('HvSaved'));
+			return array('ok' => !$sum['errors'], 'msg' => $msg, 'tested' => $st['mode'] === 'test' ? (int) (bool) $this->date_test : null);
+		}
+		return array('ok' => false, 'msg' => 'job');
+	}
+
+	/** Ergebnis eines Laufs: ok/err (Mails) und Fehlermeldungen aller Schritte */
+	public function runSummary(array $st)
+	{
+		$out = array('ok' => 0, 'err' => 0, 'errors' => array());
+		foreach ($st['jobs'] as $j) {
+			$r = $st['done'][self::jobKey($j)] ?? null;
+			if ($j['t'] === 'finish') {
+				continue;
+			}
+			if (!$r) {
+				$out['errors'][] = self::jobKey($j).': nicht ausgeführt';
+				continue;
+			}
+			if (in_array($j['t'], array('test', 'send'), true)) {
+				// Test mit Warnung (z. B. Dokument fehlt) zählt als Fehler -> keine Freigabe
+				if (!empty($r['ok'])) {
+					$out['ok']++;
+				} else {
+					$out['err']++;
+				}
+			}
+			if (empty($r['ok'])) {
+				$out['errors'][] = ($j['lang'] ?? '') !== '' ? $j['lang'].': '.$r['msg'] : (string) $r['msg'];
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Alles in einem Aufruf (Kommandozeile/Tests). Im Browser läuft der Versand in Teilschritten (mailing.php).
+	 *
+	 * @return array{ok:int,err:int,errors:string[]}
+	 */
+	public function send(User $user, $testto = '')
+	{
+		$r = $this->startRun($testto !== '' ? 'test' : 'send', $testto);
+		if (!empty($r['error'])) {
+			return array('ok' => 0, 'err' => 0, 'errors' => array($r['error']));
+		}
+		foreach ($r['jobs'] as $j) {
+			$this->step($user, $r['run'], $j);
+		}
+		return $this->runSummary($this->runState($r['run']));
+	}
+
+	/** Apartments, an die dieses Rundschreiben bereits erfolgreich ging: socid => true */
+	public function sentSocids()
+	{
+		$out = array();
+		$q = $this->db->query("SELECT DISTINCT fk_soc FROM ".$this->db->prefix()."hv_mailing_rcpt WHERE fk_mailing = ".((int) $this->id)." AND status = 'ok'");
+		while ($q && ($o = $this->db->fetch_object($q))) {
+			$out[(int) $o->fk_soc] = true;
 		}
 		return $out;
 	}
