@@ -11,7 +11,7 @@
     - **Datei hochladen** mit Sprache – oder *alle Sprachen* für sprachneutrale Dateien (Plan, Foto, Tabelle).
     - **Datei aus Dolibarr** (Modul *Dokumente*) übernehmen.
     - Weitere Sprachfassung zum selben Dokument: beim Hochladen das *Dokument* auswählen.
-    - **Fehlende Sprachfassungen per KI übersetzen (PDF)**: erstellt je Sprache ein PDF mit dem deutlichen Hinweis „KI-Übersetzung – maßgeblich ist das Original“.
+    - **Fehlende Sprachfassungen per KI übersetzen (PDF)**: erstellt je Sprache ein PDF mit dem kleinen Hinweis „KI-Übersetzung aus: Deutsch (Datei …)“.
     - Die Tabelle *wird angehängt* zeigt je Sprache, was jeder Eigentümer bekommt: das **Original** (kroatische Fassung, sonst die hochgeladene Ausgangsfassung) und die **Fassung in seiner Sprache**.
 5. **Empfänger**: alle, keine oder je Haus (H1, H2 …) auswählen, *Speichern*. Apartments ohne Eigentümer-E-Mail sind gesperrt.
 6. **Versand**:

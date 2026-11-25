@@ -365,12 +365,11 @@ class HvMailing
 		$pdf->SetTitle($r['title']);
 		$pdf->AddPage();
 		$srcName = $T->transnoentities('Language_'.$src);
-		$pdf->SetFillColor(253, 236, 200);
-		$pdf->SetTextColor(120, 70, 0);
-		$pdf->SetFont('', 'B', 9);
-		$pdf->MultiCell(0, 5, $T->transnoentities('HvMlAiDocBanner', $srcName !== 'Language_'.$src ? $srcName : $src, $origName), 0, 'L', 1);
+		$pdf->SetTextColor(110, 110, 110);
+		$pdf->SetFont('', '', 7);
+		$pdf->MultiCell(0, 3.5, $T->transnoentities('HvMlAiDocBanner', $srcName !== 'Language_'.$src ? $srcName : $src, $origName), 0, 'L');
 		$pdf->SetTextColor(0, 0, 0);
-		$pdf->Ln(3);
+		$pdf->Ln(2);
 		$pdf->SetFont('', '', 10);
 		$pdf->writeHTML('<style>h1{font-size:15pt}h2{font-size:13pt}h3{font-size:11pt}td,th{border:0.3px solid #999}</style>'.$r['html'], true, false, true, false, '');
 		$pdf->Ln(4);

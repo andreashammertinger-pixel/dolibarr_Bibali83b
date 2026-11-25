@@ -28,7 +28,7 @@ Die Vorschreibung ist die Rechnung der Gemeinschaft an das Apartment. Sie enthä
 1. Filter *Status* = **Entwurf**, alle anhaken.
 2. **Massenaktionen → Freigeben**.
 
-Die Rechnungen bekommen ihre Nummer (z. B. `IN2611-0002`) und das PDF (kroatisch + Kopie).
+Die Rechnungen bekommen ihre Nummer (z. B. `IN2611-0002`) und das PDF (kroatisch + Sprache des Eigentümers).
 
 !!! info "Freigabe nach dem Fälligkeitstag"
     Ist eine Rate bei der Freigabe schon fällig (z. B. Freigabe am 18., Fälligkeit am 5.), gilt automatisch eine Frist von **7 Tagen ab Freigabe**. Folgende Raten bleiben am Fälligkeitstag.
@@ -44,7 +44,7 @@ Die Rechnungen bekommen ihre Nummer (z. B. `IN2611-0002`) und das PDF (kroatisch
 
 Jede Mail enthält:
 
-- kroatisches Original und Übersetzungskopie der Vorschreibung,
+- Vorschreibung auf Kroatisch und in der Sprache des Eigentümers,
 - die **Erläuterung zur Vorschreibung** (Zusammensetzung, Sätze je Haus, Rücklage, Ablauf) – wird beim Versand erzeugt,
 - Text in der Sprache des Apartments mit Monatsrate, Fälligkeit und Bankdaten.
 

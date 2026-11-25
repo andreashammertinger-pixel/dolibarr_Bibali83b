@@ -164,23 +164,6 @@ class pdf_hausverwaltung extends ModelePDFFactures
 			$pdf->Cell($R - $mid, 5, $outputlangs->transnoentities('HvPdfDueMonthly', $dueDay), 0, 1, 'R');
 		}
 
-		// Kennzeichnung der Übersetzungskopie: oben links, neben Titel/Datum (unter dem Logo, falls vorhanden)
-		if ($this->copylang) {
-			$origlangs = new Translate('', $conf);
-			$origlangs->setDefaultLang($orig);
-			$origlangs->loadLangs(array('hausverwaltung@hausverwaltung'));
-			$bw = $mid - $L - 6;
-			$by = ($logo && is_readable($logo)) ? $this->marge_haute + 20 : $this->marge_haute + 2;
-			$pdf->SetFillColor(253, 236, 200);
-			$pdf->SetTextColor(120, 70, 0);
-			$pdf->SetFont('', 'B', $fs - 1);
-			$pdf->SetXY($L, $by);
-			$pdf->Cell($bw, 6, $outputlangs->transnoentities('HvPdfCopy'), 0, 2, 'L', 1);
-			$pdf->SetFont('', '', $fs - 3);
-			$pdf->MultiCell($bw, 3.8, $outputlangs->transnoentities('HvPdfCopyNote')."\n".$origlangs->transnoentities('HvPdfCopyNote'), 0, 'L', 1);
-			$pdf->SetTextColor(0, 0, 0);
-		}
-
 		// --- Adressblöcke "An" (links) / "Von" (rechts)
 		$yAddr = 58;
 		$pdf->SetFont('', 'B', $fs - 1);

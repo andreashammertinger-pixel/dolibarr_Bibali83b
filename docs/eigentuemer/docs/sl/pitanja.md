@@ -4,7 +4,7 @@
     Stroške, ki se nanašajo samo na eno hišo (zavarovanje, vrt, stopnišče), nosi samo ta hiša. Tudi rezervni sklad je odvisen od potreb posamezne stavbe. Glejte [Razumeti obremenitev](zaduzenje.md).
 
 ??? question "Kateri dokument velja – hrvaški ali v mojem jeziku?"
-    Pravno zavezujoč je **hrvaški izvirnik**. Kopija v vašem jeziku je informativna.
+    Besedila so napisana v izvirnem jeziku (običajno nemščini) in z UI prevedena v hrvaščino in vaš jezik. Na dnu vsakega dokumenta je drobno navedeno, iz katerega jezika je prevedeno. Če vam kaj ni jasno, nas vprašajte.
 
 ??? question "Nisem prejel/a e-pošte."
     Vse obremenitve najdete tudi na spletu: [Moji računi in dokumenti](racuni.md). Preverite mapo z neželeno pošto in nam sporočite spremenjen e-poštni naslov.
@@ -16,7 +16,7 @@
     Sporočite nam – podatke bomo posodobili, da bodo dokumenti pravilno izdani.
 
 ??? question "Prejel/a sem okrožnico v svojem jeziku – katera različica velja?"
-    Okrožnice in dokumenti so napisani v izvirnem jeziku in za vas prevedeni z umetno inteligenco; to je drobno navedeno na koncu vsakega sporočila in dokumenta. Pri prilogah prejmete tudi izvirnik. Velja izvirnik.
+    Okrožnice in dokumenti so napisani v izvirnem jeziku in za vas prevedeni z umetno inteligenco; to je drobno navedeno na koncu vsakega sporočila in dokumenta. Pri prilogah prejmete tudi izvirnik.
 
 ## Kontakt upravnika
 

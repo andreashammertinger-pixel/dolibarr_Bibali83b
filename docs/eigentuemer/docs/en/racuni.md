@@ -11,8 +11,8 @@ Menu **Charges | Payment → Service charges**
 
 | File | Content |
 |---|---|
-| `IN2611-0001.pdf` | service charge – **Croatian original** |
-| `IN2611-0001_en_US.pdf` | copy in your language |
+| `IN2611-0001.pdf` | service charge – **Croatian** |
+| `IN2611-0001_en_US.pdf` | in your language |
 | `IN2611-0001_info….pdf` | **explanation**: how the amount is made up |
 
 Under *Payments* you see which payments have already been recorded.

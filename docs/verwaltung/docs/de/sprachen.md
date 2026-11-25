@@ -1,6 +1,6 @@
 # Sprachen und Texte
 
-Alle Dokumente an Eigentümer (Vorschreibung, Erläuterung, Abrechnung, E-Mails, Rücklagenplan) entstehen im **kroatischen Original** und als **Kopie in der Sprache des Eigentümers**. Die Sprache kommt aus dem Geschäftspartner (Apartment) → Feld *Standardsprache*.
+Alle Dokumente an Eigentümer (Vorschreibung, Erläuterung, Abrechnung, E-Mails, Rücklagenplan) entstehen auf **Kroatisch** und zusätzlich in der **Sprache des Eigentümers**. Die Texte werden in der Ausgangssprache (meist Deutsch) verfasst und mittels KI übersetzt; das steht klein in der Fußzeile („KI-Übersetzung aus: Deutsch“). Die Sprache kommt aus dem Geschäftspartner (Apartment) → Feld *Standardsprache*.
 
 ## Sprachen-Seite
 

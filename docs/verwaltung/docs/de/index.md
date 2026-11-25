@@ -7,7 +7,7 @@ Dieses Handbuch erklärt die Arbeit mit dem Dolibarr-Modul **Hausverwaltung**: V
 
 ## Das Prinzip in einem Satz
 
-Die **Gemeinschaft** (z. B. *Zgrada Bibali 83B*) schreibt jedem Apartment monatlich **Betriebskosten**, **Rücklage** und **Verwaltung** vor – berechnet nach der Wohnfläche (m²). Alle Dokumente gibt es im **kroatischen Original** und als **Kopie in der Sprache des Eigentümers**.
+Die **Gemeinschaft** (z. B. *Zgrada Bibali 83B*) schreibt jedem Apartment monatlich **Betriebskosten**, **Rücklage** und **Verwaltung** vor – berechnet nach der Wohnfläche (m²). Alle Dokumente gibt es auf **Kroatisch** und in der **Sprache des Eigentümers** – Übersetzungen mittels KI aus der Ausgangssprache (meist Deutsch).
 
 ## Jahresablauf
 

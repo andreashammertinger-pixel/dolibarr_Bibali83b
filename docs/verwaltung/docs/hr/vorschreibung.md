@@ -28,7 +28,7 @@ Zaduženje je račun zajednice apartmanu. Sadrži tri stavke: **zajedničke tro�
 1. Filtar *Status* = **Skica**, označiti sve.
 2. **Grupne radnje → Ovjeri**.
 
-Računi dobivaju broj (npr. `IN2611-0002`) i PDF (hrvatski + kopija).
+Računi dobivaju broj (npr. `IN2611-0002`) i PDF (hrvatski + jezik vlasnika).
 
 !!! info "Ovjera nakon dana dospijeća"
     Ako je rata pri ovjeri već dospjela (npr. ovjera 18., dospijeće 5.), automatski vrijedi rok od **7 dana od ovjere**. Sljedeće rate ostaju na dan dospijeća.
@@ -44,7 +44,7 @@ Računi dobivaju broj (npr. `IN2611-0002`) i PDF (hrvatski + kopija).
 
 Svaka poruka sadrži:
 
-- hrvatski izvornik i prijevod zaduženja,
+- zaduženje na hrvatskom i na jeziku vlasnika,
 - **objašnjenje zaduženja** (sastav, stope po kući, pričuva, postupak) – izrađuje se pri slanju,
 - tekst na jeziku apartmana s mjesečnom ratom, dospijećem i podacima za uplatu.
 

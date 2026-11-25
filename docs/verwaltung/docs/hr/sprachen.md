@@ -1,6 +1,6 @@
 # Jezici i tekstovi
 
-Svi dokumenti vlasnicima (zaduženje, objašnjenje, obračun, e-pošta, plan pričuve) izrađuju se kao **hrvatski izvornik** i kao **kopija na jeziku vlasnika**. Jezik se preuzima od poslovnog partnera (apartmana) → polje *Zadani jezik*.
+Svi dokumenti vlasnicima (zaduženje, objašnjenje, obračun, e-pošta, plan pričuve) izrađuju se na **hrvatskom** i dodatno na **jeziku vlasnika**. Tekstovi se pišu na izvornom jeziku (uglavnom njemački) i prevode pomoću AI; to sitno piše u podnožju („AI prijevod s jezika: njemački“). Jezik se preuzima od poslovnog partnera (apartmana) → polje *Zadani jezik*.
 
 ## Stranica Jezici
 

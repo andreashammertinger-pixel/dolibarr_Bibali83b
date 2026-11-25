@@ -236,9 +236,6 @@ class HvMailer
 		if ($withInfo) {
 			$body .= $ol->transnoentities('HvMailInfoAttached')."\n\n";
 		}
-		if (substr($lang, 0, 2) !== substr($orig, 0, 2)) {
-			$body .= $ol->transnoentities('HvMailCopyNote')."\n\n";
-		}
 		$mgr = null;
 		if (getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID') > 0) {
 			$mgr = new Societe($this->db);
@@ -366,9 +363,6 @@ class HvMailer
 			if ($fi && !empty($fi->fk_account) && $sacc->fetch($fi->fk_account) > 0) {
 				$body .= self::bankBlock($ol, !empty($sacc->owner_name) ? $sacc->owner_name : (!empty($sacc->proprio) ? $sacc->proprio : $mysoc->name), $sacc->iban, $sacc->bic, $fi->ref);
 			}
-		}
-		if (substr($lang, 0, 2) !== substr($orig, 0, 2)) {
-			$body .= $ol->transnoentities('HvMailCopyNote')."\n\n";
 		}
 		$mgr = null;
 		if (getDolGlobalInt('HAUSVERWALTUNG_MANAGER_SOCID') > 0) {

@@ -13,5 +13,5 @@ Welcome! Here you will find out how, as an owner in **Bibali 83b**, you can find
 
 </div>
 
-!!! info "Croatian original"
-    All documents exist as a **Croatian original** and as a **copy in your language**. The Croatian original is legally binding.
+!!! info "Languages"
+    You receive all documents in **Croatian** and in **your language**. The texts are written in a source language (usually German) and translated using AI – this is stated in small print at the end of every document.

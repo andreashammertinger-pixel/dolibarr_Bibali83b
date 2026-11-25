@@ -146,20 +146,6 @@ class HvStatementPdf
 			$pdf->Cell(($R - $mid) * 0.5, 5, $r[1], 0, 1, 'R');
 			$y += 5;
 		}
-		if ($isCopy) {
-			$O = new Translate('', $conf);
-			$O->setDefaultLang($orig);
-			$O->loadLangs(array('hausverwaltung@hausverwaltung'));
-			$pdf->SetFillColor(253, 236, 200);
-			$pdf->SetTextColor(120, 70, 0);
-			$pdf->SetFont('', 'B', $fs - 1);
-			$pdf->SetXY($L, $top + 2);
-			$pdf->Cell($mid - $L - 6, 6, $T->transnoentities('HvPdfCopy'), 0, 2, 'L', 1);
-			$pdf->SetFont('', '', $fs - 3);
-			$pdf->MultiCell($mid - $L - 6, 3.8, $T->transnoentities('HvPdfCopyNote')."\n".$O->transnoentities('HvPdfCopyNote'), 0, 'L', 1);
-			$pdf->SetTextColor(0, 0, 0);
-		}
-
 		// An / Von
 		$yA = 58;
 		$pdf->SetFont('', 'B', $fs - 1);

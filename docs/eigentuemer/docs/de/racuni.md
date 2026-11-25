@@ -12,7 +12,7 @@ Menü **Vorschreibung | Zahlung → Vorschreibungen**
 | Datei | Inhalt |
 |---|---|
 | `IN2611-0001.pdf` | Vorschreibung – **kroatisches Original** |
-| `IN2611-0001_de_DE.pdf` | Kopie in Ihrer Sprache |
+| `IN2611-0001_de_DE.pdf` | in Ihrer Sprache |
 | `IN2611-0001_info….pdf` | **Erläuterung**: wie sich der Betrag zusammensetzt |
 
 Unter *Zahlungen* sehen Sie, welche Zahlungen bereits verbucht sind.

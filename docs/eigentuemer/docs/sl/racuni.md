@@ -11,8 +11,8 @@ Meni **Obremenitve | Plačila → Obremenitve**
 
 | Datoteka | Vsebina |
 |---|---|
-| `IN2611-0001.pdf` | obremenitev – **hrvaški izvirnik** |
-| `IN2611-0001_sl_SI.pdf` | kopija v vašem jeziku |
+| `IN2611-0001.pdf` | obremenitev – **hrvaško** |
+| `IN2611-0001_sl_SI.pdf` | v vašem jeziku |
 | `IN2611-0001_info….pdf` | **pojasnilo**: kako je znesek sestavljen |
 
 Pod *Plačila* vidite, katera plačila so že knjižena.

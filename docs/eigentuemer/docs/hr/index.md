@@ -13,5 +13,5 @@ Dobro došli! Ovdje saznajete kako kao vlasnik u **Bibali 83b** online pronaći 
 
 </div>
 
-!!! info "Hrvatski izvornik"
-    Svi dokumenti postoje kao **hrvatski izvornik** i kao **kopija na Vašem jeziku**. Pravno je mjerodavan hrvatski izvornik.
+!!! info "Jezici"
+    Sve dokumente dobivate na **hrvatskom** i na **Vašem jeziku**. Tekstovi se pišu na izvornom jeziku (uglavnom njemačkom) i prevode pomoću AI – to sitno piše na kraju svakog dokumenta.

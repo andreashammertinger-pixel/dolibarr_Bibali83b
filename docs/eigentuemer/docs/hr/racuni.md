@@ -11,8 +11,8 @@ Izbornik **Zaduženja | Plaćanja → Zaduženja**
 
 | Datoteka | Sadržaj |
 |---|---|
-| `IN2611-0001.pdf` | zaduženje – **hrvatski izvornik** |
-| `IN2611-0001_de_DE.pdf` | kopija na Vašem jeziku (ako nije hrvatski) |
+| `IN2611-0001.pdf` | zaduženje – **hrvatski** |
+| `IN2611-0001_de_DE.pdf` | na Vašem jeziku (ako nije hrvatski) |
 | `IN2611-0001_info….pdf` | **objašnjenje**: od čega se iznos sastoji |
 
 Pod *Plaćanja* vidite koje su uplate već proknjižene.

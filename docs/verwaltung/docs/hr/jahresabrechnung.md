@@ -16,7 +16,7 @@ Pričuva i upravljanje se **ne** obračunavaju.
 2. **Knjiži obračun** – vrijednosti se zaključavaju:
     - **nedoplata** → zaseban račun apartmanu,
     - **preplata** → uračunava se u sljedeća zaduženja.
-3. **Izradi obračunske listove** – po apartmanu jedan PDF (hrvatski + kopija) sa svim vrstama troška, udjelom, akontacijama i saldom.
+3. **Izradi obračunske listove** – po apartmanu jedan PDF (hrvatski + jezik vlasnika) sa svim vrstama troška, udjelom, akontacijama i saldom.
 4. Testno slanje na vlastitu adresu, zatim **Pošalji obračunske listove vlasnicima** (račun za nedoplatu je u privitku).
 
 Nakon slanja obračunski list i račun za nedoplatu nalaze se i kod **apartmana → Povezane datoteke** (s datumom slanja) – ondje ih vlasnik vidi u svom pristupu.

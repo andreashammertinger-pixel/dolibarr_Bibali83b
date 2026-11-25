@@ -376,12 +376,6 @@ if ($print) {
 	top_htmlhead('', $T->transnoentities('HvReservePlan'));
 	print '<body style="padding:16px;background:#fff;font-family:DejaVu Sans,Arial,sans-serif"><style>@media print{.noprint{display:none}} table{border-collapse:collapse;width:100%} td,th{padding:3px 6px;border-bottom:1px solid #ddd;font-size:11px;text-align:left} td.right,th.right{text-align:right;white-space:nowrap} .error{color:#a00} .badge{padding:2px 6px;border-radius:3px;font-size:10px;white-space:nowrap} .badge-status4{background:#d8efdc;color:#1d5e2a} .badge-status8{background:#f8d7d7;color:#8a1010} .copy{background:#fdecc8;color:#784600;padding:6px 10px;font-size:11px;margin-bottom:10px}</style>';
 	print '<div class="noprint" style="margin-bottom:8px"><button onclick="window.print()">'.$T->trans('Print').'</button></div>';
-	if (substr($plang, 0, 2) !== substr($orig, 0, 2)) {
-		$O = new Translate('', $conf);
-		$O->setDefaultLang($orig);
-		$O->loadLangs(array('hausverwaltung@hausverwaltung'));
-		print '<div class="copy"><b>'.$T->trans('HvPdfCopy').'</b><br>'.$T->trans('HvPdfCopyNote').'<br>'.$O->trans('HvPdfCopyNote').'</div>';
-	}
 	print '<h2>'.$T->trans('HvReservePlan').' – '.dol_escape_htmltag($mysoc->name).'</h2><p>'.$T->trans('HvPlanAssumptions', price($proj['inflation'], 0, $T), dol_print_date(dol_now(), 'day', false, $T)).'</p>';
 } else {
 	llxHeader('', $langs->trans('HvReservePlan'), hvHelpUrl('ruecklage/'), '', 0, 0, '', '', '', 'mod-hausverwaltung');

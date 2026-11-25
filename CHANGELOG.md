@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.16.1
+- Kein Hinweis mehr „maßgeblich ist das kroatische Original“: Kasten „KOPIE – Übersetzung“ auf Vorschreibung, Abrechnungsblatt, Erläuterung und Druckansicht entfernt, Satz in den E-Mails entfernt
+- Stattdessen nur noch klein in der Fußzeile: „Hausverwaltung <Version> · <Zeitpunkt>“ und bei übersetzten Fassungen „KI-Übersetzung aus: <Ausgangssprache>“ (in der Sprache des Dokuments)
+- KI-übersetzte Anhänge im Rundschreiben: nur kleiner Hinweis „KI-Übersetzung aus: … (Datei …)“
+- Doku und Eigentümerhilfe angepasst
+
 ## 1.16.0
 - **Rundschreiben an Eigentümer** (neuer Menüpunkt): Text in der eigenen Sprache, KI-Übersetzung in die Sprachen der Empfänger (bearbeitbar, Nachfrage bei Änderungen), Anhänge hochladen oder aus Dolibarr (Dokumente/ECM), je Dokument „alle Sprachen“ oder Fassungen je Sprache, fehlende PDF-Fassungen per KI übersetzen (gekennzeichnet „KI-Übersetzung – maßgeblich ist das Original“), Empfänger alle/keine/je Haus, Testversand je Sprache, Versand je Apartment in der Sprache des Eigentümers, Protokoll, Ablage beim Apartment
 - **Herkunftszeile** auf allen Dokumenten und E-Mails: Modulversion, Erstellzeitpunkt, Ausgangssprache und Hinweis „Fassungen in anderen Sprachen mittels KI übersetzt“ (Einstellungen: Ausgangssprache, Hinweis ein/aus)

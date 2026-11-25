@@ -122,7 +122,7 @@ function hvDocKeys()
 			continue;
 		}
 		if (preg_match('/^(HvPdf|HvMail|HvStmt|HvLine|HvInvoice|HvKey_|HvInfo)/', $m[1]) || in_array($m[1], $extra, true)) {
-			if (!in_array($m[1], array('HvMailFromSetting', 'HvMailBccSetting', 'HvMailTo', 'HvMailFiles', 'HvMailLastSent', 'HvMailNoAddress', 'HvMailNoPdf', 'HvMailNoInvoices', 'HvMailTestTo', 'HvMailSendTest', 'HvMailSendReal', 'HvMailConfirm', 'HvMailTestSent', 'HvMailSent', 'HvMailTestAddressInvalid', 'HvMailHelp', 'HvPdfPreview', 'HvPdfOriginal', 'HvPdfCopyShort', 'HvInvoiceNumber', 'HvStmtSection', 'HvStmtHelp', 'HvStmtGenerate', 'HvStmtGenerated', 'HvStmtSend', 'HvStmtSendConfirm', 'HvInfoAttachSetting', 'HvInfoAttachHelp'), true)) {
+			if (!in_array($m[1], array('HvMailFromSetting', 'HvMailBccSetting', 'HvMailTo', 'HvMailFiles', 'HvMailLastSent', 'HvMailNoAddress', 'HvMailNoPdf', 'HvMailNoInvoices', 'HvMailTestTo', 'HvMailSendTest', 'HvMailSendReal', 'HvMailConfirm', 'HvMailTestSent', 'HvMailSent', 'HvMailTestAddressInvalid', 'HvMailHelp', 'HvPdfPreview', 'HvPdfOriginal', 'HvPdfCopyShort', 'HvInvoiceNumber', 'HvMailing', 'HvStmtSection', 'HvStmtHelp', 'HvStmtGenerate', 'HvStmtGenerated', 'HvStmtSend', 'HvStmtSendConfirm', 'HvInfoAttachSetting', 'HvInfoAttachHelp'), true)) {
 				$out[$m[1]] = trim($m[2]);
 			}
 		}
@@ -444,8 +444,10 @@ function hvDocStamp($T, $withAiNote = true, $src = '')
 	$parts = array($T->transnoentities('HvDocStamp', hvModuleVersion(), dol_print_date(dol_now(), 'dayhour', 'tzuserrel', $T)));
 	if ($withAiNote && getDolGlobalString('HAUSVERWALTUNG_AI_DOC_NOTE', '1') === '1') {
 		$src = $src !== '' ? $src : hvSourceLang();
-		$name = $T->transnoentities('Language_'.$src);
-		$parts[] = $T->transnoentities('HvDocAiNote', $name !== 'Language_'.$src ? $name : $src);
+		if (substr((string) $T->defaultlang, 0, 2) !== substr($src, 0, 2)) {
+			$name = $T->transnoentities('Language_'.$src);
+			$parts[] = $T->transnoentities('HvDocAiNote', $name !== 'Language_'.$src ? $name : $src);
+		}
 	}
 	return implode(' · ', $parts);
 }

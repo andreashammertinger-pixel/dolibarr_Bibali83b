@@ -13,5 +13,5 @@ Willkommen! Hier erfahren Sie, wie Sie als Eigentümer in **Bibali 83b** Ihre Vo
 
 </div>
 
-!!! info "Kroatisches Original"
-    Alle Dokumente gibt es als **kroatisches Original** und als **Kopie in Ihrer Sprache**. Rechtlich maßgeblich ist das kroatische Original.
+!!! info "Sprachen"
+    Alle Dokumente erhalten Sie auf **Kroatisch** und in **Ihrer Sprache**. Die Texte werden in einer Ausgangssprache (meist Deutsch) verfasst und mittels KI übersetzt – das steht klein am Ende jedes Dokuments.

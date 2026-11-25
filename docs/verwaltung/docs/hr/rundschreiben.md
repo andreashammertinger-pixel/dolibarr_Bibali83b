@@ -11,7 +11,7 @@
     - **Prijenos datoteke** s jezikom – ili *svi jezici* za jezično neutralne datoteke (nacrt, fotografija, tablica).
     - **Datoteka iz Dolibarra** (modul *Dokumenti*).
     - Dodatna jezična verzija istog dokumenta: pri prijenosu odaberite *Dokument*.
-    - **Prevedi nedostajuće jezične verzije pomoću AI (PDF)**: za svaki jezik izrađuje PDF s jasnom napomenom „AI prijevod – mjerodavan je izvornik“.
+    - **Prevedi nedostajuće jezične verzije pomoću AI (PDF)**: za svaki jezik izrađuje PDF sa sitnom napomenom „AI prijevod s jezika: njemački (datoteka …)“.
     - Tablica *bit će priloženo* prikazuje po jeziku što svaki vlasnik dobiva: **izvornik** (hrvatsku verziju, inače prenesenu izvornu verziju) i **verziju na svom jeziku**.
 5. **Primatelji**: svi, nijedan ili po kući (H1, H2 …), *Spremi*. Apartmani bez e-pošte vlasnika su zaključani.
 6. **Slanje**:
