@@ -59,4 +59,7 @@ Svaka poruka sadrži:
 - **Povratne poruke** (pogrešna adresa) stižu na adresu pošiljatelja – provjeriti pretinac.
 - Sve poslane datoteke dodatno se nalaze kod **apartmana → Povezane datoteke**, s datumom slanja na početku naziva (npr. `2026-11-18_IN2611-0001.pdf`). Testno slanje ništa ne sprema.
 - Vlasnici vide zaduženje i objašnjenje i u svom [pristupu](eigentuemer-zugang.md).
+
+!!! warning "Promijenjene stope? Zaduženje i objašnjenje moraju se podudarati"
+    Objašnjenje računa s **trenutnim** stopama (plan troškova, stopa pričuve po kući, upravljanje). Potvrđeno zaduženje zadržava iznose s dana izdavanja. Prije svakog slanja (pojedinačno i u okružnici) modul stoga uspoređuje svaku stavku zaduženja s trenutnim stopama. Ako nešto odstupa, **ne** šalje se i ne izrađuje se objašnjenje; poruka navodi odstupanje, npr. *Pričuva 0,80 umjesto 0,49 €/m²*. Tada ispravite zaduženje (odobrenje i novo zaduženje) – ili, ako se namjerno ponovno šalje starije zaduženje, privremeno isključite objašnjenje u postavkama.
 - Uplate: vidi [Uplate](zahlungen.md).

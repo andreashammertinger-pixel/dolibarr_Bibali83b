@@ -487,3 +487,5 @@ HvMlOwnLangOnlyHelp = (ohne zusätzliche kroatische Fassung – gilt für hochge
 HvEventMailing = Rundschreiben #%s versendet: %s
 HvEventStatement = Abrechnungsblatt %s versendet (%s)
 HvEventFiles = Anhänge (Kopie beim Apartment unter „Verknüpfte Dokumente“)
+HvInvoiceOutdated = Vorschreibung %s enthält andere Sätze als aktuell (%s) – Erläuterung würde nicht zur Rechnung passen. Bitte Vorschreibung korrigieren (Gutschrift + neue Vorschreibung).
+HvDiffLine = %s %s statt %s €/m²

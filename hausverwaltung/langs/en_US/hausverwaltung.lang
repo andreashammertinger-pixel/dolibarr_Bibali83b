@@ -486,3 +486,5 @@ HvMlOwnLangOnlyHelp = (no additional Croatian version – applies to uploaded do
 HvEventMailing = Circular #%s sent: %s
 HvEventStatement = Statement %s sent (%s)
 HvEventFiles = Attachments (copy filed under the apartment's linked files)
+HvInvoiceOutdated = Levy notice %s contains different rates than current (%s) – the explanation would not match the invoice. Please correct the levy notice (credit note + new levy notice).
+HvDiffLine = %s %s instead of %s €/m²

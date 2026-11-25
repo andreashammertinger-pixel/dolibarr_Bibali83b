@@ -236,7 +236,13 @@ class HvMailer
 		$withInfo = false;
 		if (self::infoEnabled() && !preg_match('/-A$/', (string) ($f->array_options['options_hv_period'] ?? ''))) {
 			dol_include_once('/hausverwaltung/class/hvinfopdf.class.php');
-			$withInfo = (bool) (new HvInfoPdf($this->db))->generateForInvoice($f);
+			$ip = new HvInfoPdf($this->db);
+			$withInfo = (bool) $ip->generateForInvoice($f);
+			if (!$withInfo && $ip->error !== '' && strpos($ip->error, $f->ref) !== false) {
+				// Vorschreibung enthält andere Sätze als die Erläuterung zeigen würde -> nicht widersprüchlich versenden
+				$this->error = $ip->error;
+				return -6;
+			}
 			$files = $this->files($f);
 		}
 		$lang = !empty($f->thirdparty->default_lang) ? $f->thirdparty->default_lang : getDolGlobalString('HAUSVERWALTUNG_ORIGINAL_LANG', 'hr_HR');

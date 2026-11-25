@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.18.2
+- **Prüfung Vorschreibung ↔ aktuelle Sätze** vor jedem Versand (einzeln und im Rundschreiben): weicht eine Position ab (z. B. Rücklage 0,80 statt 0,49 €/m²), wird nicht versendet, keine Erläuterung erzeugt und eine bereits erzeugte, widersprüchliche Erläuterung entfernt – die Meldung nennt die Abweichung
+- Rücklagen-Plan (PDF): Planpositionen immer auf neuer Seite, dicke Trennlinie nach Haus 1, 2 und 3 in der Prognose, Kopfzeile der Planpositionen auf Folgeseiten, Zeilen werden nicht getrennt, einheitliche Fußzeile
+
 ## 1.18.1
 - **Ereignis beim Apartment** (Ereignisse/Agenda) für jedes versendete Rundschreiben und Abrechnungsblatt: Empfänger, Betreff, Text in der Sprache des Eigentümers, Liste der Anhänge (Kopien unter „Verknüpfte Dokumente“)
 - Vorschreibungen: Ereignis wird auch angelegt, wenn die Agenda-Automatik „Rechnung per E-Mail gesendet“ ausgeschaltet ist

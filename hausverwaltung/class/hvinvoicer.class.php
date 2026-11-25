@@ -262,6 +262,76 @@ class HvInvoicer
 	}
 
 	/**
+	 * Stimmt eine Vorschreibung noch mit den aktuellen Sätzen überein?
+	 * Vergleicht je Position (Betriebskosten, Rücklage, Verwaltung) den Monatsbetrag der Rechnung mit dem heute berechneten.
+	 * Guthaben-Zeilen u. ä. ohne diese Produkte werden ignoriert.
+	 *
+	 * @return array<int,array{label:string,inv:float,cur:float}> Abweichungen (leer = passt)
+	 */
+	public function compareWithCurrent(Facture $f)
+	{
+		require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+		dol_include_once('/hausverwaltung/class/hvcalculator.class.php');
+		$f->fetch_optionals();
+		$unitId = (int) ($f->array_options['options_hv_unit'] ?? 0);
+		$period = (string) ($f->array_options['options_hv_period'] ?? '');
+		$periodTo = (string) ($f->array_options['options_hv_period_to'] ?? '') ?: $period;
+		$calc = new HvCalculator($this->db);
+		$rows = $calc->compute();
+		if ($unitId <= 0 || empty($rows[$unitId]) || !preg_match('/^\d{4}-\d{2}$/', $period)) {
+			return array();
+		}
+		$r = $rows[$unitId];
+		$area = (float) $r['area'];
+		$multi = self::months($period, $periodTo) > 1;
+		$building = $calc->buildings[(int) $r['unit']->fk_building] ?? null;
+		$pBk = new Product($this->db);
+		$pBk->fetch(0, self::REF_BK);
+		$pAd = new Product($this->db);
+		$pAd->fetch(0, self::REF_ADMIN);
+		$map = array();
+		if ($pBk->id > 0) {
+			$map[(int) $pBk->id] = array('HvBk', (float) $r['bk_rate']);
+		}
+		if ($building && (int) $building->fk_product_reserve > 0) {
+			$map[(int) $building->fk_product_reserve] = array('HvReserve', (float) $r['reserve_rate']);
+		}
+		if ($pAd->id > 0) {
+			$map[(int) $pAd->id] = array('HvAdmin', (float) $r['admin_rate']);
+		}
+		$seen = array();
+		$out = array();
+		foreach ($f->lines as $l) {
+			$pid = (int) $l->fk_product;
+			if (!isset($map[$pid]) || (float) $l->subprice < 0) {
+				continue;
+			}
+			$seen[$pid] = true;
+			$monthInv = $multi ? (float) $l->subprice : (float) $l->subprice * (float) $l->qty;
+			$monthCur = round($map[$pid][1] * $area, 2);
+			if (abs($monthInv - $monthCur) > 0.011) {
+				$out[] = array('label' => $map[$pid][0], 'inv' => $area > 0 ? $monthInv / $area : 0, 'cur' => $map[$pid][1]);
+			}
+		}
+		foreach ($map as $pid => $m) {
+			if (!isset($seen[$pid]) && round($m[1] * $area, 2) != 0.0) {
+				$out[] = array('label' => $m[0], 'inv' => 0.0, 'cur' => $m[1]);
+			}
+		}
+		return $out;
+	}
+
+	/** Abweichungen als kurzer Text, z. B. „Rücklage 0,80 statt 0,49 €/m²“ */
+	public static function diffText(array $diffs, Translate $T)
+	{
+		$p = array();
+		foreach ($diffs as $d) {
+			$p[] = $T->transnoentities('HvDiffLine', $T->transnoentities($d['label']), price($d['inv'], 0, $T, 1, 2, 2), price($d['cur'], 0, $T, 1, 2, 2));
+		}
+		return implode('; ', $p);
+	}
+
+	/**
 	 * Positionen einer Vorschreibung: [fk_product, Text, Satz €/m² und Monat]
 	 */
 	public function lineDefs($r, $building, $fkReserveProduct, $fkBk, $fkAdmin, Translate $outlangs, $mlabel)

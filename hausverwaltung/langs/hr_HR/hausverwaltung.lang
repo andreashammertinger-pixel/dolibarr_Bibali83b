@@ -486,3 +486,5 @@ HvMlOwnLangOnlyHelp = (bez dodatne hrvatske verzije – vrijedi za prenesene dok
 HvEventMailing = Okružnica #%s poslana: %s
 HvEventStatement = Obračunski list %s poslan (%s)
 HvEventFiles = Prilozi (kopija kod apartmana pod „Povezane datoteke“)
+HvInvoiceOutdated = Zaduženje %s sadrži druge stope od trenutnih (%s) – objašnjenje ne bi odgovaralo računu. Molimo ispravite zaduženje (odobrenje + novo zaduženje).
+HvDiffLine = %s %s umjesto %s €/m²

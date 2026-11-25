@@ -45,6 +45,15 @@ class HvInfoPdf extends HvStatementPdf
 			return array();
 		}
 		$periodTo = (string) ($f->array_options['options_hv_period_to'] ?? '') ?: $period;
+		// Die Erläuterung rechnet mit den aktuellen Sätzen – nur erzeugen, wenn die Vorschreibung genau diese Sätze enthält
+		$diffs = (new HvInvoicer($this->db))->compareWithCurrent($f);
+		if ($diffs) {
+			foreach (self::infoFiles($f) as $old) {
+				dol_delete_file($old, 0, 0, 0, null, false, 0); // möglicherweise widersprüchliche Erläuterung entfernen
+			}
+			$this->error = $GLOBALS['langs']->transnoentities('HvInvoiceOutdated', $f->ref, HvInvoicer::diffText($diffs, $GLOBALS['langs']));
+			return array();
+		}
 		$calc = new HvCalculator($this->db);
 		$rows = $calc->compute();
 		if (empty($rows[$unitId])) {

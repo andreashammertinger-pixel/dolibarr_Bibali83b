@@ -342,13 +342,20 @@ class HvMailing
 				if ($f->generateDocument($f->model_pdf ?: 'hausverwaltung', $ol) <= 0) {
 					dol_syslog('HvMailing: invoice pdf '.$f->ref.' '.$f->error, LOG_WARNING);
 				}
+				$ip = null;
 				if (HvMailer::infoEnabled()) {
 					dol_include_once('/hausverwaltung/class/hvinfopdf.class.php');
-					(new HvInfoPdf($this->db))->generateForInvoice($f);
+					$ip = new HvInfoPdf($this->db);
+					$ip->generateForInvoice($f);
 				}
+				$diffs = (new HvInvoicer($this->db))->compareWithCurrent($f);
 				$files = (new HvMailer($this->db))->files($f);
 				$res = $files ?: false;
-				if (!$files) {
+				if ($diffs) {
+					// Vorschreibung beruht auf anderen Sätzen als aktuell -> dieses Apartment nicht versenden
+					$this->error = $u['unit']->ref.': '.$GLOBALS['langs']->transnoentities('HvInvoiceOutdated', $f->ref, HvInvoicer::diffText($diffs, $GLOBALS['langs']));
+					$res = false;
+				} elseif (!$files) {
 					$this->error = $f->ref.': PDF';
 				}
 			}

@@ -59,4 +59,7 @@ Jede Mail enthält:
 - **Rückläufer** (falsche Adresse) kommen an die Absenderadresse – Postfach prüfen.
 - Alle versendeten Dateien liegen zusätzlich beim **Apartment → Verknüpfte Dokumente**, mit Versanddatum vorne im Dateinamen (z. B. `2026-11-18_IN2611-0001.pdf`). Der Testversand legt nichts ab.
 - Die Eigentümer sehen Vorschreibung und Erläuterung auch in ihrem [Zugang](eigentuemer-zugang.md).
+
+!!! warning "Sätze geändert? Vorschreibung und Erläuterung müssen zusammenpassen"
+    Die Erläuterung rechnet mit den **aktuellen** Sätzen (Kostenplan, Rücklagen-Satz je Haus, Verwaltung). Eine freigegebene Vorschreibung behält dagegen die Beträge vom Ausstellungstag. Vor jedem Versand (einzeln und im Rundschreiben) vergleicht das Modul deshalb jede Position der Vorschreibung mit den aktuellen Sätzen. Weicht etwas ab, wird **nicht** versendet und keine Erläuterung erzeugt; die Meldung nennt die Abweichung, z. B. *Rücklage 0,80 statt 0,49 €/m²*. Dann die Vorschreibung korrigieren (Gutschrift und neue Vorschreibung) – oder, wenn bewusst eine ältere Vorschreibung erneut verschickt werden soll, in den Einstellungen die Erläuterung vorübergehend ausschalten.
 - Zahlungen siehe [Zahlungen](zahlungen.md).
