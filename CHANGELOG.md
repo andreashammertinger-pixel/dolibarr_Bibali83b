@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.17.0
+- **Einheitlicher KI-Hinweis** auf allen Dokumenten und E-Mails, in jeder Sprache gleich (auch Kroatisch): „Mittels KI in die jeweilige Sprache übersetzt – bei Unklarheiten bitte rückfragen.“ Keine Unterscheidung nach Ausgangssprache mehr; Einstellung „Ausgangssprache“ entfällt (Hinweis weiterhin ein/aus)
+- **Rundschreiben: Dokumente der Hausverwaltung anhängen** – Rücklagen-Plan (neues PDF), Abrechnungsblatt eines Jahres und Vorschreibung eines Monats mit Erläuterung; werden beim Versand je Apartment neu erzeugt (kroatisches Original + Sprache des Eigentümers). Fehlt ein Dokument, wird das Apartment nicht versendet (Fehler im Protokoll)
+- **Testversand ist Pflicht**: Senden erst nach erfolgreichem Testversand; jede Änderung verlangt einen neuen Test. Der Test enthält die Dokumente eines Beispiel-Apartments je Sprache
+- Neue Spalte `date_test` (Modul einmal deaktivieren/aktivieren)
+
 ## 1.16.1
 - Kein Hinweis mehr „maßgeblich ist das kroatische Original“: Kasten „KOPIE – Übersetzung“ auf Vorschreibung, Abrechnungsblatt, Erläuterung und Druckansicht entfernt, Satz in den E-Mails entfernt
 - Stattdessen nur noch klein in der Fußzeile: „Hausverwaltung <Version> · <Zeitpunkt>“ und bei übersetzten Fassungen „KI-Übersetzung aus: <Ausgangssprache>“ (in der Sprache des Dokuments)

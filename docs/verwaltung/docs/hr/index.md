@@ -7,7 +7,7 @@ Ovaj priručnik objašnjava rad s Dolibarr modulom **Hausverwaltung (upravljanje
 
 ## Načelo u jednoj rečenici
 
-**Zajednica suvlasnika** (npr. *Zgrada Bibali 83B*) svakom apartmanu mjesečno zadužuje **zajedničke troškove**, **pričuvu** i **upravljanje** – izračunato prema stambenoj površini (m²). Svi dokumenti postoje na **hrvatskom** i na **jeziku vlasnika** – prijevodi pomoću AI s izvornog jezika (uglavnom njemačkog).
+**Zajednica suvlasnika** (npr. *Zgrada Bibali 83B*) svakom apartmanu mjesečno zadužuje **zajedničke troškove**, **pričuvu** i **upravljanje** – izračunato prema stambenoj površini (m²). Svi dokumenti postoje na **hrvatskom** i na **jeziku vlasnika** – prijevodi pomoću AI.
 
 ## Godišnji tijek
 

@@ -4,7 +4,7 @@
     Costs relating to one house only (insurance, garden, stairwell) are borne by that house. The reserve also depends on the needs of each building. See [Understanding the service charge](zaduzenje.md).
 
 ??? question "Which document is valid – the Croatian one or the one in my language?"
-    The texts are written in a source language (usually German) and translated into Croatian and your language using AI. Small print at the bottom of every document states the source language. If anything is unclear, please ask us.
+    The texts are translated into Croatian and your language using AI. Small print at the bottom of every document and e-mail says: *“Translated into the respective language using AI – please ask if anything is unclear.”* If anything is unclear, please ask us.
 
 ??? question "I did not receive the e-mail."
     All service charges are also available online: [My invoices and documents](racuni.md). Please check your spam folder and tell us if your e-mail address has changed.
@@ -16,7 +16,7 @@
     Please let us know – we will update them so that documents are issued correctly.
 
 ??? question "I received a circular in my language – which version is valid?"
-    Circulars and documents are written in a source language and translated for you using AI; this is stated in small print at the end of every e-mail and document. With attachments you also receive the original.
+    Circulars and documents are translated for you using AI; this is stated in small print at the end of every e-mail and document. With attachments you also receive the Croatian version.
 
 ## Contact property manager
 

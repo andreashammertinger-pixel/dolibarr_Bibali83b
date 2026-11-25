@@ -1,6 +1,6 @@
 # Jezici i tekstovi
 
-Svi dokumenti vlasnicima (zaduženje, objašnjenje, obračun, e-pošta, plan pričuve) izrađuju se na **hrvatskom** i dodatno na **jeziku vlasnika**. Tekstovi se pišu na izvornom jeziku (uglavnom njemački) i prevode pomoću AI; to sitno piše u podnožju („AI prijevod s jezika: njemački“). Jezik se preuzima od poslovnog partnera (apartmana) → polje *Zadani jezik*.
+Svi dokumenti vlasnicima (zaduženje, objašnjenje, obračun, e-pošta, plan pričuve) izrađuju se na **hrvatskom** i dodatno na **jeziku vlasnika**. Tekstovi se prevode pomoću AI; to sitno piše u podnožju („Pomoću AI prevedeno na odgovarajući jezik – u slučaju nejasnoća molimo javite se.“). Jezik se preuzima od poslovnog partnera (apartmana) → polje *Zadani jezik*.
 
 ## Stranica Jezici
 
@@ -61,4 +61,4 @@ Ako usluga nije dostupna, tekst se ipak sprema; poruka na to upozorava.
 
 ## Napomena o podrijetlu na dokumentima
 
-Svaki dokument (zaduženje, objašnjenje, obračun, prikaz za ispis plana pričuve, prilozi prevedeni pomoću AI) i svaka poruka dolje sitno sadrži: **izrađeno modulom, verziju i vrijeme**, **izvorni jezik** i napomenu da su **verzije na drugim jezicima prevedene pomoću AI**. Izvorni jezik i napomena: *Postavke*.
+Svaki dokument (zaduženje, objašnjenje, obračun, prikaz za ispis plana pričuve, prilozi prevedeni pomoću AI) i svaka poruka dolje sitno sadrži: **Upravljanje zgradom, verziju i vrijeme** te na svakom jeziku jednako rečenicu **„Pomoću AI prevedeno na odgovarajući jezik – u slučaju nejasnoća molimo javite se.“** Uključivanje/isključivanje: *Postavke*.

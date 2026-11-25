@@ -4,7 +4,7 @@
     Kosten, die nur ein Haus betreffen (Versicherung, Garten, Stiegenhaus), trägt nur dieses Haus. Auch die Rücklage richtet sich nach dem Bedarf des jeweiligen Gebäudes. Siehe [Vorschreibung verstehen](zaduzenje.md).
 
 ??? question "Welches Dokument gilt – das kroatische oder meine Sprache?"
-    Die Texte werden in einer Ausgangssprache (meist Deutsch) verfasst und mittels KI ins Kroatische und in Ihre Sprache übersetzt. Unten auf jedem Dokument steht klein, aus welcher Sprache übersetzt wurde. Ist Ihnen etwas unklar, fragen Sie uns bitte.
+    Die Texte werden mittels KI ins Kroatische und in Ihre Sprache übersetzt. Unten auf jedem Dokument und jeder E-Mail steht klein: *„Mittels KI in die jeweilige Sprache übersetzt – bei Unklarheiten bitte rückfragen.“* Ist Ihnen etwas unklar, fragen Sie uns bitte.
 
 ??? question "Ich habe die E-Mail nicht bekommen."
     Alle Vorschreibungen finden Sie auch online: [Meine Rechnungen und Dokumente](racuni.md). Bitte prüfen Sie den Spam-Ordner und teilen Sie uns eine geänderte E-Mail-Adresse mit.
@@ -16,7 +16,7 @@
     Bitte schreiben Sie uns – wir ändern die Daten, damit Dokumente richtig ausgestellt werden.
 
 ??? question "Ich habe ein Rundschreiben in meiner Sprache bekommen – welche Fassung gilt?"
-    Rundschreiben und Dokumente werden in einer Ausgangssprache verfasst und für Sie mittels KI übersetzt; das steht klein am Ende jeder E-Mail und jedes Dokuments. Bei Anhängen erhalten Sie zusätzlich das Original.
+    Rundschreiben und Dokumente werden für Sie mittels KI übersetzt; das steht klein am Ende jeder E-Mail und jedes Dokuments. Bei Anhängen erhalten Sie zusätzlich die kroatische Fassung.
 
 ## Kontakt Hausverwaltung
 

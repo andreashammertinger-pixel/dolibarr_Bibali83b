@@ -31,6 +31,15 @@ class HvMailing
 	public $status = 'draft';
 	public $datec;
 	public $date_sent;
+	public $date_test;
+	/** Fehler beim Erzeugen von Modul-Dokumenten im letzten filesFor() */
+	public $genError = '';
+
+	/** @var array Modul-Dokumente, die während eines Versandlaufs bereits erzeugt wurden */
+	protected $genCache = array();
+
+	/** Arten von Modul-Dokumenten (werden beim Versand neu erzeugt) */
+	const GEN_KINDS = array('plan', 'statement', 'invoice');
 
 	public function __construct($db)
 	{
@@ -66,6 +75,7 @@ class HvMailing
 		$this->status = (string) $o->status;
 		$this->datec = $this->db->jdate($o->datec);
 		$this->date_sent = $this->db->jdate($o->date_sent);
+		$this->date_test = isset($o->date_test) ? $this->db->jdate($o->date_test) : null;
 		return 1;
 	}
 
@@ -81,12 +91,19 @@ class HvMailing
 		return $this->fetch($this->db->last_insert_id($this->db->prefix().'hv_mailing'));
 	}
 
-	public function update()
+	/**
+	 * Speichern. $changed = true: Inhalt/Empfänger geändert -> der letzte Testversand gilt nicht mehr.
+	 */
+	public function update($changed = false)
 	{
+		if ($changed) {
+			$this->date_test = null;
+		}
 		$sql = "UPDATE ".$this->db->prefix()."hv_mailing SET subject = '".$this->db->escape($this->subject)."', body = '".$this->db->escape($this->body)."', srclang = '".$this->db->escape($this->srclang)."'";
 		$sql .= ", i18n = ".($this->i18n ? "'".$this->db->escape(json_encode($this->i18n, JSON_UNESCAPED_UNICODE))."'" : 'NULL');
 		$sql .= ", docs = ".($this->docs ? "'".$this->db->escape(json_encode(array_values($this->docs), JSON_UNESCAPED_UNICODE))."'" : 'NULL');
 		$sql .= ", recipients = '".$this->db->escape(json_encode(array_values(array_unique(array_map('intval', $this->recipients)))))."'";
+		$sql .= ", date_test = ".($this->date_test ? "'".$this->db->idate($this->date_test)."'" : 'NULL');
 		$sql .= ", status = '".$this->db->escape($this->status)."'".($this->status === 'sent' ? ", date_sent = '".$this->db->idate($this->date_sent ?: dol_now())."'" : '');
 		$sql .= " WHERE rowid = ".((int) $this->id);
 		return $this->db->query($sql) ? 1 : -1;
@@ -186,6 +203,145 @@ class HvMailing
 		$id = 'd'.substr(md5(uniqid('', true)), 0, 8);
 		$this->docs[$id] = array('id' => $id, 'title' => (string) $title, 'versions' => array(), 'ai' => array());
 		return $id;
+	}
+
+	/** Modul-Dokument hinzufügen (Rücklagen-Plan, Abrechnungsblatt Jahr, Vorschreibung Periode) */
+	public function addGenDoc($kind, $param)
+	{
+		$this->docIndex();
+		if (!in_array($kind, self::GEN_KINDS, true)) {
+			return -1;
+		}
+		if ($kind === 'statement') {
+			$param = (string) (int) $param;
+			if ((int) $param < 2000 || (int) $param > 2100) {
+				$this->error = 'Jahr';
+				return -1;
+			}
+		} elseif ($kind === 'invoice') {
+			$param = (string) $param;
+			if (!preg_match('/^\d{4}-\d{2}$/', $param)) {
+				$this->error = 'Periode';
+				return -1;
+			}
+		} else {
+			$param = '';
+		}
+		foreach ($this->docs as $d) {
+			if (($d['gen'] ?? '') === $kind && (string) ($d['param'] ?? '') === $param) {
+				return 0; // schon vorhanden
+			}
+		}
+		$id = 'g'.substr(md5(uniqid('', true)), 0, 8);
+		$this->docs[$id] = array('id' => $id, 'title' => '', 'gen' => $kind, 'param' => $param, 'versions' => array(), 'ai' => array());
+		return 1;
+	}
+
+	public function removeDoc($docId)
+	{
+		$this->docIndex();
+		if (isset($this->docs[$docId]) && !empty($this->docs[$docId]['gen'])) {
+			unset($this->docs[$docId]);
+		}
+	}
+
+	/** Bezeichnung eines Modul-Dokuments */
+	public static function genTitle(array $d, $T)
+	{
+		$k = (string) ($d['gen'] ?? '');
+		if ($k === 'statement') {
+			return $T->trans('HvMlGenStatement', $d['param']);
+		}
+		if ($k === 'invoice') {
+			return $T->trans('HvMlGenInvoice', $d['param']);
+		}
+		return $T->trans('HvMlGenPlan');
+	}
+
+	/** Perioden, für die Vorschreibungen existieren (neueste zuerst) */
+	public static function invoicePeriods($db)
+	{
+		global $conf;
+		$out = array();
+		$res = $db->query("SELECT DISTINCT ef.hv_period FROM ".$db->prefix()."facture f INNER JOIN ".$db->prefix()."facture_extrafields ef ON ef.fk_object = f.rowid WHERE f.entity = ".((int) $conf->entity)." AND f.fk_statut > 0 AND f.type = 0 AND ef.hv_period IS NOT NULL AND ef.hv_period <> '' ORDER BY ef.hv_period DESC");
+		while ($res && ($o = $db->fetch_object($res))) {
+			$out[] = (string) $o->hv_period;
+		}
+		return $out;
+	}
+
+	/**
+	 * Modul-Dokument für ein Apartment und eine Sprache neu erzeugen (einmal je Versandlauf).
+	 *
+	 * @return string[]|false Dateien (Original + Fassung in der Sprache des Eigentümers) oder false ($this->error)
+	 */
+	protected function genFiles(array $d, $lang, $sid, array $u)
+	{
+		global $conf;
+		$orig = getDolGlobalString('HAUSVERWALTUNG_ORIGINAL_LANG', 'hr_HR');
+		$kind = (string) $d['gen'];
+		if ($kind === 'plan') {
+			dol_include_once('/hausverwaltung/class/hvplanpdf.class.php');
+			$out = array();
+			foreach (array_unique(array($orig, $lang)) as $l) {
+				if ($l !== $orig && substr($l, 0, 2) === substr($orig, 0, 2)) {
+					continue;
+				}
+				if (!isset($this->genCache['plan'][$l])) {
+					dol_mkdir($this->dir().'/gen');
+					$f = $this->dir().'/gen/'.'Plan_pricuve_'.$l.'.pdf';
+					$this->genCache['plan'][$l] = (new HvPlanPdf($this->db))->write($l, $f) ? $f : '';
+				}
+				if ($this->genCache['plan'][$l] !== '') {
+					$out[] = $this->genCache['plan'][$l];
+				}
+			}
+			return $out;
+		}
+		$key = $kind.'|'.$d['param'].'|'.$sid;
+		if (isset($this->genCache[$key])) {
+			return $this->genCache[$key];
+		}
+		$unitId = (int) ($u['unit']->rowid ?? 0);
+		$res = false;
+		if ($kind === 'statement') {
+			dol_include_once('/hausverwaltung/class/hvsettlement.class.php');
+			dol_include_once('/hausverwaltung/class/hvstatementpdf.class.php');
+			dol_include_once('/hausverwaltung/core/modules/facture/doc/pdf_hausverwaltung.modules.php');
+			$g = new HvStatementPdf($this->db);
+			$files = $g->generate((int) $d['param'], $unitId);
+			$res = $files ?: false;
+			if (!$files) {
+				$this->error = $u['unit']->ref.': '.$GLOBALS['langs']->transnoentities('HvMlGenMissing', self::genTitle($d, $GLOBALS['langs']));
+			}
+		} elseif ($kind === 'invoice') {
+			require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+			$q = $this->db->query("SELECT f.rowid FROM ".$this->db->prefix()."facture f INNER JOIN ".$this->db->prefix()."facture_extrafields ef ON ef.fk_object = f.rowid WHERE f.entity = ".((int) $conf->entity)." AND f.fk_soc = ".((int) $sid)." AND f.fk_statut > 0 AND f.type = 0 AND ef.hv_period = '".$this->db->escape($d['param'])."' ORDER BY f.rowid DESC");
+			$o = $q ? $this->db->fetch_object($q) : null;
+			$f = new Facture($this->db);
+			if (!$o || $f->fetch((int) $o->rowid) <= 0) {
+				$this->error = $u['unit']->ref.': '.$GLOBALS['langs']->transnoentities('HvMlGenMissing', self::genTitle($d, $GLOBALS['langs']));
+			} else {
+				$ol = new Translate('', $conf);
+				$ol->setDefaultLang($orig);
+				$ol->loadLangs(array('main', 'bills', 'hausverwaltung@hausverwaltung'));
+				$f->fetch_thirdparty();
+				if ($f->generateDocument($f->model_pdf ?: 'hausverwaltung', $ol) <= 0) {
+					dol_syslog('HvMailing: invoice pdf '.$f->ref.' '.$f->error, LOG_WARNING);
+				}
+				if (HvMailer::infoEnabled()) {
+					dol_include_once('/hausverwaltung/class/hvinfopdf.class.php');
+					(new HvInfoPdf($this->db))->generateForInvoice($f);
+				}
+				$files = (new HvMailer($this->db))->files($f);
+				$res = $files ?: false;
+				if (!$files) {
+					$this->error = $f->ref.': PDF';
+				}
+			}
+		}
+		$this->genCache[$key] = $res;
+		return $res;
 	}
 
 	public function docIndex()
@@ -318,8 +474,8 @@ class HvMailing
 		$n = 0;
 		$errs = array();
 		foreach ($this->docs as $id => $d) {
-			if (!empty($d['versions']['all'])) {
-				continue; // sprachneutral
+			if (!empty($d['versions']['all']) || !empty($d['gen'])) {
+				continue; // sprachneutral bzw. Modul-Dokument (wird je Sprache erzeugt)
 			}
 			list($sl, $sf) = $this->docSource($d);
 			if ($sf === '' || strtolower(pathinfo($sf, PATHINFO_EXTENSION)) !== 'pdf') {
@@ -364,12 +520,6 @@ class HvMailing
 		$pdf->SetFont(getDolGlobalString('HAUSVERWALTUNG_PDF_FONT', 'dejavusans'), '', 10);
 		$pdf->SetTitle($r['title']);
 		$pdf->AddPage();
-		$srcName = $T->transnoentities('Language_'.$src);
-		$pdf->SetTextColor(110, 110, 110);
-		$pdf->SetFont('', '', 7);
-		$pdf->MultiCell(0, 3.5, $T->transnoentities('HvMlAiDocBanner', $srcName !== 'Language_'.$src ? $srcName : $src, $origName), 0, 'L');
-		$pdf->SetTextColor(0, 0, 0);
-		$pdf->Ln(2);
 		$pdf->SetFont('', '', 10);
 		$pdf->writeHTML('<style>h1{font-size:15pt}h2{font-size:13pt}h3{font-size:11pt}td,th{border:0.3px solid #999}</style>'.$r['html'], true, false, true, false, '');
 		$pdf->Ln(4);
@@ -386,11 +536,24 @@ class HvMailing
 	 * Anhänge für eine Sprache: sprachneutrale Dateien; sonst kroatisches Original (bzw. Ausgangsfassung)
 	 * und zusätzlich die Fassung in der Sprache des Eigentümers (hochgeladen oder KI-Übersetzung).
 	 */
-	public function filesFor($lang)
+	public function filesFor($lang, $sid = 0, array $u = null)
 	{
 		$orig = getDolGlobalString('HAUSVERWALTUNG_ORIGINAL_LANG', 'hr_HR');
 		$out = array();
+		$gen = array();
+		$this->genError = '';
 		foreach ($this->docs as $d) {
+			if (!empty($d['gen'])) {
+				if ($sid > 0 && $u) {
+					$g = $this->genFiles($d, $lang, $sid, $u);
+					if ($g === false) {
+						$this->genError .= ($this->genError ? '; ' : '').$this->error;
+					} else {
+						$gen = array_merge($gen, $g);
+					}
+				}
+				continue;
+			}
 			if (!empty($d['versions']['all'])) {
 				$out[] = $d['versions']['all'];
 				continue;
@@ -405,9 +568,9 @@ class HvMailing
 			}
 		}
 		$dir = $this->dir();
-		return array_values(array_filter(array_map(function ($f) use ($dir) {
+		return array_values(array_filter(array_merge(array_map(function ($f) use ($dir) {
 			return $dir.'/'.$f;
-		}, array_unique($out)), 'is_readable'));
+		}, array_unique($out)), $gen), 'is_readable'));
 	}
 
 	/* ---------------- Versand ---------------- */
@@ -460,6 +623,10 @@ class HvMailing
 			$out['errors'][] = 'Absenderadresse fehlt';
 			return $out;
 		}
+		if ($testto === '' && !$this->date_test) {
+			$out['errors'][] = $GLOBALS['langs']->transnoentities('HvMlTestFirst');
+			return $out;
+		}
 		// fehlende Übersetzungen (Text und PDF) vor dem Versand ergänzen
 		$langsList = $this->recipientLangs();
 		if (HvTranslator::enabled()) {
@@ -475,24 +642,35 @@ class HvMailing
 			$this->translateDocs($langsList);
 			$this->update();
 		}
+		$this->genCache = array();
 		if ($testto !== '') {
 			foreach ($langsList as $l) {
 				$sample = null;
+				$sampleSid = 0;
 				foreach ($this->recipients as $sid) {
 					if (isset($units[$sid]) && $units[$sid]['lang'] === $l) {
 						$sample = $units[$sid];
+						$sampleSid = (int) $sid;
 						break;
 					}
 				}
 				$m = $this->buildMail($l, $sample);
-				$files = $this->filesFor($l);
-				$mail = new CMailFile('[TEST '.$l.'] '.$m['subject'], $testto, $from, '['.implode(', ', array_column((array) ($sample['rcpt'] ?? array()), 'email')).']'."\n\n".$m['body'], $files, array_map('dol_mimetype', $files), array_map('basename', $files), '', '', 0, 0, '', '', 'hvml'.$this->id, '', 'standard', $m['replyto']);
+				$files = $this->filesFor($l, $sampleSid, $sample);
+				if ($this->genError !== '') {
+					$out['errors'][] = $l.': '.$this->genError;
+				}
+				$info = '[TEST '.$l.' – '.($sample ? $sample['unit']->ref.' '.$sample['socname'] : '').': '.implode(', ', array_column((array) ($sample['rcpt'] ?? array()), 'email')).']';
+				$mail = new CMailFile('[TEST '.$l.'] '.$m['subject'], $testto, $from, $info."\n\n".$m['body'], $files, array_map('dol_mimetype', $files), array_map('basename', $files), '', '', 0, 0, '', '', 'hvml'.$this->id, '', 'standard', $m['replyto']);
 				if (!empty($mail->error) || !$mail->sendfile()) {
 					$out['err']++;
 					$out['errors'][] = $l.': '.($mail->error ?: 'Versand fehlgeschlagen');
 				} else {
 					$out['ok']++;
 				}
+			}
+			if ($out['ok'] > 0 && $out['err'] === 0 && !$out['errors']) {
+				$this->date_test = dol_now();
+				$this->update();
 			}
 			return $out;
 		}
@@ -507,7 +685,14 @@ class HvMailing
 				continue;
 			}
 			$m = $this->buildMail($u['lang'], $u);
-			$files = $this->filesFor($u['lang']);
+			$files = $this->filesFor($u['lang'], $sid, $u);
+			if ($this->genError !== '') {
+				// Dokument der Hausverwaltung fehlt -> dieses Apartment nicht unvollständig versenden
+				$this->logRcpt($sid, '', $u['lang'], $files, 'error', $this->genError);
+				$out['err']++;
+				$out['errors'][] = $this->genError;
+				continue;
+			}
 			$to = array();
 			foreach ($u['rcpt'] as $r) {
 				$to[] = dol_string_nospecial($r['name'], ' ', array(',')).' <'.$r['email'].'>';

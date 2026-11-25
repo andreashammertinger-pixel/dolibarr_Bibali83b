@@ -80,13 +80,13 @@ if ($ml->id) {
 				$msg = array($langs->trans('HvAiFailed', $ml->error));
 			}
 		}
-		$ml->update();
+		$ml->update(true);
 		setEventMessages($langs->trans('HvSaved'), $msg, $msg ? 'warnings' : 'mesgs');
 		$back('text');
 	}
 	if ($action === 'translate') {
 		$r = $ml->translateText($ml->recipientLangs());
-		$ml->update();
+		$ml->update(true);
 		setEventMessages($r < 0 ? $langs->trans('HvAiFailed', $ml->error) : $langs->trans('HvMlTranslated', $r), null, $r < 0 ? 'errors' : 'mesgs');
 		$back('trans');
 	}
@@ -104,7 +104,7 @@ if ($ml->id) {
 				$ml->i18n[$l] = array('subject' => $sub, 'body' => $bod, 'ai' => (($was['body'] ?? '') === $bod && ($was['subject'] ?? '') === $sub) ? (int) ($was['ai'] ?? 0) : 0);
 			}
 		}
-		$ml->update();
+		$ml->update(true);
 		setEventMessages($langs->trans('HvSaved'), null);
 		$back('trans');
 	}
@@ -112,7 +112,7 @@ if ($ml->id) {
 		$l = (string) GETPOST('lang', 'alpha');
 		if ($isLang($l) && !empty($_FILES['file']['name'])) {
 			if ($ml->addUpload((string) GETPOST('doc', 'aZ09'), $l, $_FILES['file']) > 0) {
-				$ml->update();
+				$ml->update(true);
 				setEventMessages($langs->trans('HvSaved'), null);
 			} else {
 				setEventMessages($ml->error, null, 'errors');
@@ -123,7 +123,7 @@ if ($ml->id) {
 	if ($action === 'fromdol') {
 		$l = (string) GETPOST('lang', 'alpha');
 		if ($isLang($l) && $ml->addFromDolibarr((string) GETPOST('doc', 'aZ09'), $l, (string) GETPOST('ecmfile', 'restricthtml')) > 0) {
-			$ml->update();
+			$ml->update(true);
 			setEventMessages($langs->trans('HvSaved'), null);
 		} else {
 			setEventMessages($ml->error ?: 'Error', null, 'errors');
@@ -132,18 +132,33 @@ if ($ml->id) {
 	}
 	if ($action === 'rmver') {
 		$ml->removeVersion((string) GETPOST('doc', 'aZ09'), (string) GETPOST('lang', 'alpha'), GETPOSTINT('ai') ? true : false);
-		$ml->update();
+		$ml->update(true);
+		$back('docs');
+	}
+	if ($action === 'addgen') {
+		$r = $ml->addGenDoc((string) GETPOST('gen', 'aZ09'), (string) GETPOST('gen_'.GETPOST('gen', 'aZ09'), 'alphanohtml'));
+		if ($r > 0) {
+			$ml->update(true);
+			setEventMessages($langs->trans('HvSaved'), null);
+		} elseif ($r < 0) {
+			setEventMessages($langs->trans('ErrorBadValueForParameter', $ml->error, 'gen'), null, 'errors');
+		}
+		$back('docs');
+	}
+	if ($action === 'rmdoc') {
+		$ml->removeDoc((string) GETPOST('doc', 'aZ09'));
+		$ml->update(true);
 		$back('docs');
 	}
 	if ($action === 'aidocs') {
 		$n = $ml->translateDocs($ml->recipientLangs());
-		$ml->update();
+		$ml->update(true);
 		setEventMessages($langs->trans('HvMlDocsTranslated', $n), $ml->error ? array($langs->trans('HvAiFailed', $ml->error)) : null, $ml->error ? 'warnings' : 'mesgs');
 		$back('docs');
 	}
 	if ($action === 'saverec') {
 		$ml->recipients = array_map('intval', (array) GETPOST('rec', 'array'));
-		$ml->update();
+		$ml->update(true);
 		setEventMessages($langs->trans('HvSaved'), null);
 		$back('rec');
 	}
@@ -249,6 +264,9 @@ $langOpts = function ($withAll = true) {
 };
 $docOpts = '<option value="">'.$langs->trans('HvMlNewDoc').'</option>';
 foreach ($ml->docs as $d) {
+	if (!empty($d['gen'])) {
+		continue;
+	}
 	$docOpts .= '<option value="'.$d['id'].'">'.dol_escape_htmltag($d['title']).'</option>';
 }
 print '<table class="noborder centpercent"><tr class="liste_titre"><th>'.$langs->trans('HvMlDoc').'</th><th>'.$langs->trans('HvMlVersions').'</th></tr>';
@@ -256,6 +274,11 @@ if (!$ml->docs) {
 	print '<tr><td colspan="2" class="opacitymedium">'.$langs->trans('None').'</td></tr>';
 }
 foreach ($ml->docs as $d) {
+	if (!empty($d['gen'])) {
+		print '<tr class="oddeven"><td>'.img_picto('', 'pdf', 'class="pictofixedwidth"').'<strong>'.dol_escape_htmltag(HvMailing::genTitle($d, $langs)).'</strong> <span class="badge badge-status1">'.$langs->trans('HvMlGenBadge').'</span></td>';
+		print '<td class="small"><span class="opacitymedium">'.$langs->trans('HvMlGenInfo').'</span> <a href="'.$self.'?id='.$ml->id.'&action=rmdoc&token='.newToken().'&doc='.$d['id'].'">'.img_delete().'</a></td></tr>';
+		continue;
+	}
 	print '<tr class="oddeven"><td><strong>'.dol_escape_htmltag($d['title']).'</strong></td><td>';
 	foreach (array('versions' => 0, 'ai' => 1) as $k => $isAi) {
 		foreach ((array) $d[$k] as $l => $f) {
@@ -265,6 +288,21 @@ foreach ($ml->docs as $d) {
 	print '</td></tr>';
 }
 print '</table>';
+// Dokumente der Hausverwaltung – werden beim Versand je Apartment und Sprache neu erzeugt
+$periods = HvMailing::invoicePeriods($db);
+$yNow = (int) dol_print_date(dol_now(), '%Y');
+print '<form method="POST" action="'.$self.'?id='.$ml->id.'" class="paddingtop"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="addgen">';
+print $langs->trans('HvMlGenAdd').': <select name="gen" class="flat" id="hvgen"><option value="plan">'.$langs->trans('HvMlGenPlanOpt').'</option><option value="statement">'.$langs->trans('HvMlGenStatementOpt').'</option><option value="invoice"'.($periods ? '' : ' disabled').'>'.$langs->trans('HvMlGenInvoiceOpt').'</option></select> ';
+print '<span class="hvgenp" data-k="statement">'.$langs->trans('Year').' <select name="gen_statement" class="flat">';
+for ($y = $yNow; $y >= $yNow - 5; $y--) {
+	print '<option value="'.$y.'"'.($y === $yNow - 1 ? ' selected' : '').'>'.$y.'</option>';
+}
+print '</select></span><span class="hvgenp" data-k="invoice">'.$langs->trans('HvPeriod').' <select name="gen_invoice" class="flat">';
+foreach ($periods as $p) {
+	print '<option value="'.dol_escape_htmltag($p).'">'.dol_escape_htmltag($p).'</option>';
+}
+print '</select></span> <input type="submit" class="button small" value="'.$langs->trans('Add').'"></form>';
+print '<script>jQuery(function($){var u=function(){var k=$("#hvgen").val();$(".hvgenp").each(function(){$(this).toggle($(this).data("k")===k);});};$("#hvgen").on("change",u);u();});</script>';
 print '<form method="POST" enctype="multipart/form-data" action="'.$self.'?id='.$ml->id.'" class="paddingtop"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="upload">';
 print $langs->trans('HvMlUpload').': <input type="file" name="file"> '.$langs->trans('Language').' <select name="lang" class="flat">'.$langOpts().'</select> '.$langs->trans('HvMlDoc').' <select name="doc" class="flat">'.$docOpts.'</select> <input type="submit" class="button small" value="'.$langs->trans('Upload').'"></form>';
 $ecm = HvMailing::ecmFiles();
@@ -281,7 +319,13 @@ if (HvMailing::ecmDir() === '') {
 if ($ml->docs && $rLangs) {
 	print '<br><table class="noborder"><tr class="liste_titre"><th>'.$langs->trans('Language').'</th><th>'.$langs->trans('HvMlAttachedFor').'</th></tr>';
 	foreach ($rLangs as $l) {
-		print '<tr class="oddeven"><td>'.$l.'</td><td class="small">'.dol_escape_htmltag(implode(', ', array_map('basename', $ml->filesFor($l))) ?: '–').'</td></tr>';
+		$names = array_map('basename', $ml->filesFor($l));
+		foreach ($ml->docs as $d) {
+			if (!empty($d['gen'])) {
+				$names[] = HvMailing::genTitle($d, $langs);
+			}
+		}
+		print '<tr class="oddeven"><td>'.$l.'</td><td class="small">'.dol_escape_htmltag(implode(', ', $names) ?: '–').'</td></tr>';
 	}
 	print '</table>';
 }
@@ -312,9 +356,11 @@ print '<script>jQuery(function($){$(".hvsel").on("click",function(e){e.preventDe
 // 5. Versand
 print '<a id="send"></a>'.load_fiche_titre('5. '.$langs->trans('HvMlSend'), '', '');
 print '<div class="opacitymedium">'.$langs->trans('HvMlSendHelp').'</div>';
+$tested = (bool) $ml->date_test;
+print '<div class="'.($tested ? 'ok' : 'warning').'" style="margin:6px 0">'.($tested ? img_picto('', 'tick', 'class="pictofixedwidth"').$langs->trans('HvMlTestedAt', dol_print_date($ml->date_test, 'dayhour')) : img_warning('', '', 'pictofixedwidth').$langs->trans('HvMlTestFirst')).'</div>';
 print '<form method="POST" action="'.$self.'?id='.$ml->id.'#send"><input type="hidden" name="token" value="'.newToken().'">';
 print $langs->trans('HvMailTestTo').': <input name="testto" class="minwidth250" value="'.dol_escape_htmltag((string) $user->email).'"> <button class="button" name="action" value="sendtest">'.$langs->trans('HvMlTestBtn').'</button> ';
-print '<button class="button button-save" name="action" value="send"'.(($ml->subject === '' || $ml->body === '' || !$ml->recipients) ? ' disabled' : '').'>'.$langs->trans('HvMlSendBtn').' ('.count($ml->recipients).')</button></form>';
+print '<button class="button button-save" name="action" value="send"'.(($ml->subject === '' || $ml->body === '' || !$ml->recipients || !$tested) ? ' disabled title="'.dol_escape_htmltag($langs->trans('HvMlTestFirst')).'"' : '').'>'.$langs->trans('HvMlSendBtn').' ('.count($ml->recipients).')</button></form>';
 $log = $ml->log();
 if ($log) {
 	print '<br><table class="noborder centpercent"><tr class="liste_titre"><th>'.$langs->trans('Date').'</th><th>'.$langs->trans('HvUnit').'</th><th>'.$langs->trans('HvMailTo').'</th><th>'.$langs->trans('Language').'</th><th>'.$langs->trans('HvMailFiles').'</th><th>'.$langs->trans('Status').'</th></tr>';

@@ -11,17 +11,21 @@
     - **Datei hochladen** mit Sprache – oder *alle Sprachen* für sprachneutrale Dateien (Plan, Foto, Tabelle).
     - **Datei aus Dolibarr** (Modul *Dokumente*) übernehmen.
     - Weitere Sprachfassung zum selben Dokument: beim Hochladen das *Dokument* auswählen.
-    - **Fehlende Sprachfassungen per KI übersetzen (PDF)**: erstellt je Sprache ein PDF mit dem kleinen Hinweis „KI-Übersetzung aus: Deutsch (Datei …)“.
+    - **Fehlende Sprachfassungen per KI übersetzen (PDF)**: erstellt je Sprache ein PDF; unten steht klein „Mittels KI in die jeweilige Sprache übersetzt – bei Unklarheiten bitte rückfragen.“
+    - **Dokument der Hausverwaltung** – *Rücklagen-Plan*, *Abrechnungsblatt (je Apartment)* mit Jahr oder *Vorschreibung mit Erläuterung (je Apartment)* mit Abrechnungsmonat wählen, *Hinzufügen*. Diese Dokumente werden **beim Versand neu erzeugt** (aktueller Stand), je Apartment mit seinen eigenen Zahlen, als kroatisches Original und in der Sprache des Eigentümers. Fehlt für ein Apartment das Dokument (z. B. keine Vorschreibung für den Monat), wird dieses Apartment **nicht** versendet und im Protokoll als Fehler gezeigt.
     - Die Tabelle *wird angehängt* zeigt je Sprache, was jeder Eigentümer bekommt: das **Original** (kroatische Fassung, sonst die hochgeladene Ausgangsfassung) und die **Fassung in seiner Sprache**.
 5. **Empfänger**: alle, keine oder je Haus (H1, H2 …) auswählen, *Speichern*. Apartments ohne Eigentümer-E-Mail sind gesperrt.
 6. **Versand**:
-    - **Testversand** – je Sprache der Empfänger eine E-Mail an Ihre Adresse.
+    - **Testversand** – je Sprache der Empfänger eine E-Mail an Ihre Adresse, mit genau dem Text und den Anhängen, die ein Beispiel-Apartment dieser Sprache bekäme (oben im Test steht, welches Apartment und welche Empfänger).
     - **An ausgewählte Eigentümer senden** – je Apartment eine E-Mail an dessen Eigentümer.
+
+!!! warning "Testversand ist Pflicht"
+    *Senden* ist erst nach einem erfolgreichen Testversand möglich (grüner Hinweis *Testversand erfolgreich am …*). Jede Änderung an Text, Übersetzungen, Anhängen oder Empfängern verlangt einen neuen Testversand.
 
 Fehlende Übersetzungen werden vor dem Versand automatisch ergänzt. Das Versandprotokoll steht unten; Text und Anhänge werden beim **Apartment → Verknüpfte Dokumente** abgelegt (mit Versanddatum).
 
 !!! info "Hinweis in jeder E-Mail"
-    Unter der Grußformel steht klein: erstellt mit Hausverwaltung (Version, Zeitpunkt), Ausgangssprache und dass andere Sprachfassungen mittels KI übersetzt wurden.
+    Unter der Grußformel steht klein: Hausverwaltung (Version, Zeitpunkt) · „Mittels KI in die jeweilige Sprache übersetzt – bei Unklarheiten bitte rückfragen.“ Derselbe Satz steht in der Fußzeile aller Dokumente – in jeder Sprache gleich, auch auf Kroatisch.
 
 !!! warning "Keine personenbezogenen Daten in Anhängen zur KI-Übersetzung"
     Für die KI-Übersetzung wird das PDF an den Übersetzungsdienst übertragen. Dokumente mit Namen, OIB oder Kontodaten einzelner Eigentümer nicht per KI übersetzen.

@@ -176,5 +176,4 @@ HvRateLegalSource = Zakonski minimum po Zakon o upravljanju i održavanju zgrada
 HvRateExplain = Minimalna stopnja po načrtu = najnižja stalna stopnja, pri kateri rezervni sklad hiše v obdobju načrtovanja nikoli ni negativen (upoštevana rast gradbenih stroškov). Določene stopnje se zaokrožijo navzgor na 2 decimalki in veljajo za nove obremenitve.
 HvInfoReserveLegal = Zakonska minimalna stopnja: %s €/m².
 HvDocStamp = Upravljanje stavb %s · %s
-HvDocAiNote = Prevod z UI iz jezika: %s
-HvMlAiDocBanner = Prevod z UI iz jezika: %s (datoteka %s)
+HvDocAiNote = Z UI prevedeno v ustrezni jezik – v primeru nejasnosti nas prosim vprašajte

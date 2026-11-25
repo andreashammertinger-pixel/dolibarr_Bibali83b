@@ -17,7 +17,7 @@
 | Hilfe-Adresse | Basisadresse dieses Handbuchs |
 | KI-Übersetzung | API-Schlüssel (Anthropic, verschlüsselt gespeichert), ein/aus, *Verbindung testen* – siehe [Sprachen und Texte](sprachen.md#ki-ubersetzung) |
 | Baukostensteigerung / Planungszeitraum | für die Rücklagen-Planung |
-| Ausgangssprache / KI-Hinweis | Sprache, in der die Texte verfasst werden; Hinweis „mittels KI übersetzt“ in der Fußzeile aller Dokumente und E-Mails |
+| Hinweis zur KI-Übersetzung auf Dokumenten und E-Mails | ein/aus: „Mittels KI in die jeweilige Sprache übersetzt – bei Unklarheiten bitte rückfragen.“ in der Fußzeile aller Dokumente und E-Mails (in jeder Sprache) |
 | Gesetzliche Mindestrücklage | Prozentsatz (0,54 %) und *etalonska cijena građenja* (€/m²) – jährlich prüfen |
 
 ## Neues Objekt anlegen

@@ -116,7 +116,7 @@ function hvDocKeys()
 		'HvPlanAssumptions', 'HvPlanMonthly', 'HvPlanCurrentRate', 'HvPlanRequiredRate', 'HvPlanMinBalance', 'HvPlanOk', 'HvPlanShortfall', 'HvPlanRequiredHelp', 'HvPlanProjection',
 		'HvPlanEndBalance', 'HvPlanMeasures', 'HvPlanItems', 'HvPlanYear', 'HvPlanAmount', 'HvPlanBasis', 'HvPlanTodayPrices', 'HvPlanDisclaimer',
 		'HvRateTitle', 'HvRateLegal', 'HvRatePlanMin', 'HvRateMode', 'HvRateMode_plan', 'HvRateMode_factor', 'HvRateMode_manual', 'HvRateMode_legal', 'HvRateNew', 'HvRateMonthly', 'HvRateNote',
-		'HvRateHistory', 'HvRateDate', 'HvRateChange', 'HvRatePlanVolume', 'HvRateBalance', 'HvRateLegalSource', 'HvRateExplain', 'HvDocStamp', 'HvDocAiNote', 'HvMlAiDocBanner');
+		'HvRateHistory', 'HvRateDate', 'HvRateChange', 'HvRatePlanVolume', 'HvRateBalance', 'HvRateLegalSource', 'HvRateExplain', 'HvDocStamp', 'HvDocAiNote');
 	foreach (file($file) ?: array() as $line) {
 		if (!preg_match('/^\s*([A-Za-z0-9_]+)\s*=\s*(.*)$/', $line, $m)) {
 			continue;
@@ -440,14 +440,9 @@ function hvSourceLang()
  */
 function hvDocStamp($T, $withAiNote = true, $src = '')
 {
-	$T->load('languages');
 	$parts = array($T->transnoentities('HvDocStamp', hvModuleVersion(), dol_print_date(dol_now(), 'dayhour', 'tzuserrel', $T)));
 	if ($withAiNote && getDolGlobalString('HAUSVERWALTUNG_AI_DOC_NOTE', '1') === '1') {
-		$src = $src !== '' ? $src : hvSourceLang();
-		if (substr((string) $T->defaultlang, 0, 2) !== substr($src, 0, 2)) {
-			$name = $T->transnoentities('Language_'.$src);
-			$parts[] = $T->transnoentities('HvDocAiNote', $name !== 'Language_'.$src ? $name : $src);
-		}
+		$parts[] = $T->transnoentities('HvDocAiNote');
 	}
 	return implode(' · ', $parts);
 }

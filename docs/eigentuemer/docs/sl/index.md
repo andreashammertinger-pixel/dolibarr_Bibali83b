@@ -14,4 +14,4 @@ Dobrodošli! Tukaj izveste, kako kot lastnik v **Bibali 83b** na spletu najdete 
 </div>
 
 !!! info "Jeziki"
-    Vse dokumente prejmete v **hrvaščini** in v **vašem jeziku**. Besedila so napisana v izvirnem jeziku (običajno nemščini) in prevedena z UI – to je drobno navedeno na koncu vsakega dokumenta.
+    Vse dokumente prejmete v **hrvaščini** in v **vašem jeziku**. Besedila so prevedena z UI – na koncu vsakega dokumenta je drobno zapisano: *»Z UI prevedeno v ustrezni jezik – v primeru nejasnosti nas prosim vprašajte.«*

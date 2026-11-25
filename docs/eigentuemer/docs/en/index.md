@@ -14,4 +14,4 @@ Welcome! Here you will find out how, as an owner in **Bibali 83b**, you can find
 </div>
 
 !!! info "Languages"
-    You receive all documents in **Croatian** and in **your language**. The texts are written in a source language (usually German) and translated using AI – this is stated in small print at the end of every document.
+    You receive all documents in **Croatian** and in **your language**. The texts are translated using AI – small print at the end of every document says: *“Translated into the respective language using AI – please ask if anything is unclear.”*

@@ -1,6 +1,6 @@
 # Sprachen und Texte
 
-Alle Dokumente an Eigentümer (Vorschreibung, Erläuterung, Abrechnung, E-Mails, Rücklagenplan) entstehen auf **Kroatisch** und zusätzlich in der **Sprache des Eigentümers**. Die Texte werden in der Ausgangssprache (meist Deutsch) verfasst und mittels KI übersetzt; das steht klein in der Fußzeile („KI-Übersetzung aus: Deutsch“). Die Sprache kommt aus dem Geschäftspartner (Apartment) → Feld *Standardsprache*.
+Alle Dokumente an Eigentümer (Vorschreibung, Erläuterung, Abrechnung, E-Mails, Rücklagenplan) entstehen auf **Kroatisch** und zusätzlich in der **Sprache des Eigentümers**. Die Texte werden mittels KI übersetzt; das steht klein in der Fußzeile („Mittels KI in die jeweilige Sprache übersetzt – bei Unklarheiten bitte rückfragen.“). Die Sprache kommt aus dem Geschäftspartner (Apartment) → Feld *Standardsprache*.
 
 ## Sprachen-Seite
 
@@ -61,4 +61,4 @@ Ist der Dienst nicht erreichbar, wird der Text trotzdem gespeichert; eine Meldun
 
 ## Herkunftszeile auf Dokumenten
 
-Jedes Dokument (Vorschreibung, Erläuterung, Abrechnung, Druckansicht Rücklagen-Plan, KI-übersetzte Anhänge) und jede E-Mail trägt unten klein: **erstellt mit Hausverwaltung, Version und Zeitpunkt**, die **Ausgangssprache** und den Hinweis, dass **Fassungen in anderen Sprachen mittels KI übersetzt** wurden. Ausgangssprache und Hinweis: *Einstellungen*.
+Jedes Dokument (Vorschreibung, Erläuterung, Abrechnung, Druckansicht Rücklagen-Plan, KI-übersetzte Anhänge) und jede E-Mail trägt unten klein: **Hausverwaltung, Version und Zeitpunkt** sowie in jeder Sprache gleich den Satz **„Mittels KI in die jeweilige Sprache übersetzt – bei Unklarheiten bitte rückfragen.“** Ein-/ausschalten: *Einstellungen*.

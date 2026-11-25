@@ -14,4 +14,4 @@ Willkommen! Hier erfahren Sie, wie Sie als Eigentümer in **Bibali 83b** Ihre Vo
 </div>
 
 !!! info "Sprachen"
-    Alle Dokumente erhalten Sie auf **Kroatisch** und in **Ihrer Sprache**. Die Texte werden in einer Ausgangssprache (meist Deutsch) verfasst und mittels KI übersetzt – das steht klein am Ende jedes Dokuments.
+    Alle Dokumente erhalten Sie auf **Kroatisch** und in **Ihrer Sprache**. Die Texte werden mittels KI übersetzt – am Ende jedes Dokuments steht klein: *„Mittels KI in die jeweilige Sprache übersetzt – bei Unklarheiten bitte rückfragen.“*

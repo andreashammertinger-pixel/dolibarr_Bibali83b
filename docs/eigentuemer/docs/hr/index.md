@@ -14,4 +14,4 @@ Dobro došli! Ovdje saznajete kako kao vlasnik u **Bibali 83b** online pronaći 
 </div>
 
 !!! info "Jezici"
-    Sve dokumente dobivate na **hrvatskom** i na **Vašem jeziku**. Tekstovi se pišu na izvornom jeziku (uglavnom njemačkom) i prevode pomoću AI – to sitno piše na kraju svakog dokumenta.
+    Sve dokumente dobivate na **hrvatskom** i na **Vašem jeziku**. Tekstovi se prevode pomoću AI – na kraju svakog dokumenta sitno piše: *„Pomoću AI prevedeno na odgovarajući jezik – u slučaju nejasnoća molimo javite se.“*

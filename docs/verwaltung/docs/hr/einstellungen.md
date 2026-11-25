@@ -17,7 +17,7 @@
 | Adresa pomoći | osnovna adresa ovog priručnika |
 | AI prijevod | API ključ (Anthropic, sprema se šifrirano), uklj./isklj., *Testiraj vezu* – vidi [Jezici i tekstovi](sprachen.md#ai-prijevod) |
 | Rast troškova gradnje / razdoblje planiranja | za plan pričuve |
-| Izvorni jezik / AI napomena | jezik na kojem se pišu tekstovi; napomena „prevedeno pomoću AI“ u podnožju svih dokumenata i poruka |
+| Napomena o AI prijevodu na dokumentima i e-pošti | uklj./isklj.: „Pomoću AI prevedeno na odgovarajući jezik – u slučaju nejasnoća molimo javite se.“ u podnožju svih dokumenata i poruka (na svakom jeziku) |
 | Zakonska minimalna pričuva | postotak (0,54 %) i *etalonska cijena građenja* (€/m²) – provjeravati godišnje |
 
 ## Novi objekt
