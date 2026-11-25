@@ -24,6 +24,9 @@
 !!! info "Slanje korak po korak"
     Test, slanje i *Prevedi nedostajuće jezične verzije pomoću AI* odvijaju se u pojedinačnim koracima s prikazom napretka (prijevod teksta, AI prijevod po datoteci i jeziku, testna poruka po jeziku, po jedna poruka po apartmanu). Ostavite stranicu otvorenom dok se sama ne osvježi. Ako poslužitelju treba dulje (npr. kod AI prijevoda), piše *uskoro ponovna provjera* – korak se nastavlja u pozadini. Ako se postupak prekine: ponovno učitajte stranicu i pokrenite ponovo – obavljeno se ne ponavlja, **već poslani apartmani nikada ne dobivaju okružnicu dvaput**.
 
+!!! tip "Isključite prevođenje u pregledniku"
+    Ako preglednik (Chrome, Edge, Firefox) automatski prevodi stranicu, natpisi i jezični kodovi se iskrivljuju (npr. *en_SI* umjesto *sl_SI*). Za Dolibarr stoga odaberite „Nikad ne prevodi ovu web-lokaciju“.
+
 !!! warning "Najprije spremite"
     Test i slanje uvijek koriste **spremljeni** tekst. Nakon pisanja ili izmjene zato kliknite **Spremi**. Kod nespremljenih izmjena pri kliku na *Testno slanje* ili *Pošalji* pojavljuje se napomena; ako predmet ili tekst nisu spremljeni, oba su gumba zaključana.
 

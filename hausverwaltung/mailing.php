@@ -363,7 +363,7 @@ if (!$others) {
 	foreach ($others as $l) {
 		$t = $ml->i18n[$l] ?? array();
 		$badge = empty($t['body']) ? '<span class="badge badge-status1">'.$langs->trans('HvMlMissing').'</span>' : (!empty($t['ai']) ? '<span class="badge badge-status4">KI</span>' : '<span class="badge badge-status6">'.$langs->trans('HvMlEdited').'</span>');
-		print '<tr class="oddeven"><td><strong>'.$l.'</strong><br>'.$badge.'</td><td><input name="tr['.$l.'][subject]" class="centpercent" value="'.dol_escape_htmltag($t['subject'] ?? '').'"><textarea name="tr['.$l.'][body]" rows="6" class="centpercent">'.dol_escape_htmltag($t['body'] ?? '').'</textarea></td></tr>';
+		print '<tr class="oddeven"><td><strong translate="no">'.$l.'</strong><br>'.$badge.'</td><td><input name="tr['.$l.'][subject]" class="centpercent" value="'.dol_escape_htmltag($t['subject'] ?? '').'"><textarea name="tr['.$l.'][body]" rows="6" class="centpercent">'.dol_escape_htmltag($t['body'] ?? '').'</textarea></td></tr>';
 	}
 	print '</table><div class="center"><input type="submit" class="button button-save" value="'.$langs->trans('Save').'"></div></form>';
 }
@@ -401,7 +401,7 @@ foreach ($ml->docs as $d) {
 	print '<tr class="oddeven"><td><strong>'.dol_escape_htmltag($d['title']).'</strong>';
 	// weitere Sprachfassung direkt zu diesem Dokument hochladen
 	print '<form method="POST" enctype="multipart/form-data" action="'.$self.'?id='.$ml->id.'" class="small paddingtop"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="upload"><input type="hidden" name="doc" value="'.$d['id'].'">';
-	print $langs->trans('HvMlAddVersion').': <input type="file" name="file" class="small" style="max-width:190px"> <select name="lang" class="flat small">'.$langOpts(false).'</select> <input type="submit" class="button smallpaddingimp" value="'.$langs->trans('Upload').'"></form>';
+	print $langs->trans('HvMlAddVersion').': <input type="file" name="file" class="small" style="max-width:190px"> <select name="lang" translate="no" class="flat small">'.$langOpts(false).'</select> <input type="submit" class="button smallpaddingimp" value="'.$langs->trans('Upload').'"></form>';
 	$others = array();
 	foreach ($ml->docs as $o) {
 		if ($o['id'] !== $d['id'] && empty($o['gen'])) {
@@ -415,7 +415,7 @@ foreach ($ml->docs as $d) {
 	print '</td><td>';
 	foreach (array('versions' => 0, 'ai' => 1) as $k => $isAi) {
 		foreach ((array) $d[$k] as $l => $f) {
-			print '<div>'.($l === 'all' ? $langs->trans('HvMlAllLangs') : $l).($isAi ? ' <span class="badge badge-status4">KI</span>' : '').': '.$fileLink($f).' <a href="'.$self.'?id='.$ml->id.'&action=rmver&token='.newToken().'&doc='.$d['id'].'&lang='.$l.'&ai='.$isAi.'">'.img_delete().'</a></div>';
+			print '<div>'.($l === 'all' ? $langs->trans('HvMlAllLangs') : '<span translate="no">'.$l.'</span>').($isAi ? ' <span class="badge badge-status4">KI</span>' : '').': '.$fileLink($f).' <a href="'.$self.'?id='.$ml->id.'&action=rmver&token='.newToken().'&doc='.$d['id'].'&lang='.$l.'&ai='.$isAi.'">'.img_delete().'</a></div>';
 		}
 	}
 	print '</td></tr>';
@@ -440,7 +440,7 @@ foreach ($periods as $p) {
 print '</select></span> <input type="submit" class="button small" value="'.$langs->trans('Add').'"></form>';
 print '<script>jQuery(function($){var u=function(){var k=$("#hvgen").val();$(".hvgenp").each(function(){$(this).toggle($(this).data("k")===k);});};$("#hvgen").on("change",u);u();});</script>';
 print '<form method="POST" enctype="multipart/form-data" action="'.$self.'?id='.$ml->id.'" class="paddingtop"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="upload">';
-print $langs->trans('HvMlUploadNew').': <input type="file" name="file"> '.$langs->trans('Language').' <select name="lang" class="flat">'.$langOpts().'</select> '.$langs->trans('HvMlDoc').' <select name="doc" class="flat">'.$docOpts.'</select> <input type="submit" class="button small" value="'.$langs->trans('Upload').'"></form>';
+print $langs->trans('HvMlUploadNew').': <input type="file" name="file"> '.$langs->trans('Language').' <select name="lang" translate="no" class="flat">'.$langOpts().'</select> '.$langs->trans('HvMlDoc').' <select name="doc" class="flat">'.$docOpts.'</select> <input type="submit" class="button small" value="'.$langs->trans('Upload').'"></form>';
 $ecm = HvMailing::ecmFiles();
 if (HvMailing::ecmDir() === '') {
 	print '<div class="opacitymedium small paddingtop">'.$langs->trans('HvMlNoEcm').'</div>';
@@ -450,7 +450,7 @@ if (HvMailing::ecmDir() === '') {
 	foreach ($ecm as $f) {
 		print '<option value="'.dol_escape_htmltag($f).'">'.dol_escape_htmltag($f).'</option>';
 	}
-	print '</select> '.$langs->trans('Language').' <select name="lang" class="flat">'.$langOpts().'</select> '.$langs->trans('HvMlDoc').' <select name="doc" class="flat">'.$docOpts.'</select> <input type="submit" class="button small" value="'.$langs->trans('Add').'"'.($ecm ? '' : ' disabled').'></form>';
+	print '</select> '.$langs->trans('Language').' <select name="lang" translate="no" class="flat">'.$langOpts().'</select> '.$langs->trans('HvMlDoc').' <select name="doc" class="flat">'.$docOpts.'</select> <input type="submit" class="button small" value="'.$langs->trans('Add').'"'.($ecm ? '' : ' disabled').'></form>';
 }
 if ($ml->docs && $rLangs) {
 	print '<br><table class="noborder"><tr class="liste_titre"><th>'.$langs->trans('Language').'</th><th>'.$langs->trans('HvMlAttachedFor').'</th></tr>';
@@ -461,7 +461,7 @@ if ($ml->docs && $rLangs) {
 				$names[] = HvMailing::genTitle($d, $langs);
 			}
 		}
-		print '<tr class="oddeven"><td>'.$l.'</td><td class="small">'.dol_escape_htmltag(implode(', ', $names) ?: '–').'</td></tr>';
+		print '<tr class="oddeven"><td translate="no">'.$l.'</td><td class="small">'.dol_escape_htmltag(implode(', ', $names) ?: '–').'</td></tr>';
 	}
 	print '</table>';
 }
@@ -484,7 +484,7 @@ foreach ($units as $sid => $u) {
 	print '<td>'.dol_escape_htmltag($u['unit']->ref).' <span class="opacitymedium small">'.dol_escape_htmltag($u['socname']).'</span></td><td>'.dol_escape_htmltag($u['building']).'</td>';
 	print '<td class="small">'.($ok ? dol_escape_htmltag(implode(', ', array_map(function ($r) {
 		return $r['name'].' <'.$r['email'].'>';
-	}, $u['rcpt']))) : '<span class="error">'.$langs->trans('HvMailNoAddress').'</span>').'</td><td>'.dol_escape_htmltag($u['lang']).'</td></tr>';
+	}, $u['rcpt']))) : '<span class="error">'.$langs->trans('HvMailNoAddress').'</span>').'</td><td translate="no">'.dol_escape_htmltag($u['lang']).'</td></tr>';
 }
 print '</table><div class="center"><input type="submit" class="button button-save" value="'.$langs->trans('Save').'"></div></form>';
 print '<script>jQuery(function($){$(".hvsel").on("click",function(e){e.preventDefault();var b=$(this).data("b");$("input[name=\'rec[]\']:not(:disabled)").each(function(){$(this).prop("checked", b==="*" ? true : (b==="" ? false : ($(this).data("b")===b)));});});});</script>';
@@ -508,7 +508,7 @@ $log = $ml->log();
 if ($log) {
 	print '<br><table class="noborder centpercent"><tr class="liste_titre"><th>'.$langs->trans('Date').'</th><th>'.$langs->trans('HvUnit').'</th><th>'.$langs->trans('HvMailTo').'</th><th>'.$langs->trans('Language').'</th><th>'.$langs->trans('HvMailFiles').'</th><th>'.$langs->trans('Status').'</th></tr>';
 	foreach ($log as $o) {
-		print '<tr class="oddeven"><td>'.dol_print_date($db->jdate($o->datec), 'dayhour').'</td><td>'.dol_escape_htmltag((string) $o->nom).'</td><td class="small">'.dol_escape_htmltag((string) $o->email).'</td><td>'.dol_escape_htmltag((string) $o->lang).'</td><td class="small">'.dol_escape_htmltag((string) $o->files).'</td><td>'.($o->status === 'ok' ? '<span class="ok">OK</span>' : '<span class="error">'.dol_escape_htmltag((string) $o->error).'</span>').'</td></tr>';
+		print '<tr class="oddeven"><td>'.dol_print_date($db->jdate($o->datec), 'dayhour').'</td><td>'.dol_escape_htmltag((string) $o->nom).'</td><td class="small">'.dol_escape_htmltag((string) $o->email).'</td><td translate="no">'.dol_escape_htmltag((string) $o->lang).'</td><td class="small">'.dol_escape_htmltag((string) $o->files).'</td><td>'.($o->status === 'ok' ? '<span class="ok">OK</span>' : '<span class="error">'.dol_escape_htmltag((string) $o->error).'</span>').'</td></tr>';
 	}
 	print '</table>';
 }

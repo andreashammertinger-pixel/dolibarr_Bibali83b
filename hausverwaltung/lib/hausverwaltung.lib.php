@@ -22,7 +22,7 @@ function hvSelectPeriod($name, $selected)
 {
 	global $langs;
 	$opts = array(12 => 'HvPeriod12', 6 => 'HvPeriod6', 3 => 'HvPeriod3', 1 => 'HvPeriod1');
-	$out = '<select name="'.$name.'" class="flat">';
+	$out = '<select name="'.$name.'" class="flat" translate="no">';
 	foreach ($opts as $k => $v) {
 		$out .= '<option value="'.$k.'"'.((int) $selected === $k ? ' selected' : '').'>'.$langs->trans($v).'</option>';
 	}
@@ -359,7 +359,7 @@ function hvSrcLangSelect($name = 'hv_srclang', $cur = '')
 	if (!in_array($cur, hvDocLangs(), true)) {
 		$cur = in_array($langs->defaultlang, hvDocLangs(), true) ? $langs->defaultlang : hvDocLangs()[0];
 	}
-	$h = '<select name="'.$name.'" class="flat">';
+	$h = '<select name="'.$name.'" class="flat" translate="no">';
 	foreach (hvDocLangs() as $l) {
 		$h .= '<option value="'.$l.'"'.($l === $cur ? ' selected' : '').'>'.$l.'</option>';
 	}

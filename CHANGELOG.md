@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.19.2
+- Sprachcodes (z. B. sl_SI, uk_UA) in Auswahllisten und Tabellen gegen automatische Browser-Übersetzung geschützt (wurde zu „en_SI“ verfälscht)
+- Doku: Hinweis, die Browser-Übersetzung für Dolibarr auszuschalten
+
 ## 1.19.1
 - Rundschreiben: Testversand und Versand gesperrt, solange Betreff oder Text nicht gespeichert sind; Hinweis bei ungespeicherten Änderungen (Klick auf Testversand/Senden, Verlassen der Seite) – verhindert E-Mails ohne Text
 - Fußzeile der Dokumente: Datum/Uhrzeit einheitlich im Format TT.MM.JJJJ HH:MM (bisher auf Kroatisch „25/11/2026 02:41 PM“)

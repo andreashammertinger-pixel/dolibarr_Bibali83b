@@ -24,6 +24,9 @@
 !!! info "Versand Schritt für Schritt"
     Testversand, Versand und *Fehlende Sprachfassungen per KI übersetzen* laufen in einzelnen Schritten mit Fortschrittsanzeige (Text übersetzen, KI-Übersetzung je Datei und Sprache, Testmail je Sprache, je Apartment eine E-Mail). Bitte die Seite offen lassen, bis sie sich selbst aktualisiert. Braucht der Server länger (z. B. bei einer KI-Übersetzung), steht *wird gleich erneut geprüft* – der Schritt läuft im Hintergrund weiter. Wird der Ablauf abgebrochen: Seite neu laden und erneut starten – Erledigtes wird nicht wiederholt, **bereits versendete Apartments bekommen das Rundschreiben nie doppelt**.
 
+!!! tip "Browser-Übersetzung ausschalten"
+    Übersetzt der Browser (Chrome, Edge, Firefox) die Seite automatisch, werden Beschriftungen und Sprachcodes verfälscht (z. B. *en_SI* statt *sl_SI*). Für Dolibarr daher „Diese Website nie übersetzen“ wählen.
+
 !!! warning "Zuerst speichern"
     Testversand und Versand verwenden immer den **gespeicherten** Text. Nach dem Schreiben oder Ändern daher **Speichern** drücken. Bei ungespeicherten Änderungen erscheint beim Klick auf *Testversand* oder *Senden* ein Hinweis; ist kein Betreff oder Text gespeichert, sind beide Knöpfe gesperrt.
 
