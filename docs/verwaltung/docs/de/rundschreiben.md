@@ -10,7 +10,8 @@
 4. **Anhänge**:
     - **Datei hochladen** mit Sprache – oder *alle Sprachen* für sprachneutrale Dateien (Plan, Foto, Tabelle).
     - **Datei aus Dolibarr** (Modul *Dokumente*) übernehmen.
-    - Weitere Sprachfassung zum selben Dokument: beim Hochladen das *Dokument* auswählen.
+    - **Dasselbe Schreiben in mehreren Sprachen** (z. B. DE, HR, SL): zuerst eine Sprache als *Neues Dokument hochladen*, die weiteren Sprachen dann **beim Dokument** mit *Sprachfassung hinzufügen*. Nur fehlende Sprachen werden per KI übersetzt; eine echte Sprachfassung ersetzt eine vorhandene KI-Übersetzung.
+    - Schon getrennt hochgeladen? Beim Dokument *Ist dasselbe Schreiben wie … → Zusammenführen*. Die Seite warnt, wenn mehrere Dokumente mit je nur einer Sprache vorhanden sind.
     - **Fehlende Sprachfassungen per KI übersetzen (PDF)**: erstellt je Sprache ein PDF; unten steht klein „Mittels KI in die jeweilige Sprache übersetzt – bei Unklarheiten bitte rückfragen.“
     - **Dokument der Hausverwaltung** – *Rücklagen-Plan*, *Abrechnungsblatt (je Apartment)* mit Jahr oder *Vorschreibung mit Erläuterung (je Apartment)* mit Abrechnungsmonat wählen, *Hinzufügen*. Diese Dokumente werden **beim Versand neu erzeugt** (aktueller Stand), je Apartment mit seinen eigenen Zahlen, als kroatisches Original und in der Sprache des Eigentümers. Fehlt für ein Apartment das Dokument (z. B. keine Vorschreibung für den Monat), wird dieses Apartment **nicht** versendet und im Protokoll als Fehler gezeigt.
     - Die Tabelle *wird angehängt* zeigt je Sprache, was jeder Eigentümer bekommt: das **Original** (kroatische Fassung, sonst die hochgeladene Ausgangsfassung) und die **Fassung in seiner Sprache**.

@@ -201,6 +201,13 @@ if ($ml->id) {
 		}
 		$back('docs');
 	}
+	if ($action === 'mergedoc') {
+		if ($ml->mergeDoc((string) GETPOST('doc', 'aZ09'), (string) GETPOST('into', 'aZ09')) > 0) {
+			$ml->update(true);
+			setEventMessages($langs->trans('HvMlMerged'), null);
+		}
+		$back('docs');
+	}
 	if ($action === 'rmdoc') {
 		$ml->removeDoc((string) GETPOST('doc', 'aZ09'));
 		$ml->update(true);
@@ -382,7 +389,21 @@ foreach ($ml->docs as $d) {
 		print '<td class="small"><span class="opacitymedium">'.$langs->trans('HvMlGenInfo').'</span> <a href="'.$self.'?id='.$ml->id.'&action=rmdoc&token='.newToken().'&doc='.$d['id'].'">'.img_delete().'</a></td></tr>';
 		continue;
 	}
-	print '<tr class="oddeven"><td><strong>'.dol_escape_htmltag($d['title']).'</strong></td><td>';
+	print '<tr class="oddeven"><td><strong>'.dol_escape_htmltag($d['title']).'</strong>';
+	// weitere Sprachfassung direkt zu diesem Dokument hochladen
+	print '<form method="POST" enctype="multipart/form-data" action="'.$self.'?id='.$ml->id.'" class="small paddingtop"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="upload"><input type="hidden" name="doc" value="'.$d['id'].'">';
+	print $langs->trans('HvMlAddVersion').': <input type="file" name="file" class="small" style="max-width:190px"> <select name="lang" class="flat small">'.$langOpts(false).'</select> <input type="submit" class="button smallpaddingimp" value="'.$langs->trans('Upload').'"></form>';
+	$others = array();
+	foreach ($ml->docs as $o) {
+		if ($o['id'] !== $d['id'] && empty($o['gen'])) {
+			$others[] = '<option value="'.$o['id'].'">'.dol_escape_htmltag($o['title']).'</option>';
+		}
+	}
+	if ($others) {
+		print '<form method="POST" action="'.$self.'?id='.$ml->id.'" class="small"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="mergedoc"><input type="hidden" name="doc" value="'.$d['id'].'">';
+		print $langs->trans('HvMlMergeInto').': <select name="into" class="flat small">'.implode('', $others).'</select> <input type="submit" class="button smallpaddingimp" value="'.$langs->trans('HvMlMergeBtn').'"></form>';
+	}
+	print '</td><td>';
 	foreach (array('versions' => 0, 'ai' => 1) as $k => $isAi) {
 		foreach ((array) $d[$k] as $l => $f) {
 			print '<div>'.($l === 'all' ? $langs->trans('HvMlAllLangs') : $l).($isAi ? ' <span class="badge badge-status4">KI</span>' : '').': '.$fileLink($f).' <a href="'.$self.'?id='.$ml->id.'&action=rmver&token='.newToken().'&doc='.$d['id'].'&lang='.$l.'&ai='.$isAi.'">'.img_delete().'</a></div>';
@@ -391,6 +412,9 @@ foreach ($ml->docs as $d) {
 	print '</td></tr>';
 }
 print '</table>';
+if ($ml->looksSplit()) {
+	print '<div class="warning">'.img_warning('', '', 'pictofixedwidth').$langs->trans('HvMlLooksSplit').'</div>';
+}
 // Dokumente der Hausverwaltung – werden beim Versand je Apartment und Sprache neu erzeugt
 $periods = HvMailing::invoicePeriods($db);
 $yNow = (int) dol_print_date(dol_now(), '%Y');
@@ -407,7 +431,7 @@ foreach ($periods as $p) {
 print '</select></span> <input type="submit" class="button small" value="'.$langs->trans('Add').'"></form>';
 print '<script>jQuery(function($){var u=function(){var k=$("#hvgen").val();$(".hvgenp").each(function(){$(this).toggle($(this).data("k")===k);});};$("#hvgen").on("change",u);u();});</script>';
 print '<form method="POST" enctype="multipart/form-data" action="'.$self.'?id='.$ml->id.'" class="paddingtop"><input type="hidden" name="token" value="'.newToken().'"><input type="hidden" name="action" value="upload">';
-print $langs->trans('HvMlUpload').': <input type="file" name="file"> '.$langs->trans('Language').' <select name="lang" class="flat">'.$langOpts().'</select> '.$langs->trans('HvMlDoc').' <select name="doc" class="flat">'.$docOpts.'</select> <input type="submit" class="button small" value="'.$langs->trans('Upload').'"></form>';
+print $langs->trans('HvMlUploadNew').': <input type="file" name="file"> '.$langs->trans('Language').' <select name="lang" class="flat">'.$langOpts().'</select> '.$langs->trans('HvMlDoc').' <select name="doc" class="flat">'.$docOpts.'</select> <input type="submit" class="button small" value="'.$langs->trans('Upload').'"></form>';
 $ecm = HvMailing::ecmFiles();
 if (HvMailing::ecmDir() === '') {
 	print '<div class="opacitymedium small paddingtop">'.$langs->trans('HvMlNoEcm').'</div>';

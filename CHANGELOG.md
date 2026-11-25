@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.17.3
+- Rundschreiben-Anhänge: **Sprachfassung direkt beim Dokument hinzufügen**; **Zusammenführen** von getrennt hochgeladenen Fassungen desselben Schreibens („Ist dasselbe Schreiben wie …“); Warnung, wenn mehrere Dokumente mit je nur einer Sprache vorhanden sind
+- Eine echte Sprachfassung ersetzt eine vorhandene KI-Übersetzung derselben Sprache (wird gelöscht); es wird nur noch übersetzt, was in keiner Sprache vorliegt
+
 ## 1.17.2
 - Rundschreiben: Testversand, Versand und KI-Übersetzung der Anhänge laufen **in Teilschritten mit Fortschrittsanzeige** – behebt „Gateway Timeout“ bei IONOS, wenn KI-Übersetzungen und Dokumente in einer Anfrage zu lange dauerten
 - Lange Schritte laufen nach einer Zeitüberschreitung im Hintergrund weiter und werden nicht doppelt gestartet; die Anmeldung wird währenddessen nicht mehr blockiert

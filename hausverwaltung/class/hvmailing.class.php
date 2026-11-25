@@ -384,7 +384,7 @@ class HvMailing
 		if (!$docId || !isset($this->docs[$docId])) {
 			$docId = $this->addDoc(pathinfo($name, PATHINFO_FILENAME));
 		}
-		$this->docs[$docId]['versions'][$lang] = $target;
+		$this->setVersion($docId, $lang, $target);
 		return 1;
 	}
 
@@ -404,8 +404,76 @@ class HvMailing
 		if (!$docId || !isset($this->docs[$docId])) {
 			$docId = $this->addDoc(pathinfo($src, PATHINFO_FILENAME));
 		}
-		$this->docs[$docId]['versions'][$lang] = $target;
+		$this->setVersion($docId, $lang, $target);
 		return 1;
+	}
+
+	/** Echte Sprachfassung setzen; eine KI-Übersetzung derselben Sprache wird dadurch überflüssig und entfernt */
+	protected function setVersion($docId, $lang, $file)
+	{
+		$old = $this->docs[$docId]['versions'][$lang] ?? '';
+		if ($old !== '' && $old !== $file) {
+			dol_delete_file($this->dir().'/'.$old, 0, 0, 0, null, false, 0);
+		}
+		$this->docs[$docId]['versions'][$lang] = $file;
+		$langs = $lang === 'all' ? array_keys((array) $this->docs[$docId]['ai']) : array($lang);
+		foreach ($langs as $l) {
+			if (!empty($this->docs[$docId]['ai'][$l])) {
+				dol_delete_file($this->dir().'/'.$this->docs[$docId]['ai'][$l], 0, 0, 0, null, false, 0);
+				unset($this->docs[$docId]['ai'][$l]);
+			}
+		}
+	}
+
+	/**
+	 * Dokument $fromId als Sprachfassungen in $toId übernehmen (z. B. dasselbe Schreiben getrennt in DE, HR, SL hochgeladen).
+	 * Echte Fassungen gehen vor; KI-Übersetzungen nur, wenn das Ziel für diese Sprache noch nichts hat.
+	 */
+	public function mergeDoc($fromId, $toId)
+	{
+		$this->docIndex();
+		if ($fromId === $toId || !isset($this->docs[$fromId], $this->docs[$toId]) || !empty($this->docs[$fromId]['gen']) || !empty($this->docs[$toId]['gen'])) {
+			return -1;
+		}
+		$from = $this->docs[$fromId];
+		unset($this->docs[$fromId]);
+		foreach ((array) $from['versions'] as $l => $f) {
+			if (empty($this->docs[$toId]['versions'][$l])) {
+				$this->setVersion($toId, $l, $f);
+			} else {
+				dol_delete_file($this->dir().'/'.$f, 0, 0, 0, null, false, 0);
+			}
+		}
+		foreach ((array) $from['ai'] as $l => $f) {
+			if (empty($this->docs[$toId]['versions'][$l]) && empty($this->docs[$toId]['ai'][$l])) {
+				$this->docs[$toId]['ai'][$l] = $f;
+			} else {
+				dol_delete_file($this->dir().'/'.$f, 0, 0, 0, null, false, 0);
+			}
+		}
+		// KI-Übersetzungen, für die es jetzt eine echte Fassung gibt, entfernen
+		foreach (array_keys((array) $this->docs[$toId]['ai']) as $l) {
+			if (!empty($this->docs[$toId]['versions'][$l])) {
+				dol_delete_file($this->dir().'/'.$this->docs[$toId]['ai'][$l], 0, 0, 0, null, false, 0);
+				unset($this->docs[$toId]['ai'][$l]);
+			}
+		}
+		return 1;
+	}
+
+	/** Verdacht: dasselbe Schreiben als getrennte Dokumente mit je einer Sprache hochgeladen */
+	public function looksSplit()
+	{
+		$langs = array();
+		$n = 0;
+		foreach ($this->docs as $d) {
+			if (!empty($d['gen']) || !empty($d['versions']['all']) || count((array) $d['versions']) !== 1) {
+				continue;
+			}
+			$langs[key($d['versions'])] = true;
+			$n++;
+		}
+		return $n >= 2 && count($langs) >= 2;
 	}
 
 	protected function uniqueName($name)

@@ -10,7 +10,8 @@
 4. **Prilozi**:
     - **Prijenos datoteke** s jezikom – ili *svi jezici* za jezično neutralne datoteke (nacrt, fotografija, tablica).
     - **Datoteka iz Dolibarra** (modul *Dokumenti*).
-    - Dodatna jezična verzija istog dokumenta: pri prijenosu odaberite *Dokument*.
+    - **Isti dopis na više jezika** (npr. DE, HR, SL): prvo jedan jezik kao *Prenesi novi dokument*, ostale jezike zatim **kod dokumenta** s *Dodaj jezičnu verziju*. Samo nedostajući jezici prevode se pomoću AI; prava jezična verzija zamjenjuje postojeći AI prijevod.
+    - Već preneseno zasebno? Kod dokumenta *Isti dopis kao … → Spoji*. Stranica upozorava ako postoji više dokumenata sa samo po jednim jezikom.
     - **Prevedi nedostajuće jezične verzije pomoću AI (PDF)**: za svaki jezik izrađuje PDF; dolje sitno piše „Pomoću AI prevedeno na odgovarajući jezik – u slučaju nejasnoća molimo javite se.“
     - **Dokument upravitelja** – odaberite *Plan pričuve*, *Obračunski list (po apartmanu)* s godinom ili *Zaduženje s objašnjenjem (po apartmanu)* s obračunskim mjesecom, *Dodaj*. Ti se dokumenti **izrađuju iznova pri slanju** (trenutno stanje), za svaki apartman s njegovim brojkama, kao hrvatski izvornik i na jeziku vlasnika. Ako za neki apartman dokument ne postoji (npr. nema zaduženja za taj mjesec), taj se apartman **ne** šalje i u zapisniku se prikazuje kao pogreška.
     - Tablica *bit će priloženo* prikazuje po jeziku što svaki vlasnik dobiva: **izvornik** (hrvatsku verziju, inače prenesenu izvornu verziju) i **verziju na svom jeziku**.
