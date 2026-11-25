@@ -153,7 +153,7 @@ class HvMailing
 			foreach ($inv->ownerContacts((int) $u->fk_soc) as $cid) {
 				$c = new Contact($db);
 				if ($c->fetch($cid) > 0 && isValidEmail($c->email)) {
-					$rc[] = array('name' => $c->getFullName($GLOBALS['langs']), 'email' => $c->email, 'company' => trim((string) $c->firstname) === '');
+					$rc[] = array('id' => (int) $c->id, 'name' => $c->getFullName($GLOBALS['langs']), 'email' => $c->email, 'company' => trim((string) $c->firstname) === '');
 				}
 			}
 			$out[(int) $u->fk_soc] = array('unit' => $u, 'building' => (string) ($u->building_ref ?? ''), 'socname' => $soc->name, 'lang' => $soc->default_lang ?: getDolGlobalString('HAUSVERWALTUNG_ORIGINAL_LANG', 'hr_HR'), 'rcpt' => $rc);
@@ -932,6 +932,7 @@ class HvMailing
 				return array('ok' => false, 'msg' => $u['socname'].': '.($mail->error ?: 'Versand fehlgeschlagen'));
 			}
 			$this->logRcpt($sid, implode(', ', $to), $u['lang'], $files, 'ok', '');
+			HvMailer::addEvent($this->db, $user, $sid, array_column($u['rcpt'], 'id'), $GLOBALS['langs']->transnoentities('HvEventMailing', $this->id, $this->subject), implode(', ', $to), $from, $m['subject'], $m['body'], array_merge(array('Rundschreiben-'.((int) $this->id).'_'.$u['lang'].'.txt'), $files), 'hvml-'.((int) $this->id).'-'.$sid, 0, $mail->msgid);
 			if (HvMailer::archiveEnabled()) {
 				$txt = $this->dir().'/Rundschreiben-'.((int) $this->id).'_'.$u['lang'].'.txt';
 				file_put_contents($txt, $m['subject']."\n\n".$m['body']);
@@ -998,6 +999,48 @@ class HvMailing
 			$this->step($user, $r['run'], $j);
 		}
 		return $this->runSummary($this->runState($r['run']));
+	}
+
+	/**
+	 * Einmalig/bei Aktivierung: Ereignisse für bereits versendete Rundschreiben nachtragen (aus dem Versandprotokoll).
+	 *
+	 * @return int Anzahl angelegter Ereignisse
+	 */
+	public static function backfillEvents($db, User $user)
+	{
+		global $conf, $mysoc;
+		$n = 0;
+		$res = $db->query("SELECT r.fk_mailing, r.fk_soc, r.email, r.lang, r.files, r.datec FROM ".$db->prefix()."hv_mailing_rcpt r WHERE r.entity = ".((int) $conf->entity)." AND r.status = 'ok' ORDER BY r.rowid");
+		$rows = array();
+		while ($res && ($o = $db->fetch_object($res))) {
+			$rows[] = $o;
+		}
+		$cache = array();
+		foreach ($rows as $o) {
+			$mid = (int) $o->fk_mailing;
+			if (!isset($cache[$mid])) {
+				$cache[$mid] = new self($db);
+				if ($cache[$mid]->fetch($mid) <= 0) {
+					$cache[$mid] = null;
+				}
+			}
+			$ml = $cache[$mid];
+			if (!$ml) {
+				continue;
+			}
+			$tx = $ml->textFor((string) $o->lang);
+			$files = array_filter(array_map('trim', explode(',', (string) $o->files)));
+			$from = getDolGlobalString('HAUSVERWALTUNG_MAIL_FROM', $mysoc->email);
+			$cids = array();
+			foreach ((new HvInvoicer($db))->ownerContacts((int) $o->fk_soc) as $cid) {
+				$cids[] = (int) $cid;
+			}
+			$r = HvMailer::addEvent($db, $user, (int) $o->fk_soc, $cids, $GLOBALS['langs']->transnoentities('HvEventMailing', $mid, $ml->subject), (string) $o->email, $from, $mysoc->name.' – '.$tx['subject'], $tx['body'], array_merge(array('Rundschreiben-'.$mid.'_'.$o->lang.'.txt'), $files), 'hvml-'.$mid.'-'.((int) $o->fk_soc), $db->jdate($o->datec));
+			if ($r > 0) {
+				$n++;
+			}
+		}
+		return $n;
 	}
 
 	/** Apartments, an die dieses Rundschreiben bereits erfolgreich ging: socid => true */

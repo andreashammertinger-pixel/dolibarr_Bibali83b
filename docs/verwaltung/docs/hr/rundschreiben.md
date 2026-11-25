@@ -29,6 +29,10 @@
 
 Nedostajući prijevodi automatski se dodaju prije slanja. Zapisnik slanja nalazi se dolje; tekst i prilozi spremaju se kod **apartmana → Povezane datoteke** (s datumom slanja).
 
+## Sljedivost kod apartmana
+
+Svaka poslana poruka vlasnicima nalazi se kod **apartmana → Događaji/Agenda** – kronološki na jednom popisu: zaduženja, obračunski listovi i okružnice. Događaj sadrži primatelje, predmet, tekst na jeziku vlasnika i popis priloga; same datoteke nalaze se s datumom slanja pod **Povezane datoteke**. Za ranije poslane okružnice događaji se dodaju pri aktiviranju modula. Odgovori vlasnika bit će dodani čim se postavi Dolibarr *sakupljač e-pošte*.
+
 !!! info "Napomena u svakoj poruci"
     Ispod završne formule sitno piše: Upravljanje zgradom (verzija, vrijeme) · „Pomoću AI prevedeno na odgovarajući jezik – u slučaju nejasnoća molimo javite se.“ Ista rečenica stoji u podnožju svih dokumenata – na svakom jeziku jednako, i na hrvatskom.
 

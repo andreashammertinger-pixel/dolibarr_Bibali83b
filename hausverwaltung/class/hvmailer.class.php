@@ -53,6 +53,68 @@ class HvMailer
 		return $n;
 	}
 
+	/**
+	 * Ereignis (Agenda) beim Apartment: versendete E-Mail mit Empfängern, Betreff, Text und Anhängen,
+	 * damit unter „Ereignisse“ die gesamte Kommunikation mit dem Eigentümer chronologisch sichtbar ist.
+	 *
+	 * @param array  $contactIds Kontakte (Eigentümer), an die gesendet wurde
+	 * @param string[] $files    angehängte Dateien (Namen; Kopien liegen unter „Verknüpfte Dokumente“ mit Datum vorne)
+	 * @param string $refExt     eindeutiger Schlüssel (verhindert doppelte Einträge)
+	 * @return int id des Ereignisses, 0 wenn schon vorhanden/Agenda aus, <0 Fehler
+	 */
+	public static function addEvent($db, User $user, $socid, array $contactIds, $label, $to, $from, $subject, $body, array $files, $refExt, $when = 0, $msgid = '')
+	{
+		if (!isModEnabled('agenda') || (int) $socid <= 0) {
+			return 0;
+		}
+		require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+		if ($refExt !== '') {
+			$q = $db->query("SELECT id FROM ".$db->prefix()."actioncomm WHERE ref_ext = '".$db->escape($refExt)."'");
+			if ($q && $db->num_rows($q) > 0) {
+				return 0;
+			}
+		}
+		$when = $when ?: dol_now();
+		$names = array();
+		$prefix = self::archiveEnabled() ? dol_print_date($when, '%Y-%m-%d').'_' : '';
+		foreach ($files as $f) {
+			$names[] = $prefix.basename($f);
+		}
+		$note = 'Sent to: '.$to."\nSubject: ".$subject."\n\n".$body;
+		if ($names) {
+			$note .= "\n\n".$GLOBALS['langs']->transnoentities('HvEventFiles').":\n- ".implode("\n- ", $names);
+		}
+		$ev = new ActionComm($db);
+		$ev->type_code = 'AC_OTH_AUTO';
+		$ev->code = 'AC_HV_MAIL';
+		$ev->label = dol_trunc($label, 250, 'right', 'UTF-8', 1);
+		$ev->note_private = dol_nl2br(dol_escape_htmltag($note, 0, 1));
+		$ev->datep = $when;
+		$ev->datef = $when;
+		$ev->percentage = -1;
+		$ev->fulldayevent = 0;
+		$ev->socid = (int) $socid;
+		$ev->userownerid = (int) $user->id;
+		$ev->authorid = (int) $user->id;
+		$ev->ref_ext = $refExt;
+		$ev->email_subject = $subject;
+		$ev->email_to = $to;
+		$ev->email_from = $from;
+		$ev->email_msgid = $msgid;
+		$contactIds = array_values(array_filter(array_map('intval', $contactIds)));
+		if ($contactIds) {
+			$ev->contact_id = $contactIds[0];
+			foreach ($contactIds as $cid) {
+				$ev->socpeopleassigned[$cid] = array('id' => $cid, 'mandatory' => 0, 'answer_status' => 0, 'transparency' => 0);
+			}
+		}
+		$r = $ev->create($user, 1);
+		if ($r <= 0) {
+			dol_syslog('HvMailer::addEvent '.$ev->error, LOG_WARNING);
+		}
+		return $r;
+	}
+
 	/** Einmalig: bereits versendete Vorschreibungen nachträglich beim Apartment ablegen */
 	public static function backfillArchive($db)
 	{
@@ -291,6 +353,10 @@ class HvMailer
 			$f->email_from = $from;
 			$f->email_msgid = $mail->msgid;
 			$f->call_trigger('BILL_SENTBYMAIL', $user);
+			if (!getDolGlobalString('MAIN_AGENDA_ACTIONAUTO_BILL_SENTBYMAIL')) {
+				// Agenda-Automatik für Rechnungsversand ist aus -> Ereignis selbst anlegen, damit es beim Apartment sichtbar ist
+				self::addEvent($this->db, $user, (int) $f->socid, array_column($rcpt, 'id'), $GLOBALS['langs']->transnoentities('InvoiceSentByEMail', $f->ref), implode(', ', $to), $from, $subject, $body, $files, 'hvinv-'.((int) $f->id).'-'.dol_now(), 0, $mail->msgid);
+			}
 		}
 		return 1;
 	}
@@ -400,6 +466,7 @@ class HvMailer
 		}
 		if ($testto === '') {
 			$this->db->query("INSERT INTO ".$this->db->prefix()."hv_mail_log (entity, fk_invoice, sendto, files, status, error, datec, fk_user) VALUES (".((int) $conf->entity).", ".($fi ? (int) $fi->id : 0).", '".$this->db->escape(implode(', ', $to))."', '".$this->db->escape(implode(', ', $names))."', 'ok', '', '".$this->db->idate(dol_now())."', ".((int) $user->id).")");
+			self::addEvent($this->db, $user, (int) $d['unit']->fk_soc, array_column($rcpt, 'id'), $GLOBALS['langs']->transnoentities('HvEventStatement', $year, $d['unit']->ref), implode(', ', $to), $from, $subject, $body, $files, 'hvstmt-'.((int) $year).'-'.((int) $unitId).'-'.dol_now(), 0, $mail->msgid);
 		}
 		return 1;
 	}

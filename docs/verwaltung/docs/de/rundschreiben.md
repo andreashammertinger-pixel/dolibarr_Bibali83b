@@ -29,6 +29,10 @@
 
 Fehlende Übersetzungen werden vor dem Versand automatisch ergänzt. Das Versandprotokoll steht unten; Text und Anhänge werden beim **Apartment → Verknüpfte Dokumente** abgelegt (mit Versanddatum).
 
+## Nachvollziehbarkeit beim Apartment
+
+Jede versendete E-Mail an Eigentümer steht beim **Apartment → Ereignisse/Agenda** – chronologisch in einer Liste: Vorschreibungen, Abrechnungsblätter und Rundschreiben. Das Ereignis enthält Empfänger, Betreff, den Text in der Sprache des Eigentümers und die Liste der Anhänge; die Dateien selbst liegen mit Versanddatum unter **Verknüpfte Dokumente**. Für bereits früher versendete Rundschreiben werden die Ereignisse beim Aktivieren des Moduls nachgetragen. Antworten der Eigentümer kommen dazu, sobald der Dolibarr-*E-Mail-Sammler* eingerichtet ist.
+
 !!! info "Hinweis in jeder E-Mail"
     Unter der Grußformel steht klein: Hausverwaltung (Version, Zeitpunkt) · „Mittels KI in die jeweilige Sprache übersetzt – bei Unklarheiten bitte rückfragen.“ Derselbe Satz steht in der Fußzeile aller Dokumente – in jeder Sprache gleich, auch auf Kroatisch.
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.18.1
+- **Ereignis beim Apartment** (Ereignisse/Agenda) für jedes versendete Rundschreiben und Abrechnungsblatt: Empfänger, Betreff, Text in der Sprache des Eigentümers, Liste der Anhänge (Kopien unter „Verknüpfte Dokumente“)
+- Vorschreibungen: Ereignis wird auch angelegt, wenn die Agenda-Automatik „Rechnung per E-Mail gesendet“ ausgeschaltet ist
+- Beim Aktivieren werden Ereignisse für bereits versendete Rundschreiben nachgetragen (ohne Doppelte)
+
 ## 1.18.0
 - Rundschreiben: Auswahl **„Anhänge nur in der Sprache des Eigentümers“** (Standard an) – hochgeladene Schreiben und Rücklagen-Plan ohne zusätzliche kroatische Datei; Vorschreibung mit Erläuterung und Abrechnungsblatt weiterhin immer mit kroatischem Original
 - Neue Spalte `ownlang_only` (Modul einmal deaktivieren/aktivieren)

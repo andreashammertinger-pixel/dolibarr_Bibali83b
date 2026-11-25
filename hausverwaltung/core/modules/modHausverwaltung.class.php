@@ -29,7 +29,7 @@ class modHausverwaltung extends DolibarrModules
 		$this->descriptionlong = 'Kostenplan je Gebäude/alle Gebäude, Verteilung nach m², monatliche Vorschreibung als Kundenrechnung, automatische Rücklagen-Umbuchung bei Zahlungseingang, Jahresabrechnung und mobile Belegerfassung.';
 		$this->editor_name = 'Green Villa and Apartment Resorts d.o.o.';
 		$this->editor_url = 'https://www.greenresorts.hr';
-		$this->version = '1.18.0';
+		$this->version = '1.18.1';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->picto = 'building';
 
@@ -198,6 +198,12 @@ class modHausverwaltung extends DolibarrModules
 			// bereits versendete Vorschreibungen einmalig beim Apartment ablegen
 			dol_include_once('/hausverwaltung/class/hvmailer.class.php');
 			HvMailer::backfillArchive($this->db);
+			// Ereignisse (Agenda) für bereits versendete Rundschreiben nachtragen
+			global $user;
+			dol_include_once('/hausverwaltung/class/hvmailing.class.php');
+			if (is_object($user) && !empty($user->id)) {
+				HvMailing::backfillEvents($this->db, $user);
+			}
 			dol_include_once('/hausverwaltung/class/hvreserveplan.class.php');
 			HvReserveRate::migrate($this->db);
 		}

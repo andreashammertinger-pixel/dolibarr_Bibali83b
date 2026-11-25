@@ -483,3 +483,6 @@ HvMlLooksSplit = Više dokumenata sa samo po jednim jezikom: je li to isti dopis
 HvMlUploadNew = Prenesi novi dokument
 HvMlOwnLangOnly = Prilozi samo na jeziku vlasnika
 HvMlOwnLangOnlyHelp = (bez dodatne hrvatske verzije – vrijedi za prenesene dokumente i plan pričuve; zaduženje s objašnjenjem i obračunski list uvijek s hrvatskim izvornikom)
+HvEventMailing = Okružnica #%s poslana: %s
+HvEventStatement = Obračunski list %s poslan (%s)
+HvEventFiles = Prilozi (kopija kod apartmana pod „Povezane datoteke“)

@@ -483,3 +483,6 @@ HvMlLooksSplit = Several documents with only one language each: is this the same
 HvMlUploadNew = Upload new document
 HvMlOwnLangOnly = Attachments only in the owner's language
 HvMlOwnLangOnlyHelp = (no additional Croatian version – applies to uploaded documents and the reserve plan; levy notice with explanation and statement always include the Croatian original)
+HvEventMailing = Circular #%s sent: %s
+HvEventStatement = Statement %s sent (%s)
+HvEventFiles = Attachments (copy filed under the apartment's linked files)
